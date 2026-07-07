@@ -1,0 +1,202 @@
+HOTELNOW REST API SPECIFICATION
+=================================
+
+Base URL: http://localhost:8080/api
+
+1. GLOBAL SCHEMAS
+-----------------
+All responses are wrapped in a standard structure:
+{
+  "success": boolean,
+  "message": string,
+  "timestamp": string (ISO OffsetDateTime),
+  "status": number (HTTP Status Code),
+  "data": T (Actual payload)
+}
+
+Paginated responses contain the following structure inside the "data" field:
+{
+  "content": T[],
+  "page": number (0-indexed current page),
+  "size": number (items per page),
+  "totalElements": number (total records in DB),
+  "totalPages": number (total pages)
+}
+
+Common pagination query parameters:
+- page: number (default: 0)
+- size: number (default: 10)
+- sort: string (format: "propertyName,direction" e.g., "createdAt,desc" or "price,asc")
+
+
+2. AUTHENTICATION SERVICE (/api/auth)
+--------------------------------------
+- POST /auth/register
+  Request (UserRegisterDTO): { username, password, email }
+  Response: UserResponseDTO (User starts with status = "inactive")
+
+- POST /auth/login
+  Request (LoginRequestDTO): { username, password }
+  Response (TokenResponseDTO): { accessToken, refreshToken }
+
+- POST /auth/logout
+  Request (RefreshTokenRequestDTO): { refreshToken }
+  Response: Void
+
+- POST /auth/refresh-token
+  Request (RefreshTokenRequestDTO): { refreshToken }
+  Response (TokenResponseDTO): { accessToken, refreshToken }
+
+- POST /auth/forgot-password
+  Request (ForgotPasswordRequestDTO): { email }
+  Response: Void
+
+- POST /auth/verify-email
+  Request (VerifyEmailRequestDTO): { token }
+  Response: Void
+
+
+3. HOTEL SERVICE (/api/hotels)
+------------------------------
+- GET /hotels
+  Parameters: page, size, sort, keyword, status, createdFrom, createdTo
+  Response: PageResponse<HotelResponseDTO>
+
+- GET /hotels/{hotelId}
+  Response: HotelDetailDTO (includes images, rooms list)
+
+- GET /hotels/{hotelId}/search
+  Parameters: city, stars, keyword, status, page, size, sort
+  Response: PageResponse<HotelResponseDTO> (general search engine for hotels)
+
+- POST /hotels (MANAGER / ADMIN only)
+  Request (HotelCreateDTO): { name, address, city, stars, description, status }
+  Response: HotelResponseDTO
+
+- PUT /hotels/{hotelId} (MANAGER / ADMIN only)
+  Request (HotelUpdateDTO): { name, address, city, stars, description, status }
+  Response: HotelResponseDTO
+
+- DELETE /hotels/{hotelId} (ADMIN only)
+  Response: Void (HTTP 204)
+
+- POST /hotels/{hotelId}/images (MANAGER / ADMIN only)
+  Content-Type: multipart/form-data
+  Request: file (Multipart binary file)
+  Response: string (image url)
+
+
+4. ROOM SERVICE (/api/rooms)
+----------------------------
+- GET /rooms
+  Parameters: hotelId, available, keyword, status, page, size, sort
+  Response: PageResponse<RoomResponseDTO>
+
+- GET /rooms/{roomId}
+  Response: RoomDetailDTO (includes room images list)
+
+- GET /rooms/{roomId}/images
+  Response: string[] (images URL list)
+
+- POST /rooms (MANAGER / ADMIN only)
+  Request (RoomCreateDTO): { hotelId, roomNumber, type, price, description, status }
+  Response: RoomResponseDTO
+
+- PUT /rooms/{roomId} (MANAGER / ADMIN only)
+  Request (RoomUpdateDTO): { roomNumber, type, price, description, status }
+  Response: RoomResponseDTO
+
+- DELETE /rooms/{roomId} (ADMIN only)
+  Response: Void (HTTP 204)
+
+
+5. BOOKING SERVICE (/api/bookings)
+----------------------------------
+- POST /bookings (CUSTOMER only)
+  Request (BookingCreateDTO): { userId, roomId, checkInDate, checkOutDate, guests }
+  Response: BookingResponseDTO
+
+- GET /bookings
+  Parameters: userId, status, keyword, page, size, sort
+  Response: PageResponse<BookingResponseDTO> (customers see theirs, staff/managers/admins see all)
+
+- GET /bookings/{bookingId}
+  Response: BookingDetailDTO (includes user details, room details, paymentStatus)
+
+- GET /bookings/{bookingId}/availability
+  Response: boolean
+
+- GET /bookings/{bookingId}/payment-status
+  Response: string ("pending", "completed", "failed")
+
+- PUT /bookings/{bookingId}
+  Request (BookingUpdateDTO): { checkInDate, checkOutDate, guests, status }
+  Response: BookingResponseDTO
+
+- DELETE /bookings/{bookingId}
+  Response: Void (HTTP 204 - cancel booking)
+
+
+6. PAYMENT SERVICE (/api/payments)
+----------------------------------
+- POST /payments (CUSTOMER only)
+  Request (PaymentCreateDTO): { bookingId, amount, paymentMethod ("credit_card", "paypal", "bank_transfer") }
+  Response: PaymentResponseDTO
+
+- GET /payments
+  Parameters: userId, bookingId, status, page, size, sort
+  Response: PageResponse<PaymentResponseDTO>
+
+
+7. REVIEW SERVICE (/api/reviews)
+--------------------------------
+- POST /reviews (CUSTOMER only)
+  Request (ReviewCreateDTO): { userId, hotelId?, roomId?, rating (1-5), comment }
+  Response: ReviewResponseDTO
+
+- PUT /reviews/{reviewId} (Owner of review)
+  Request (ReviewUpdateDTO): { rating, comment }
+  Response: ReviewResponseDTO
+
+- DELETE /reviews/{reviewId} (Owner or Admin)
+  Response: Void (HTTP 204)
+
+
+8. NOTIFICATION SERVICE (/api/notifications)
+--------------------------------------------
+- GET /notifications
+  Parameters: status ("unread", "read"), page, size, sort
+  Response: PageResponse<NotificationResponseDTO>
+
+- POST /notifications/{notificationId}/mark-as-read
+  Response: Void
+
+
+9. USER SERVICE (/api/users)
+----------------------------
+- GET /users (MANAGER / ADMIN only)
+  Parameters: role, status, keyword, page, size, sort
+  Response: PageResponse<UserResponseDTO>
+
+- GET /users/{userId}
+  Response: UserDetailDTO (includes bookings history)
+
+- POST /users (MANAGER / ADMIN only)
+  Request (UserCreateDTO): { username, password, email, role, status }
+  Response: UserResponseDTO
+
+- PUT /users/{userId} (Own profile or Admin)
+  Request (UserUpdateDTO): { email, status }
+  Response: UserResponseDTO
+
+- DELETE /users/{userId} (ADMIN only)
+  Response: Void (HTTP 204)
+
+- PUT /users/{userId}/avatar
+  Content-Type: multipart/form-data
+  Request: file (Multipart binary file)
+  Response: string (avatar url)
+
+- POST /users/{userId}/change-password
+  Request: { oldPassword, newPassword }
+  Response: Void
