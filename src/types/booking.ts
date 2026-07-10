@@ -18,6 +18,7 @@ export interface BookingResponseDTO {
   checkOutDate: string;
   guests: number;
   status: BookingStatus;
+  totalPrice: number;
   createdAt: string;
   updatedAt: string;
 }

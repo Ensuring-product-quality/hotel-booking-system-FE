@@ -13,4 +13,10 @@ export const ROUTES = {
   MANAGER_HOTELS: "/manager/hotels",
   MANAGER_ROOMS: "/manager/rooms",
   MANAGER_USERS: "/manager/users",
+  OFFERS: "/offers",
+  OFFER_DETAIL: "/offers/:id",
+  TRAVEL_GUIDE: "/travel-guide",
+  ARTICLE_DETAIL: "/travel-guide/:id",
+  BOOKING_LOOKUP: "/booking-lookup",
+  CONTACT: "/contact",
 } as const;

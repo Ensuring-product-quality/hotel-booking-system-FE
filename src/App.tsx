@@ -8,6 +8,12 @@ import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { HotelsPage } from "./pages/HotelsPage";
 import { HotelDetailPage } from "./pages/HotelDetailPage";
 import { MyBookingsPage } from "./pages/MyBookingsPage";
+import { OffersPage } from "./pages/OffersPage";
+import { OfferDetailPage } from "./pages/OfferDetailPage";
+import { TravelGuidePage } from "./pages/TravelGuidePage";
+import { ArticleDetailPage } from "./pages/ArticleDetailPage";
+import { BookingLookupPage } from "./pages/BookingLookupPage";
+import { ContactPage } from "./pages/ContactPage";
 import { BookingDetailPage } from "./pages/BookingDetailPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
 import { StaffBookingsPage } from "./pages/StaffBookingsPage";
@@ -40,6 +46,12 @@ function App() {
           <Route path={ROUTES.VERIFY_EMAIL} element={<VerifyEmailPage />} />
           <Route path={ROUTES.HOTELS} element={<HotelsPage />} />
           <Route path={ROUTES.HOTEL_DETAIL} element={<HotelDetailPage />} />
+          <Route path={ROUTES.OFFERS} element={<OffersPage />} />
+          <Route path={ROUTES.OFFER_DETAIL} element={<OfferDetailPage />} />
+          <Route path={ROUTES.TRAVEL_GUIDE} element={<TravelGuidePage />} />
+          <Route path={ROUTES.ARTICLE_DETAIL} element={<ArticleDetailPage />} />
+          <Route path={ROUTES.BOOKING_LOOKUP} element={<BookingLookupPage />} />
+          <Route path={ROUTES.CONTACT} element={<ContactPage />} />
 
           {/* Customer Routes */}
           <Route

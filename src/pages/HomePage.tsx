@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 import { ROUTES } from "../constants/routes";
 
 interface SearchFormState {
@@ -214,7 +215,7 @@ export function HomePage() {
                 <span className="bg-brand-500 text-white text-xs uppercase font-bold py-1 px-2.5 rounded-md w-fit mb-3">
                   Giảm tới 20%
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold mb-2">Đại hội nghỉ dưỡng nội đô HotelNow</h3>
+                <h3 className="text-xl sm:text-2xl font-bold mb-2">Đại hội nghỉ dưỡng nội đô HotelBooking</h3>
                 <p className="text-slate-300 text-sm mb-6">
                   Tận hưởng kỳ nghỉ ngắn ngày tại các khách sạn 5 sao ngay trong lòng thành phố với đặc quyền check-in sớm.
                 </p>
@@ -279,7 +280,7 @@ export function HomePage() {
 
         {/* Text */}
         <div className="flex flex-col gap-6 text-slate-700">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-800">Tại sao chọn HotelNow?</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-800">Tại sao chọn HotelBooking?</h2>
 
           <div className="flex gap-4">
             <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
@@ -313,7 +314,7 @@ export function HomePage() {
             </div>
             <div>
               <h3 className="font-bold text-lg text-slate-800">Tuyển chọn nghiêm ngặt</h3>
-              <p className="text-slate-500 text-sm mt-1">Tất cả khách sạn trên HotelNow đều được kiểm tra chất lượng định kỳ để đảm bảo tiêu chuẩn cao nhất.</p>
+              <p className="text-slate-500 text-sm mt-1">Tất cả khách sạn trên HotelBooking đều được kiểm tra chất lượng định kỳ để đảm bảo tiêu chuẩn cao nhất.</p>
             </div>
           </div>
         </div>
@@ -343,73 +344,7 @@ export function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 pt-16 pb-8 border-t border-slate-800 w-full mt-auto">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          <div>
-            <h3 className="text-white font-bold text-lg mb-4">HotelNow</h3>
-            <p className="text-sm leading-relaxed mb-4">Nâng tầm trải nghiệm du lịch của bạn với dịch vụ đặt phòng khách sạn và biệt thự sang trọng hàng đầu Việt Nam.</p>
-            <div className="flex gap-4">
-              {/* Icons placeholders */}
-              <a href="#" className="hover:text-white"><i className="fab fa-facebook"></i></a>
-              <a href="#" className="hover:text-white"><i className="fab fa-instagram"></i></a>
-              <a href="#" className="hover:text-white"><i className="fab fa-youtube"></i></a>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Về chúng tôi</h4>
-            <ul className="flex flex-col gap-2 text-sm">
-              <li><a href="#" className="hover:text-white transition">Giới thiệu</a></li>
-              <li><a href="#" className="hover:text-white transition">Tuyển dụng</a></li>
-              <li><a href="#" className="hover:text-white transition">Blog du lịch</a></li>
-              <li><a href="#" className="hover:text-white transition">Đại sứ thương hiệu</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Hỗ trợ</h4>
-            <ul className="flex flex-col gap-2 text-sm">
-              <li><a href="#" className="hover:text-white transition">Trung tâm trợ giúp</a></li>
-              <li><a href="#" className="hover:text-white transition">Chính sách bảo mật</a></li>
-              <li><a href="#" className="hover:text-white transition">Điều khoản sử dụng</a></li>
-              <li><a href="#" className="hover:text-white transition">Câu hỏi thường gặp</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Liên hệ</h4>
-            <ul className="flex flex-col gap-2.5 text-sm">
-              <li className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>contact@hotelnow.com</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <span>1900 833 345</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Tầng 20, Tòa nhà Landmark 81, Vinhomes Central Park, TP. HCM</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 border-t border-slate-800/80 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <p>&copy; 2026 HotelNow. Tất cả các quyền được bảo lưu.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:underline">Tiếng Việt (VN)</a>
-            <a href="#" className="hover:underline">VNĐ</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

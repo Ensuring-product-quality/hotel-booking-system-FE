@@ -169,7 +169,7 @@ export function ManagerHotelsPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Quản lý khách sạn</h1>
-            <p className="text-slate-400 text-sm mt-1">Danh sách hệ thống khách sạn trực thuộc HotelNow</p>
+            <p className="text-slate-400 text-sm mt-1">Danh sách hệ thống khách sạn trực thuộc HotelBooking</p>
           </div>
           <button
             onClick={() => openModal(null)}

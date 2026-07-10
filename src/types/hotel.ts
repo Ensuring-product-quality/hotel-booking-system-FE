@@ -11,6 +11,7 @@ export interface HotelResponseDTO {
   createdAt: string;
   updatedAt: string;
   images?: string[];
+  price?: number;
 }
 
 export interface HotelDetailDTO extends HotelResponseDTO {

@@ -31,7 +31,9 @@ export function useAuth() {
           refreshToken: res.data.refreshToken,
           user: res.data.user ?? null,
         });
-        navigate(ROUTES.HOME);
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get("redirect");
+        navigate(redirect || ROUTES.HOME);
         return true;
       } catch (err) {
         setError(getErrorMessage(err, "Đăng nhập thất bại."));

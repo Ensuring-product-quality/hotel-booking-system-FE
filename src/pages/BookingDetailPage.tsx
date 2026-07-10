@@ -223,7 +223,7 @@ export function BookingDetailPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={paymentStatus === "completed"}
-                    placeholder="example@hotelnow.com"
+                    placeholder="example@hotelbooking.com"
                     className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700 disabled:bg-slate-50"
                   />
                 </div>
@@ -253,7 +253,7 @@ export function BookingDetailPage() {
                   <span className="text-xl">✅</span>
                   <div>
                     <p className="font-bold text-xs">Đã thanh toán thành công!</p>
-                    <p className="text-[10px] text-emerald-600 mt-0.5">HotelNow đã xác thực giao dịch cho đơn hàng này.</p>
+                    <p className="text-[10px] text-emerald-600 mt-0.5">HotelBooking đã xác thực giao dịch cho đơn hàng này.</p>
                   </div>
                 </div>
               ) : (

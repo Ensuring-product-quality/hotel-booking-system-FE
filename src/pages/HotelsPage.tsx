@@ -373,10 +373,18 @@ export function HotelsPage() {
 
                           <div className="flex items-end gap-4 w-full sm:w-auto justify-between sm:justify-end">
                             <div className="text-right">
-                              <p className="text-[10px] text-slate-400 line-through">1.200.000đ</p>
-                              <p className="text-lg font-extrabold text-brand-600">
-                                950.000đ <span className="text-xs font-normal text-slate-400">/ đêm</span>
-                              </p>
+                              {hotel.price && hotel.price > 0 ? (
+                                <>
+                                  <p className="text-[10px] text-slate-400 line-through">
+                                    {(Math.round(hotel.price * 1.25)).toLocaleString("vi-VN")}đ
+                                  </p>
+                                  <p className="text-lg font-extrabold text-brand-600">
+                                    {hotel.price.toLocaleString("vi-VN")}đ <span className="text-xs font-normal text-slate-400">/ đêm</span>
+                                  </p>
+                                </>
+                              ) : (
+                                <p className="text-sm font-semibold text-slate-500">Liên hệ đặt phòng</p>
+                              )}
                             </div>
 
                             <button

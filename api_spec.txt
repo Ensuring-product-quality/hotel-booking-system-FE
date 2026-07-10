@@ -123,6 +123,10 @@ Common pagination query parameters:
 - GET /bookings/{bookingId}
   Response: BookingDetailDTO (includes user details, room details, paymentStatus)
 
+- GET /bookings/public/lookup
+  Parameters: bookingId, email
+  Response: BookingDetailDTO (No authentication required)
+
 - GET /bookings/{bookingId}/availability
   Response: boolean
 

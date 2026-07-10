@@ -63,7 +63,7 @@ export function MyBookingsPage() {
         {/* Title */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Đơn đặt phòng của tôi</h1>
-          <p className="text-slate-400 text-sm mt-1">Quản lý lịch sử đặt phòng của bạn tại HotelNow</p>
+          <p className="text-slate-400 text-sm mt-1">Quản lý lịch sử đặt phòng của bạn tại HotelBooking</p>
         </div>
 
         {/* Status Filter Tabs */}

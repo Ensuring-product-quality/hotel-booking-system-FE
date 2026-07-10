@@ -50,4 +50,11 @@ export const bookingApi = {
     apiClient
       .delete<StandardResponse<null>>(`/bookings/${id}`)
       .then((res) => res.data),
+
+  publicLookup: (bookingId: number, email: string) =>
+    apiClient
+      .get<StandardResponse<BookingDetailDTO>>("/bookings/public/lookup", {
+        params: { bookingId, email },
+      })
+      .then((res) => res.data),
 };

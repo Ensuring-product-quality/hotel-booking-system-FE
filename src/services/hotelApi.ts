@@ -54,3 +54,5 @@ export const hotelApi = {
       .then((res) => res.data);
   },
 };
+
+
