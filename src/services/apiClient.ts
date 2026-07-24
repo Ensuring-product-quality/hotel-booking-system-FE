@@ -8,12 +8,11 @@ import type { RefreshTokenRequest, LoginResponseData } from "../types/auth";
 import { ROUTES } from "../constants/routes";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL as string;
+const APP_BASENAME = "/vi-vn";
 
 if (!baseURL) {
-  // Fail sớm và rõ ràng thay vì gọi API tới "undefined/..." rồi mới lỗi khó hiểu.
-  // eslint-disable-next-line no-console
   console.error(
-    "VITE_API_BASE_URL chưa được cấu hình trong .env — kiểm tra lại file .env ở root project."
+    "VITE_API_BASE_URL chưa được cấu hình trong .env. Hãy kiểm tra file .env ở thư mục gốc.",
   );
 }
 
@@ -22,7 +21,6 @@ export const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// --- Gắn Authorization header cho mọi request ---
 apiClient.interceptors.request.use((config) => {
   const { accessToken } = getAuthState();
   if (accessToken) {
@@ -31,12 +29,10 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// --- Xử lý 401: tự refresh token, gộp các request đang chờ để tránh gọi
-// refresh-token nhiều lần song song khi nhiều request cùng 401 một lúc ---
 let isRefreshing = false;
 let pendingQueue: Array<{
   resolve: (token: string) => void;
-  reject: (err: unknown) => void;
+  reject: (error: unknown) => void;
 }> = [];
 
 function resolveQueue(token: string) {
@@ -44,15 +40,16 @@ function resolveQueue(token: string) {
   pendingQueue = [];
 }
 
-function rejectQueue(err: unknown) {
-  pendingQueue.forEach(({ reject }) => reject(err));
+function rejectQueue(error: unknown) {
+  pendingQueue.forEach(({ reject }) => reject(error));
   pendingQueue = [];
 }
 
 function forceLogoutAndRedirect() {
   getAuthState().clearAuth();
-  if (window.location.pathname !== ROUTES.LOGIN) {
-    window.location.href = ROUTES.LOGIN;
+  const loginPath = `${APP_BASENAME}${ROUTES.LOGIN}`;
+  if (window.location.pathname !== loginPath) {
+    window.location.assign(loginPath);
   }
 }
 
@@ -69,13 +66,11 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Tránh vòng lặp vô hạn nếu chính request refresh-token cũng trả 401.
     if (originalRequest.url?.includes("/auth/refresh-token")) {
       forceLogoutAndRedirect();
       return Promise.reject(error);
     }
 
-    // Request này đã từng được retry rồi mà vẫn 401 -> không retry nữa.
     if (originalRequest._retry) {
       forceLogoutAndRedirect();
       return Promise.reject(error);
@@ -90,11 +85,13 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
 
     if (isRefreshing) {
-      // Đã có 1 request khác đang refresh -> xếp hàng chờ token mới.
       return new Promise((resolve, reject) => {
         pendingQueue.push({
-          resolve: (newToken: string) => {
-            originalRequest.headers.set("Authorization", `Bearer ${newToken}`);
+          resolve: (newToken) => {
+            originalRequest.headers.set(
+              "Authorization",
+              `Bearer ${newToken}`,
+            );
             resolve(apiClient(originalRequest));
           },
           reject,
@@ -105,19 +102,26 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
     try {
       const body: RefreshTokenRequest = { refreshToken };
-      const res = await axios.post<StandardResponse<LoginResponseData>>(
-        `${baseURL}/auth/refresh-token`,
-        body
-      );
-      const newAccessToken = res.data.data?.accessToken;
-      if (!newAccessToken) {
-        throw new Error("Refresh-token response không có accessToken");
+      const response = await axios.post<
+        StandardResponse<LoginResponseData>
+      >(`${baseURL}/auth/refresh-token`, body);
+      const refreshedAuth = response.data.data;
+
+      if (!refreshedAuth?.accessToken || !refreshedAuth.refreshToken) {
+        throw new Error("Phản hồi refresh token không có đủ token");
       }
 
-      getAuthState().setAccessToken(newAccessToken);
-      resolveQueue(newAccessToken);
+      getAuthState().setAuth({
+        accessToken: refreshedAuth.accessToken,
+        refreshToken: refreshedAuth.refreshToken,
+        user: refreshedAuth.user ?? getAuthState().user,
+      });
+      resolveQueue(refreshedAuth.accessToken);
 
-      originalRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
+      originalRequest.headers.set(
+        "Authorization",
+        `Bearer ${refreshedAuth.accessToken}`,
+      );
       return apiClient(originalRequest);
     } catch (refreshError) {
       rejectQueue(refreshError);
@@ -126,12 +130,13 @@ apiClient.interceptors.response.use(
     } finally {
       isRefreshing = false;
     }
-  }
+  },
 );
 
-// Helper đọc message lỗi thống nhất từ StandardResponse (backend trả lỗi
-// dạng { success:false, message:"..." } chứ không phải throw string thô).
-export function getErrorMessage(error: unknown, fallback = "Đã có lỗi xảy ra, vui lòng thử lại."): string {
+export function getErrorMessage(
+  error: unknown,
+  fallback = "Đã có lỗi xảy ra, vui lòng thử lại.",
+): string {
   if (axios.isAxiosError(error)) {
     const data = error.response?.data as StandardResponse | undefined;
     if (data?.message) return data.message;
