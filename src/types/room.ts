@@ -4,6 +4,7 @@ export interface RoomResponseDTO {
   roomNumber: string;
   type: string;
   price: number;
+  capacity: number;
   description: string;
   status: string;
   createdAt: string;
@@ -19,6 +20,7 @@ export interface RoomCreateDTO {
   roomNumber: string;
   type: string;
   price: number;
+  capacity: number;
   description: string;
   status: string;
 }
