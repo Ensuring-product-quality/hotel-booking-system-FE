@@ -8,6 +8,7 @@ export interface HotelResponseDTO {
   stars: number;
   description: string;
   status: "active" | "inactive";
+  averageRating: number;
   createdAt: string;
   updatedAt: string;
   images?: string[];
