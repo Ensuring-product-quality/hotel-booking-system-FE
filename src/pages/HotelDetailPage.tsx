@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "../components/Header";
 import { hotelApi } from "../services/hotelApi";
 import { bookingApi } from "../services/bookingApi";
@@ -10,20 +10,13 @@ import { getErrorMessage } from "../services/apiClient";
 import { ROUTES } from "../constants/routes";
 import { Role } from "../types/auth";
 
-interface ReviewLocal {
-  id: number;
-  author: string;
-  rating: number;
-  comment: string;
-  date: string;
-  isLocal?: boolean;
-}
 
 export function HotelDetailPage() {
   const { id } = useParams<{ id: string }>();
   const hotelId = parseInt(id || "0");
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   // Booking Modal States
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -41,23 +34,20 @@ export function HotelDetailPage() {
   const [comment, setComment] = useState("");
   const [reviewError, setReviewError] = useState<string | null>(null);
 
-  // Local state for reviews since backend lacks review list endpoint
-  const [localReviews, setLocalReviews] = useState<ReviewLocal[]>([
-    {
-      id: 101,
-      author: "Nguyễn Hoàng",
-      rating: 5,
-      comment: "Trải nghiệm tuyệt vời. Nhân viên cực kỳ chuyên nghiệp và tận tâm. View phòng nhìn ra Nhà Thờ Đức Bà rất đẹp. Buffet sáng đa dạng món.",
-      date: "Đã nghỉ tại đây 3 ngày trước",
-    },
-    {
-      id: 102,
-      author: "Trần Lan",
-      rating: 4.8,
-      comment: "Khách sạn nằm ở vị trí trung tâm, rất thuận tiện đi lại. Phòng ốc sạch sẽ, hiện đại. Hồ bơi hơi đông vào cuối tuần nhưng dịch vụ vẫn rất tốt.",
-      date: "Đã nghỉ tại đây 1 tuần trước",
-    },
-  ]);
+  const { data: reviewsData } = useQuery({
+    queryKey: ["reviews", hotelId],
+    queryFn: () => reviewApi.getAll({ hotelId }),
+    enabled: hotelId > 0,
+  });
+
+  const localReviews = (reviewsData?.data ?? []).map((review) => ({
+    id: review.id,
+    userId: review.userId,
+    author: review.username,
+    rating: review.rating,
+    comment: review.comment,
+    date: new Date(review.createdAt).toLocaleDateString("vi-VN"),
+  }));
 
   // Fetch hotel details
   const { data: hotelData, isLoading, error } = useQuery({
@@ -75,7 +65,7 @@ export function HotelDetailPage() {
 
   // Check if user has a completed booking at this hotel
   const hasCompletedBooking = userBookingsData?.data?.content?.some(
-    (b: any) => b.status === "completed"
+    (booking) => booking.status === "completed" && booking.hotelId === hotelId
   ) || false;
 
   // Book room mutation
@@ -103,17 +93,9 @@ export function HotelDetailPage() {
   const reviewMutation = useMutation({
     mutationFn: (body: { hotelId: number; rating: number; comment: string }) =>
       reviewApi.create(body),
-    onSuccess: (res) => {
-      // Add review to local list
-      const newReview: ReviewLocal = {
-        id: res.data?.id || Date.now(),
-        author: user?.username || "Bạn",
-        rating: rating,
-        comment: comment,
-        date: "Vừa xong",
-        isLocal: true,
-      };
-      setLocalReviews([newReview, ...localReviews]);
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["reviews", hotelId] });
+      void queryClient.invalidateQueries({ queryKey: ["hotel", hotelId] });
       setComment("");
       setRating(5);
       setReviewError(null);
@@ -184,17 +166,14 @@ export function HotelDetailPage() {
     });
   };
 
-  const handleReviewDelete = async (reviewId: number, isLocal?: boolean) => {
+  const handleReviewDelete = async (reviewId: number) => {
     if (confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) {
-      if (isLocal) {
-        setLocalReviews(localReviews.filter((r) => r.id !== reviewId));
-      } else {
-        try {
-          await reviewApi.delete(reviewId);
-          setLocalReviews(localReviews.filter((r) => r.id !== reviewId));
-        } catch (err) {
-          alert(getErrorMessage(err, "Không thể xóa đánh giá này."));
-        }
+      try {
+        await reviewApi.delete(reviewId);
+        await queryClient.invalidateQueries({ queryKey: ["reviews", hotelId] });
+        await queryClient.invalidateQueries({ queryKey: ["hotel", hotelId] });
+      } catch (err) {
+        alert(getErrorMessage(err, "Không thể xóa đánh giá này."));
       }
     }
   };
@@ -227,14 +206,7 @@ export function HotelDetailPage() {
   const hotel = hotelData.data;
   const rooms = hotel.rooms || [];
 
-  // Mock photo grid images matching Airbnb design from mockup
-  const hotelImages = hotel.images && hotel.images.length > 0 ? hotel.images : [
-    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200",
-    "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=600",
-    "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600",
-    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600",
-    "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=600",
-  ];
+  const hotelImages = hotel.images ?? [];
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -278,25 +250,19 @@ export function HotelDetailPage() {
           </div>
         </div>
 
-        {/* Photo Grid (Airbnb Style) */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-2xl overflow-hidden shadow-md mb-8 h-[460px]">
-          {/* Main Large Image */}
-          <div className="md:col-span-2 h-full overflow-hidden">
-            <img src={hotelImages[0]} alt="Main" className="h-full w-full object-cover hover:scale-101 transition duration-500 cursor-pointer" />
-          </div>
-          {/* Smaller Images Grid */}
-          <div className="hidden md:grid grid-cols-2 col-span-2 gap-3 h-full">
-            {hotelImages.slice(1, 5).map((img, index) => (
-              <div key={index} className="relative h-full overflow-hidden">
-                <img src={img} alt={`Sub ${index}`} className="h-full w-full object-cover hover:scale-102 transition duration-500 cursor-pointer" />
-                {index === 3 && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm font-bold pointer-events-none">
-                    +24 ảnh khác
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Hotel image supplied by the API */}
+        <div className="rounded-2xl overflow-hidden shadow-md mb-8 h-[460px] bg-slate-100">
+          {hotelImages[0] ? (
+            <img
+              src={hotelImages[0]}
+              alt={hotel.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center text-sm font-semibold text-slate-400">
+              Khách sạn chưa có ảnh
+            </div>
+          )}
         </div>
 
         {/* Hotel Details layout */}
@@ -365,16 +331,18 @@ export function HotelDetailPage() {
               )}
             </div>
 
-            {/* Map */}
-            <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm relative h-56 flex items-center justify-center bg-slate-100">
-              {/* Map background image */}
-              <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400" alt="Map" className="h-full w-full object-cover opacity-60" />
-              <div className="absolute inset-0 bg-black/10"></div>
-              <div className="absolute text-center">
-                <button className="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-md hover:bg-slate-800 transition cursor-pointer">
-                  Xem trên bản đồ
-                </button>
-              </div>
+            {/* Address link built from current hotel data */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <h3 className="font-bold text-slate-800 mb-2">Vị trí khách sạn</h3>
+              <p className="text-sm text-slate-500 mb-4">{hotel.address}, {hotel.city}</p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${hotel.address}, ${hotel.city}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-slate-800 transition"
+              >
+                Xem trên bản đồ
+              </a>
             </div>
           </div>
         </div>
@@ -387,7 +355,7 @@ export function HotelDetailPage() {
               <p className="text-xs text-slate-400 mt-0.5">Tổng số {localReviews.length} lượt đánh giá tại khách sạn này</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-black text-brand-600">4.9</span>
+              <span className="text-2xl font-black text-brand-600">{hotel.averageRating.toFixed(1)}</span>
               <div className="text-xs text-slate-500 font-semibold">
                 <p>Xuất sắc</p>
                 <p className="text-[10px] text-slate-400">Đánh giá trung bình</p>
@@ -451,9 +419,9 @@ export function HotelDetailPage() {
                       {rev.rating.toFixed(1)}/5
                     </span>
                     {/* Delete button (If review belongs to user or admin) */}
-                    {(user?.username === rev.author || user?.role === Role.ADMIN) && (
+                    {(user?.id === rev.userId || user?.role === Role.ADMIN) && (
                       <button
-                        onClick={() => handleReviewDelete(rev.id, rev.isLocal)}
+                        onClick={() => handleReviewDelete(rev.id)}
                         className="text-red-500 hover:text-red-700 text-xs font-semibold p-1 hover:bg-red-50 rounded"
                         title="Xóa đánh giá"
                       >

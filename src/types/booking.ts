@@ -15,6 +15,7 @@ export interface BookingResponseDTO {
   userId: number;
   roomId: number;
   roomNumber: string;
+  hotelId: number;
   hotelName: string;
   checkInDate: string;
   checkOutDate: string;
