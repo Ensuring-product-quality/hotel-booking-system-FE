@@ -14,6 +14,8 @@ export interface BookingResponseDTO {
   id: number;
   userId: number;
   roomId: number;
+  roomNumber: string;
+  hotelName: string;
   checkInDate: string;
   checkOutDate: string;
   guests: number;
@@ -26,7 +28,6 @@ export interface BookingResponseDTO {
 export interface BookingDetailDTO extends BookingResponseDTO {
   user: User;
   room: RoomResponseDTO;
-  hotelName?: string;
   paymentStatus: "pending" | "completed" | "failed" | "refunded";
 }
 

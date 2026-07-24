@@ -49,12 +49,6 @@ export function MyBookingsPage() {
     }
   };
 
-  const getMockHotelName = (id: number) => {
-    // Standard mock names matching seed database hotel IDs
-    if (id === 1 || id % 2 === 1) return "Grand Palace Hotel";
-    return "Ocean Breeze Resort";
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
@@ -129,7 +123,7 @@ export function MyBookingsPage() {
                     </div>
 
                     <h3 className="font-extrabold text-slate-800 text-lg hover:text-brand-600 transition">
-                      {getMockHotelName(booking.roomId)}
+                      {booking.hotelName}
                     </h3>
 
                     <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-slate-500 font-medium mt-1">
@@ -140,7 +134,7 @@ export function MyBookingsPage() {
                         Ngày trả: <span className="text-slate-700 font-semibold">{booking.checkOutDate}</span>
                       </p>
                       <p>Số khách: <span className="text-slate-700 font-semibold">{booking.guests} khách</span></p>
-                      <p>Phòng số: <span className="text-slate-700 font-semibold">{booking.roomId}</span></p>
+                      <p>Phòng số: <span className="text-slate-700 font-semibold">{booking.roomNumber}</span></p>
                     </div>
                   </div>
 
