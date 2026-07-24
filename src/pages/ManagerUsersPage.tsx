@@ -122,7 +122,7 @@ export function ManagerUsersPage() {
 
     if (editingUser) {
       updateMutation.mutate({
-        id: parseInt(editingUser.id),
+        id: editingUser.id,
         body: { email, status },
       });
     } else {
@@ -291,7 +291,7 @@ export function ManagerUsersPage() {
                         </button>
                         {isAdmin && usr.username !== currentUser?.username && (
                           <button
-                            onClick={() => handleDeleteClick(parseInt(usr.id))}
+                            onClick={() => handleDeleteClick(usr.id)}
                             className="px-2 py-1 border border-red-100 text-red-600 bg-red-50/30 hover:bg-red-50 rounded-lg transition text-[11px] font-semibold cursor-pointer"
                           >
                             Xóa

@@ -13,7 +13,6 @@ export interface ReviewResponseDTO {
 }
 
 export interface ReviewCreateDTO {
-  userId: number;
   hotelId?: number;
   roomId?: number;
   rating: number;

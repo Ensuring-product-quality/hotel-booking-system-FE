@@ -1,12 +1,8 @@
-// Role được khai báo 1 chỗ duy nhất — mọi nơi khác trong app phải import
-// từ đây, KHÔNG được gõ chuỗi "ROLE_ADMIN" tay ở nơi khác.
-// (Dùng "const object" thay vì `enum` vì project bật erasableSyntaxOnly
-// của TypeScript 6 — enum thường không được phép trong chế độ này.)
 export const Role = {
-  ADMIN: "ROLE_ADMIN",
-  MANAGER: "ROLE_MANAGER",
-  STAFF: "ROLE_STAFF",
-  CUSTOMER: "ROLE_CUSTOMER",
+  ADMIN: "ADMIN",
+  MANAGER: "MANAGER",
+  STAFF: "STAFF",
+  CUSTOMER: "CUSTOMER",
 } as const;
 
 export type Role = (typeof Role)[keyof typeof Role];
@@ -21,7 +17,7 @@ export const ALL_ROLES: Role[] = [
 export type UserStatus = "active" | "inactive" | "banned";
 
 export interface User {
-  id: string;
+  id: number;
   username: string;
   email: string;
   role: Role;
@@ -37,7 +33,7 @@ export interface LoginRequest {
 export interface LoginResponseData {
   accessToken: string;
   refreshToken: string;
-  user?: User;
+  user: User;
 }
 
 export interface RegisterRequest {

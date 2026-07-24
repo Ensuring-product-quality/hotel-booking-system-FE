@@ -69,7 +69,7 @@ export function HotelDetailPage() {
   // Fetch user's bookings to check if they have a completed booking at this hotel to post a review
   const { data: userBookingsData } = useQuery({
     queryKey: ["userBookings", user?.id],
-    queryFn: () => bookingApi.getAll({ userId: parseInt(user?.id || "0"), status: "completed" }),
+    queryFn: () => bookingApi.getAll({ userId: user?.id || 0, status: "completed" }),
     enabled: isAuthenticated && !!user?.id,
   });
 
@@ -80,7 +80,7 @@ export function HotelDetailPage() {
 
   // Book room mutation
   const bookingMutation = useMutation({
-    mutationFn: (body: { userId: number; roomId: number; checkInDate: string; checkOutDate: string; guests: number }) =>
+    mutationFn: (body: { roomId: number; checkInDate: string; checkOutDate: string; guests: number }) =>
       bookingApi.create(body),
     onSuccess: (res) => {
       setBookingSuccess(true);
@@ -101,7 +101,7 @@ export function HotelDetailPage() {
 
   // Post review mutation
   const reviewMutation = useMutation({
-    mutationFn: (body: { userId: number; hotelId: number; rating: number; comment: string }) =>
+    mutationFn: (body: { hotelId: number; rating: number; comment: string }) =>
       reviewApi.create(body),
     onSuccess: (res) => {
       // Add review to local list
@@ -163,7 +163,6 @@ export function HotelDetailPage() {
     }
 
     bookingMutation.mutate({
-      userId: parseInt(user.id),
       roomId: selectedRoomId,
       checkInDate,
       checkOutDate,
@@ -179,7 +178,6 @@ export function HotelDetailPage() {
       return;
     }
     reviewMutation.mutate({
-      userId: parseInt(user.id),
       hotelId: hotelId,
       rating: rating,
       comment: comment,
@@ -351,7 +349,7 @@ export function HotelDetailPage() {
                           <p className="text-[10px] text-slate-400 font-medium">Tiêu chuẩn • Giường lớn</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-extrabold text-brand-600">{(room.price * 20000).toLocaleString("vi-VN")}đ</p>
+                          <p className="text-sm font-extrabold text-brand-600">{(room.price).toLocaleString("vi-VN")}đ</p>
                           <p className="text-[9px] text-slate-400">/ đêm</p>
                         </div>
                       </div>
@@ -542,7 +540,7 @@ export function HotelDetailPage() {
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs">
                   <div className="flex justify-between font-medium text-slate-500 mb-1">
                     <span>Đơn giá phòng:</span>
-                    <span>{(selectedRoomPrice * 20000).toLocaleString("vi-VN")}đ / đêm</span>
+                    <span>{(selectedRoomPrice).toLocaleString("vi-VN")}đ / đêm</span>
                   </div>
                 </div>
 

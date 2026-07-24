@@ -31,9 +31,11 @@ export const bookingApi = {
       .get<StandardResponse<BookingDetailDTO>>(`/bookings/${id}`)
       .then((res) => res.data),
 
-  checkAvailability: (bookingId: number) =>
+  checkAvailability: (roomId: number, checkIn: string, checkOut: string) =>
     apiClient
-      .get<StandardResponse<boolean>>(`/bookings/${bookingId}/availability`)
+      .get<StandardResponse<boolean>>(`/rooms/${roomId}/availability`, {
+        params: { checkIn, checkOut },
+      })
       .then((res) => res.data),
 
   getPaymentStatus: (bookingId: number) =>

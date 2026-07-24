@@ -11,13 +11,12 @@ export interface PaymentResponseDTO {
   bookingId: number;
   amount: number;
   paymentMethod: PaymentMethod;
-  status: "pending" | "completed" | "failed";
+  status: "pending" | "completed" | "failed" | "refunded";
   transactionId?: string;
   createdAt: string;
 }
 
 export interface PaymentCreateDTO {
   bookingId: number;
-  amount: number;
   paymentMethod: PaymentMethod;
 }

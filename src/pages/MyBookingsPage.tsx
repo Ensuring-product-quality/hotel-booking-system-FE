@@ -11,7 +11,7 @@ import { BookingStatus } from "../types/booking";
 export function MyBookingsPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const userId = parseInt(user?.id || "0");
+  const userId = user?.id || 0;
 
   const [activeStatus, setActiveStatus] = useState<string>("all");
   const [page, setPage] = useState(0);
@@ -36,7 +36,7 @@ export function MyBookingsPage() {
 
   const getStatusLabel = (status: BookingStatus) => {
     switch (status) {
-      case "pending":
+      case "pending_payment":
         return { text: "Chờ xác nhận", className: "bg-amber-50 text-amber-700 border-amber-100" };
       case "confirmed":
         return { text: "Đã xác nhận", className: "bg-blue-50 text-blue-700 border-blue-100" };
@@ -70,7 +70,7 @@ export function MyBookingsPage() {
         <div className="flex border-b border-slate-200 gap-1.5 overflow-x-auto pb-px mb-8 text-sm">
           {[
             { id: "all", label: "Tất cả" },
-            { id: "pending", label: "Chờ xác nhận" },
+            { id: "pending_payment", label: "Chờ xác nhận" },
             { id: "confirmed", label: "Đã xác nhận" },
             { id: "completed", label: "Đã hoàn thành" },
             { id: "cancelled", label: "Đã hủy" },

@@ -2,7 +2,7 @@ import type { User } from "./auth";
 import type { RoomResponseDTO } from "./room";
 
 export const BookingStatus = {
-  PENDING: "pending",
+  PENDING_PAYMENT: "pending_payment",
   CONFIRMED: "confirmed",
   CANCELLED: "cancelled",
   COMPLETED: "completed",
@@ -27,11 +27,10 @@ export interface BookingDetailDTO extends BookingResponseDTO {
   user: User;
   room: RoomResponseDTO;
   hotelName?: string;
-  paymentStatus: "pending" | "completed" | "failed";
+  paymentStatus: "pending" | "completed" | "failed" | "refunded";
 }
 
 export interface BookingCreateDTO {
-  userId: number;
   roomId: number;
   checkInDate: string;
   checkOutDate: string;
