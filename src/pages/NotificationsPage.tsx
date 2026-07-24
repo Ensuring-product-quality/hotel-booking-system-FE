@@ -26,8 +26,8 @@ export function NotificationsPage() {
   // Mutation to mark a notification as read
   const markAsReadMutation = useMutation({
     mutationFn: (id: number) => notificationApi.markAsRead(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: (err) => {
       alert(getErrorMessage(err, "Không thể đánh dấu thông báo này là đã đọc."));
@@ -36,11 +36,8 @@ export function NotificationsPage() {
 
   // Mark all as read helper
   const handleMarkAllAsRead = async () => {
-    const unreadNotifications = notifications.filter((n) => n.status === "unread");
-    if (unreadNotifications.length === 0) return;
-
     try {
-      await Promise.all(unreadNotifications.map((n) => notificationApi.markAsRead(n.id)));
+      await notificationApi.markAllAsRead();
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       alert("Đã đánh dấu tất cả thông báo là đã đọc.");
     } catch {

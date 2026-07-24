@@ -16,4 +16,9 @@ export const notificationApi = {
     apiClient
       .post<StandardResponse<null>>(`/notifications/${id}/mark-as-read`)
       .then((res) => res.data),
+
+  markAllAsRead: () =>
+    apiClient
+      .post<StandardResponse<number>>("/notifications/mark-all-as-read")
+      .then((res) => res.data),
 };
