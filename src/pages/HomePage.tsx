@@ -83,7 +83,7 @@ export function HomePage() {
             </div>
 
             {/* Check-in Date */}
-            <div className="w-full md:w-48 text-left relative shrink-0">
+            <div className="w-full md:w-36 text-left relative shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -92,7 +92,7 @@ export function HomePage() {
               </label>
               <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
                 <span className={`text-slate-800 font-medium ${!searchState.checkInDate ? "text-slate-400" : ""}`}>
-                  {formatDateDisplay(searchState.checkInDate) || "Chọn ngày"}
+                  {formatDateDisplay(searchState.checkInDate) || "dd/mm/yyyy"}
                 </span>
                 <input
                   type="date"
@@ -104,7 +104,7 @@ export function HomePage() {
             </div>
 
             {/* Check-out Date */}
-            <div className="w-full md:w-48 text-left relative shrink-0">
+            <div className="w-full md:w-36 text-left relative shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -113,7 +113,7 @@ export function HomePage() {
               </label>
               <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
                 <span className={`text-slate-800 font-medium ${!searchState.checkOutDate ? "text-slate-400" : ""}`}>
-                  {formatDateDisplay(searchState.checkOutDate) || "Chọn ngày"}
+                  {formatDateDisplay(searchState.checkOutDate) || "dd/mm/yyyy"}
                 </span>
                 <input
                   type="date"
@@ -125,7 +125,7 @@ export function HomePage() {
             </div>
 
             {/* Guests */}
-            <div className="w-full md:w-36 text-left shrink-0">
+            <div className="w-full md:w-20 text-left shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
