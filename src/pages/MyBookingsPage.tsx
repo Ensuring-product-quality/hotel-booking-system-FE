@@ -99,9 +99,7 @@ export function MyBookingsPage() {
           </div>
         ) : bookings.length === 0 ? (
           <div className="py-20 text-center bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center px-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2m-6-9l2 2 4-4" />
-            </svg>
+            <i className="fa-regular fa-clipboard text-4xl text-slate-350 mb-2"></i>
             <p className="text-slate-500 font-semibold mt-4">Không tìm thấy đơn đặt phòng nào</p>
             <p className="text-slate-400 text-sm mt-1">Bạn chưa thực hiện giao dịch nào trong trạng thái này.</p>
           </div>

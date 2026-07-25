@@ -67,10 +67,7 @@ export function HomePage() {
             {/* Destination */}
             <div className="w-full md:flex-1 text-left">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                <i className="fa-solid fa-location-dot text-brand-600"></i>
                 Điểm đến
               </label>
               <input
@@ -85,9 +82,7 @@ export function HomePage() {
             {/* Check-in Date */}
             <div className="w-full md:w-36 text-left relative shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <i className="fa-regular fa-calendar text-brand-600"></i>
                 Nhận phòng
               </label>
               <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
@@ -106,9 +101,7 @@ export function HomePage() {
             {/* Check-out Date */}
             <div className="w-full md:w-36 text-left relative shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <i className="fa-regular fa-calendar text-brand-600"></i>
                 Trả phòng
               </label>
               <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
@@ -127,9 +120,7 @@ export function HomePage() {
             {/* Guests */}
             <div className="w-full md:w-20 text-left shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
+                <i className="fa-solid fa-user-group text-brand-600"></i>
                 Khách
               </label>
               <input
@@ -147,9 +138,7 @@ export function HomePage() {
               type="submit"
               className="w-full md:w-auto px-8 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition hover:scale-[1.01] shadow-lg shadow-brand-600/10 cursor-pointer shrink-0"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <i className="fa-solid fa-magnifying-glass"></i>
               <span>Tìm kiếm</span>
             </button>
           </form>
@@ -195,9 +184,7 @@ export function HomePage() {
 
               {/* Rating badge */}
               <div className="absolute top-4 left-4 flex items-center gap-1 bg-white/95 text-slate-800 py-1 px-2.5 rounded-full text-xs font-bold shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-amber-500 fill-amber-500" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+                <i className="fa-solid fa-star text-amber-500 text-[10px]"></i>
                 {dest.rating}
               </div>
 
@@ -301,9 +288,7 @@ export function HomePage() {
 
           <div className="flex gap-4">
             <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
+              <i className="fa-solid fa-shield-halved text-lg"></i>
             </div>
             <div>
               <h3 className="font-bold text-lg text-slate-800">Đảm bảo giá tốt nhất</h3>
@@ -313,9 +298,7 @@ export function HomePage() {
 
           <div className="flex gap-4">
             <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
+              <i className="fa-solid fa-headset text-lg"></i>
             </div>
             <div>
               <h3 className="font-bold text-lg text-slate-800">Hỗ trợ 24/7 chuyên nghiệp</h3>
@@ -325,9 +308,7 @@ export function HomePage() {
 
           <div className="flex gap-4">
             <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
+              <i className="fa-solid fa-clipboard-check text-lg"></i>
             </div>
             <div>
               <h3 className="font-bold text-lg text-slate-800">Tuyển chọn nghiêm ngặt</h3>

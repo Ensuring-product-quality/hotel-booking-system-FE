@@ -16,24 +16,24 @@ interface Destination {
 }
 
 const NORTH_DESTINATIONS: Destination[] = [
-  { name: "Hà Nội", desc: "Thủ đô cổ kính, nghìn năm văn hiến", icon: "🏛️" },
-  { name: "Hạ Long", desc: "Kỳ quan thiên nhiên hùng vĩ", icon: "⛵" },
-  { name: "Sa Pa", desc: "Thị trấn sương mờ trên đỉnh núi", icon: "🏔️" },
-  { name: "Ninh Bình", desc: "Tràng An cổ kính, non nước hữu tình", icon: "🛶" }
+  { name: "Hà Nội", desc: "Thủ đô cổ kính, nghìn năm văn hiến", icon: "fa-solid fa-landmark" },
+  { name: "Hạ Long", desc: "Kỳ quan thiên nhiên hùng vĩ", icon: "fa-solid fa-ship" },
+  { name: "Sa Pa", desc: "Thị trấn sương mờ trên đỉnh núi", icon: "fa-solid fa-mountain" },
+  { name: "Ninh Bình", desc: "Tràng An cổ kính, non nước hữu tình", icon: "fa-solid fa-water" }
 ];
 
 const CENTRAL_DESTINATIONS: Destination[] = [
-  { name: "Đà Nẵng", desc: "Thành phố đáng sống, cầu Vàng rực rỡ", icon: "Bridge" },
-  { name: "Hội An", desc: "Phố cổ đèn lồng lung linh cổ kính", icon: "🏮" },
-  { name: "Nha Trang", desc: "Vịnh biển đầy nắng, cát trắng trải dài", icon: "🏖️" },
-  { name: "Đà Lạt", desc: "Thành phố ngàn hoa trong sương lạnh", icon: "🌲" }
+  { name: "Đà Nẵng", desc: "Thành phố đáng sống, cầu Vàng rực rỡ", icon: "fa-solid fa-archway" },
+  { name: "Hội An", desc: "Phố cổ đèn lồng lung linh cổ kính", icon: "fa-solid fa-lightbulb" },
+  { name: "Nha Trang", desc: "Vịnh biển đầy nắng, cát trắng trải dài", icon: "fa-solid fa-umbrella-beach" },
+  { name: "Đà Lạt", desc: "Thành phố ngàn hoa trong sương lạnh", icon: "fa-solid fa-tree" }
 ];
 
 const SOUTH_DESTINATIONS: Destination[] = [
-  { name: "Hồ Chí Minh", desc: "Đô thị sầm uất, nhịp sống năng động", icon: "🌆" },
-  { name: "Phú Quốc", desc: "Đảo ngọc thiên đường, hoàng hôn rực rỡ", icon: "🏝️" },
-  { name: "Vũng Tàu", desc: "Biển xanh rì rào, nghỉ dưỡng lý tưởng", icon: "🌅" },
-  { name: "Cần Thơ", desc: "Sông nước miền Tây, chợ nổi độc đáo", icon: "🚣" }
+  { name: "Hồ Chí Minh", desc: "Đô thị sầm uất, nhịp sống năng động", icon: "fa-solid fa-city" },
+  { name: "Phú Quốc", desc: "Đảo ngọc thiên đường, hoàng hôn rực rỡ", icon: "fa-solid fa-sun" },
+  { name: "Vũng Tàu", desc: "Biển xanh rì rào, nghỉ dưỡng lý tưởng", icon: "fa-solid fa-compass" },
+  { name: "Cần Thơ", desc: "Sông nước miền Tây, chợ nổi độc đáo", icon: "fa-solid fa-anchor" }
 ];
 
 
@@ -143,18 +143,7 @@ export function Header() {
           <div className="group relative">
             <button className="flex items-center gap-1 transition hover:text-brand-600 py-2 cursor-pointer">
               <span>Điểm đến</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-slate-400 group-hover:text-brand-600 transition-transform group-hover:rotate-180"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <i className="fa-solid fa-chevron-down text-xs text-slate-400 group-hover:text-brand-600 transition-transform group-hover:rotate-180"></i>
             </button>
 
             {/* Mega Dropdown Panel */}
@@ -172,7 +161,7 @@ export function Header() {
                           to={`${ROUTES.HOTELS}?city=${encodeURIComponent(d.name)}`}
                           className="group/item flex items-center gap-2 rounded-lg p-1.5 hover:bg-slate-50 transition"
                         >
-                          <span className="text-lg shrink-0">{d.icon}</span>
+                          <span className="text-xs text-slate-500 shrink-0"><i className={d.icon}></i></span>
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-slate-700 group-hover/item:text-brand-600 truncate">
                               {d.name}
@@ -197,7 +186,7 @@ export function Header() {
                           to={`${ROUTES.HOTELS}?city=${encodeURIComponent(d.name)}`}
                           className="group/item flex items-center gap-2 rounded-lg p-1.5 hover:bg-slate-50 transition"
                         >
-                          <span className="text-lg shrink-0">{d.icon === "Bridge" ? "🌉" : d.icon}</span>
+                          <span className="text-xs text-slate-500 shrink-0"><i className={d.icon}></i></span>
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-slate-700 group-hover/item:text-brand-600 truncate">
                               {d.name}
@@ -222,7 +211,7 @@ export function Header() {
                           to={`${ROUTES.HOTELS}?city=${encodeURIComponent(d.name)}`}
                           className="group/item flex items-center gap-2 rounded-lg p-1.5 hover:bg-slate-50 transition"
                         >
-                          <span className="text-lg shrink-0">{d.icon}</span>
+                          <span className="text-xs text-slate-500 shrink-0"><i className={d.icon}></i></span>
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-slate-700 group-hover/item:text-brand-600 truncate">
                               {d.name}
@@ -294,20 +283,7 @@ export function Header() {
                 className="relative p-1.5 text-slate-500 hover:text-brand-600 rounded-full hover:bg-slate-50 transition"
                 title="Thông báo"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
+                <i className="fa-regular fa-bell text-lg"></i>
                 {unreadCount > 0 && (
                   <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
                     {unreadCount}
@@ -317,7 +293,10 @@ export function Header() {
 
               {/* User Dropdown/Display */}
               <div className="relative group">
-                <button className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-50 transition text-sm cursor-pointer">
+                <button 
+                  onClick={() => navigate(ROUTES.PROFILE)}
+                  className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-50 transition text-sm cursor-pointer"
+                >
                   {user?.avatarUrl ? (
                     <img
                       src={user.avatarUrl}
@@ -335,14 +314,22 @@ export function Header() {
                 </button>
 
                 {/* Dropdown menu */}
-                <div className="absolute right-0 mt-1 w-52 rounded-xl border border-slate-100 bg-white p-1.5 shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                <div className="absolute right-0 mt-1 w-52 rounded-xl border border-slate-100 bg-white p-1.5 shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50 before:absolute before:content-[''] before:-top-2 before:left-0 before:right-0 before:h-2">
                   <div className="px-3 py-2 border-b border-slate-50 mb-1">
                     <p className="text-xs text-slate-400">Tài khoản</p>
-                    <p className="text-sm font-semibold text-slate-700 truncate">{user?.email}</p>
+                    <p className="text-sm font-bold text-slate-700 truncate">{user?.username}</p>
+                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                     <p className="text-[10px] inline-flex mt-1 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase font-semibold">
                       {user?.role?.replace("ROLE_", "")}
                     </p>
                   </div>
+
+                  <Link
+                    to={ROUTES.PROFILE}
+                    className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
+                  >
+                    Hồ sơ cá nhân
+                  </Link>
 
                   {/* Customer specific links */}
                   {user?.role === Role.CUSTOMER && (
@@ -424,13 +411,9 @@ export function Header() {
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <i className="fa-solid fa-xmark text-lg"></i>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <i className="fa-solid fa-bars text-lg"></i>
             )}
           </button>
         </div>
@@ -456,9 +439,7 @@ export function Header() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <i className="fa-solid fa-xmark text-lg"></i>
             </button>
           </div>
 
@@ -496,14 +477,7 @@ export function Header() {
                 className="flex w-full items-center justify-between px-3 py-2.5 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-50 transition text-left cursor-pointer"
               >
                 <span>Điểm đến</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-4 w-4 text-slate-400 transition-transform ${isMobileDestinationsOpen ? "rotate-180" : ""}`}
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
+                <i className={`fa-solid fa-chevron-down text-xs text-slate-400 transition-transform ${isMobileDestinationsOpen ? "rotate-180" : ""}`}></i>
               </button>
               
               {isMobileDestinationsOpen && (
@@ -518,7 +492,7 @@ export function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center gap-1 px-2 py-1.5 text-xs text-slate-600 rounded hover:bg-slate-100 transition"
                         >
-                          <span>{d.icon}</span>
+                          <span className="text-xs text-slate-500 shrink-0"><i className={d.icon}></i></span>
                           <span className="truncate">{d.name}</span>
                         </Link>
                       ))}
@@ -535,7 +509,7 @@ export function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center gap-1 px-2 py-1.5 text-xs text-slate-600 rounded hover:bg-slate-100 transition"
                         >
-                          <span>{d.icon === "Bridge" ? "🌉" : d.icon}</span>
+                          <span className="text-xs text-slate-500 shrink-0"><i className={d.icon}></i></span>
                           <span className="truncate">{d.name}</span>
                         </Link>
                       ))}
@@ -552,7 +526,7 @@ export function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center gap-1 px-2 py-1.5 text-xs text-slate-600 rounded hover:bg-slate-100 transition"
                         >
-                          <span>{d.icon}</span>
+                          <span className="text-xs text-slate-500 shrink-0"><i className={d.icon}></i></span>
                           <span className="truncate">{d.name}</span>
                         </Link>
                       ))}
@@ -626,9 +600,7 @@ export function Header() {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <i className="fa-solid fa-magnifying-glass text-brand-600"></i>
                 Tra cứu đặt phòng
               </h3>
               <button
@@ -639,9 +611,7 @@ export function Header() {
                 }}
                 className="text-slate-400 hover:text-slate-600 transition cursor-pointer"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <i className="fa-solid fa-xmark text-lg"></i>
               </button>
             </div>
 

@@ -8,7 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 import { ROUTES } from "../constants/routes";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Vui lòng nhập tên đăng nhập"),
+  username: z.string().min(1, "Vui lòng nhập tên đăng nhập hoặc email"),
   password: z.string().min(1, "Vui lòng nhập mật khẩu"),
 });
 
@@ -40,7 +40,7 @@ export function LoginPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <FormField
           id="username"
-          label="Tên đăng nhập"
+          label="Tên đăng nhập hoặc Email"
           autoComplete="username"
           error={errors.username?.message}
           {...register("username")}

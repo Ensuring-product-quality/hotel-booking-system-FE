@@ -220,15 +220,11 @@ export function HotelDetailPage() {
             <div className="flex flex-wrap items-center gap-2 mt-1.5">
               <span className="flex items-center gap-0.5 text-amber-500">
                 {Array.from({ length: hotel.stars }).map((_, i) => (
-                  <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+                  <i key={i} className="fa-solid fa-star text-xs"></i>
                 ))}
               </span>
-              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                </svg>
+              <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                <i className="fa-solid fa-location-dot text-slate-350"></i>
                 {hotel.address}, {hotel.city}
               </span>
             </div>
@@ -236,15 +232,11 @@ export function HotelDetailPage() {
 
           <div className="flex gap-2">
             <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-xl shadow-sm transition">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 10.742l1.99 2.085 4.574-4.752m-.001 7.823L16 19.382a2 2 0 002.585-2.585L16.29 14m-10.375 0L3 16.29a2 2 0 002.585 2.585L8.5 16" />
-              </svg>
+              <i className="fa-solid fa-share-nodes"></i>
               <span>Chia sẻ</span>
             </button>
             <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-xl shadow-sm transition">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
+              <i className="fa-regular fa-heart"></i>
               <span>Lưu</span>
             </button>
           </div>
@@ -485,10 +477,8 @@ export function HotelDetailPage() {
             {/* Modal Body */}
             {bookingSuccess ? (
               <div className="p-8 text-center flex flex-col items-center">
-                <div className="h-12 w-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+                <div className="h-12 w-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-4 text-xl">
+                  <i className="fa-solid fa-circle-check"></i>
                 </div>
                 <h4 className="font-bold text-slate-800">Đặt phòng thành công!</h4>
                 <p className="text-xs text-slate-400 mt-1">Đang chuyển tới trang chi tiết đơn hàng...</p>

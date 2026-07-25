@@ -181,8 +181,8 @@ export function BookingDetailPage() {
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Guest Info Form */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-              <h2 className="font-bold text-slate-800 text-base mb-4 flex items-center gap-2">
-                <span className="text-brand-600">👤</span>
+              <h2 className="font-bold text-slate-800 text-base mb-4 flex items-center gap-2.5">
+                <i className="fa-solid fa-user text-brand-600"></i>
                 Thông tin khách hàng
               </h2>
 
@@ -237,13 +237,13 @@ export function BookingDetailPage() {
             {/* Payment Method Form */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
               <h2 className="font-bold text-slate-800 text-base mb-4 flex items-center gap-2">
-                <span className="text-brand-600">💳</span>
+                <i className="fa-solid fa-credit-card text-brand-600"></i>
                 Phương thức thanh toán
               </h2>
 
               {paymentStatus === "completed" ? (
                 <div className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl flex items-center gap-3">
-                  <span className="text-xl">✅</span>
+                  <i className="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
                   <div>
                     <p className="font-bold text-xs">Đã thanh toán thành công!</p>
                     <p className="text-[10px] text-emerald-600 mt-0.5">HotelBooking đã xác thực giao dịch cho đơn hàng này.</p>
@@ -253,9 +253,9 @@ export function BookingDetailPage() {
                 <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     {[
-                      { id: "credit_card", label: "Thẻ tín dụng / Ghi nợ", sub: "Visa, Mastercard, JCB, American Express", icon: "💳" },
-                      { id: "bank_transfer", label: "Chuyển khoản ngân hàng", sub: "Xác nhận nhanh trong vòng 15 phút", icon: "🏦" },
-                      { id: "paypal", label: "Ví điện tử", sub: "MoMo, ZaloPay, ShopeePay", icon: "👛" },
+                      { id: "credit_card", label: "Thẻ tín dụng / Ghi nợ", sub: "Visa, Mastercard, JCB, American Express", icon: "fa-solid fa-credit-card" },
+                      { id: "bank_transfer", label: "Chuyển khoản ngân hàng", sub: "Xác nhận nhanh trong vòng 15 phút", icon: "fa-solid fa-building-columns" },
+                      { id: "paypal", label: "Ví điện tử", sub: "MoMo, ZaloPay, ShopeePay", icon: "fa-solid fa-wallet" },
                     ].map((method) => (
                       <label
                         key={method.id}
@@ -276,7 +276,7 @@ export function BookingDetailPage() {
                             <p className="font-bold text-slate-800">{method.label}</p>
                             <p className="text-[10px] text-slate-400 mt-0.5">{method.sub}</p>
                           </div>
-                          <span className="text-xl">{method.icon}</span>
+                          <span className="text-lg text-slate-500"><i className={method.icon}></i></span>
                         </div>
                       </label>
                     ))}
@@ -313,10 +313,8 @@ export function BookingDetailPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 text-white">
                   <h3 className="font-bold text-sm">{booking.hotelName}</h3>
-                  <p className="text-[10px] text-slate-300 mt-0.5 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    </svg>
+                  <p className="text-[10px] text-slate-300 mt-0.5 flex items-center gap-1.5">
+                    <i className="fa-solid fa-location-dot text-slate-400"></i>
                     Bãi Bắc, Sơn Trà, Đà Nẵng, Việt Nam
                   </p>
                 </div>

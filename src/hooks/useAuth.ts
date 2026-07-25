@@ -11,6 +11,22 @@ import type {
   VerifyEmailRequest,
 } from "../types/auth";
 
+function decodeJwt(token: string): any {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 export function useAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,10 +42,22 @@ export function useAuth() {
       try {
         const res = await authApi.login(body);
         if (!res.data) throw new Error("Phản hồi đăng nhập không hợp lệ");
+
+        const decoded = decodeJwt(res.data.accessToken);
+        const userObj = decoded
+          ? {
+              id: String(decoded.userId || ""),
+              username: decoded.sub || "",
+              email: decoded.email || "",
+              role: decoded.role || "",
+              status: "active" as const,
+            }
+          : null;
+
         setAuth({
           accessToken: res.data.accessToken,
           refreshToken: res.data.refreshToken,
-          user: res.data.user ?? null,
+          user: userObj,
         });
         const params = new URLSearchParams(window.location.search);
         const redirect = params.get("redirect");

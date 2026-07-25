@@ -109,7 +109,7 @@ export function TravelGuidePage() {
           {/* Search bar */}
           <div className="relative w-full md:w-80">
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-              🔍
+              <i className="fa-solid fa-magnifying-glass text-xs"></i>
             </span>
             <input 
               type="text" 
@@ -203,8 +203,8 @@ export function TravelGuidePage() {
                     </p>
 
                     <div className="border-t border-slate-50 pt-4 flex items-center justify-between text-xs mt-auto">
-                      <span className="text-slate-400 flex items-center gap-1">
-                        ⏱️ {article.readTime}
+                      <span className="text-slate-400 flex items-center gap-1.5">
+                        <i className="fa-regular fa-clock text-[10px]"></i> {article.readTime}
                       </span>
                       <span className="text-brand-600 font-bold group-hover:translate-x-1 transition duration-200">
                         ➔
@@ -215,8 +215,8 @@ export function TravelGuidePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm">
-              <span className="text-4xl block mb-2">📁</span>
+            <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+              <i className="fa-regular fa-folder-open text-4xl text-slate-350 mb-3"></i>
               <p className="text-slate-500 font-medium">Không tìm thấy bài viết nào phù hợp.</p>
             </div>
           )}

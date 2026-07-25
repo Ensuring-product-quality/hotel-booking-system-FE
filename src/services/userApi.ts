@@ -58,4 +58,9 @@ export const userApi = {
       })
       .then((res) => res.data);
   },
+
+  changePassword: (id: number, body: any) =>
+    apiClient
+      .post<StandardResponse<null>>(`/users/${id}/change-password`, body)
+      .then((res) => res.data),
 };

@@ -19,4 +19,5 @@ export const ROUTES = {
   ARTICLE_DETAIL: "/travel-guide/:id",
   BOOKING_LOOKUP: "/booking-lookup",
   CONTACT: "/contact",
+  PROFILE: "/profile",
 } as const;

@@ -1,0 +1,45 @@
+CÁC CẬP NHẬT TRONG DỰ ÁN ĐẶT PHÒNG KHÁCH SẠN (HOTEL BOOKING) - NGÀY 25/07/2026
+
+=== I. PHẦN FRONTEND (Vite / React / TypeScript) ===
+
+1. Đồng bộ hóa Icon sang Font Awesome 6 (Thay thế toàn bộ SVG thô do AI tự sinh):
+   - Header: Thay đổi icon chuông thông báo, menu hamburger, nút đóng menu mobile, icon tìm kiếm & đóng trong modal Tra cứu.
+   - Footer: Thay thế các icon Facebook, Instagram, Twitter X, Email, Điện thoại, Địa chỉ.
+   - HomePage: Thay thế icon tìm kiếm, ngôi sao, định vị, tiện ích "Tại sao chọn chúng tôi".
+   - HotelsPage & HotelDetailPage: Thay thế icon bản đồ, bộ lọc sao, nút yêu thích (trái tim), nút chia sẻ, địa chỉ khách sạn.
+   - OffersPage: Thay thế icon cài đặt bộ lọc.
+   - MyBookingsPage, BookingDetailPage & NotificationsPage: Thay thế icon chuông trống, emoji/icon người dùng, địa chỉ và các trạng thái đơn đặt phòng rỗng.
+
+2. Cập nhật Đăng nhập & Giải mã JWT Token:
+   - Viết thêm hàm giải mã JWT (decodeJwt) trong hook useAuth.ts.
+   - Khi đăng nhập thành công, tự động giải mã accessToken để lấy thông tin chi tiết (userId, email, role, username) và ghi vào Auth Store thay vì để trống như trước.
+   - Cập nhật nhãn và thông báo lỗi trên LoginPage.tsx từ "Tên đăng nhập" thành "Tên đăng nhập hoặc Email" để người dùng dễ dàng sử dụng.
+
+3. Xây dựng trang cá nhân (ProfilePage.tsx):
+   - Tạo mới trang cá nhân (/profile) tích hợp Header và Footer chung.
+   - Phần bên trái hiển thị Avatar (tự động lấy chữ cái đầu của tên đăng nhập làm ảnh đại diện mặc định), nút tải ảnh đại diện lên và vai trò (Role) của người dùng.
+   - Phần bên phải bao gồm 2 tab:
+     * Tab "Thông tin cá nhân": Cập nhật địa chỉ email.
+     * Tab "Đổi mật khẩu": Form đổi mật khẩu bảo mật (yêu cầu mật khẩu cũ, mật khẩu mới tối thiểu 6 ký tự và xác nhận mật khẩu mới).
+   - Tích hợp gọi API cập nhật thông tin qua userApi.
+
+4. Cải tiến trải nghiệm người dùng (UX) tại Header:
+   - Khi hover vào avatar ở Header, hiển thị đậm Username và địa chỉ Email.
+   - Avatar của nút bấm tự động lấy ký tự đầu của username để tạo giao diện cá nhân hóa.
+   - Bấm vào avatar hoặc tùy chọn "Hồ sơ cá nhân" sẽ chuyển hướng tới trang cá nhân.
+   - Thêm lớp CSS pseudo-element (before) để lấp đầy khoảng trống 4px giữa avatar và menu dropdown, giúp menu không bị mất đột ngột khi người dùng di chuột xuống để chọn.
+
+
+=== II. PHẦN BACKEND (Java / Spring Boot / Spring Data JPA) ===
+
+1. Cải tiến JWT Token (JwtTokenProvider.java):
+   - Thêm các claims cần thiết bao gồm "userId", "email", và "role" vào trong JWT token được sinh ra.
+   - Nhờ đó, phía Frontend có thể giải mã token và lấy trực tiếp thông tin tài khoản mà không cần gọi thêm API lấy thông tin riêng biệt.
+
+2. Hỗ trợ đăng nhập linh hoạt bằng Username hoặc Email:
+   - Cập nhật AuthService.java và CustomUserDetailsService.java hỗ trợ tìm kiếm tài khoản theo username hoặc email trong cơ sở dữ liệu.
+   - Khi gọi authenticationManager.authenticate, tự động truyền username chính thức được lấy từ cơ sở dữ liệu để Spring Security xử lý chính xác.
+
+3. Kích hoạt tài khoản mặc định khi đăng ký mới:
+   - Cập nhật AuthService.java để tự động chuyển trạng thái của người dùng mới đăng ký thành "active" (thay vì "inactive" như cấu hình mặc định ban đầu).
+   - Giúp người dùng có thể thực hiện đăng nhập và thử nghiệm hệ thống lập tức sau khi đăng ký mà không bị chặn bởi bước xác thực email trong môi trường local.

@@ -20,6 +20,7 @@ import { StaffBookingsPage } from "./pages/StaffBookingsPage";
 import { ManagerHotelsPage } from "./pages/ManagerHotelsPage";
 import { ManagerRoomsPage } from "./pages/ManagerRoomsPage";
 import { ManagerUsersPage } from "./pages/ManagerUsersPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { Role } from "./types/auth";
 import { ROUTES } from "./constants/routes";
@@ -77,6 +78,14 @@ function App() {
             element={
               <PrivateRoute>
                 <NotificationsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={ROUTES.PROFILE}
+            element={
+              <PrivateRoute>
+                <ProfilePage />
               </PrivateRoute>
             }
           />
