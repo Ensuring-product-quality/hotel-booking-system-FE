@@ -21,9 +21,9 @@ export function HomePage() {
   });
 
   const formatDateDisplay = (dateStr: string) => {
-    if (!dateStr) return "dd/mm/yyyy";
+    if (!dateStr) return "";
     const [year, month, day] = dateStr.split("-");
-    if (!year || !month || !day) return "dd/mm/yyyy";
+    if (!year || !month || !day) return dateStr;
     return `${day}/${month}/${year}`;
   };
 
@@ -62,7 +62,7 @@ export function HomePage() {
           {/* Search Box */}
           <form
             onSubmit={handleSearch}
-            className="w-full max-w-4xl bg-white text-slate-700 rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col md:flex-row gap-4 items-end"
+            className="w-full bg-white text-slate-700 rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col md:flex-row gap-4 items-end"
           >
             {/* Destination */}
             <div className="w-full md:flex-1 text-left">
@@ -83,55 +83,49 @@ export function HomePage() {
             </div>
 
             {/* Check-in Date */}
-            <div className="w-full md:w-40 shrink-0 text-left relative">
+            <div className="w-full md:w-36 text-left relative shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Nhận phòng
               </label>
-              <div className="relative border-b border-slate-200 py-2 flex items-center justify-between">
-                <span className={`font-medium text-sm ${searchState.checkInDate ? 'text-slate-800' : 'text-slate-400'}`}>
-                  {formatDateDisplay(searchState.checkInDate)}
+              <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
+                <span className={`text-slate-800 font-medium ${!searchState.checkInDate ? "text-slate-400" : ""}`}>
+                  {formatDateDisplay(searchState.checkInDate) || "dd/mm/yyyy"}
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
                 <input
                   type="date"
                   value={searchState.checkInDate}
                   onChange={(e) => setSearchState({ ...searchState, checkInDate: e.target.value })}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                 />
               </div>
             </div>
 
             {/* Check-out Date */}
-            <div className="w-full md:w-40 shrink-0 text-left relative">
+            <div className="w-full md:w-36 text-left relative shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Trả phòng
               </label>
-              <div className="relative border-b border-slate-200 py-2 flex items-center justify-between">
-                <span className={`font-medium text-sm ${searchState.checkOutDate ? 'text-slate-800' : 'text-slate-400'}`}>
-                  {formatDateDisplay(searchState.checkOutDate)}
+              <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
+                <span className={`text-slate-800 font-medium ${!searchState.checkOutDate ? "text-slate-400" : ""}`}>
+                  {formatDateDisplay(searchState.checkOutDate) || "dd/mm/yyyy"}
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
                 <input
                   type="date"
                   value={searchState.checkOutDate}
                   onChange={(e) => setSearchState({ ...searchState, checkOutDate: e.target.value })}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                 />
               </div>
             </div>
 
             {/* Guests */}
-            <div className="w-full md:w-28 shrink-0 text-left">
+            <div className="w-full md:w-20 text-left shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -151,7 +145,7 @@ export function HomePage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full md:w-auto shrink-0 px-8 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition hover:scale-[1.01] shadow-lg shadow-brand-600/10 cursor-pointer"
+              className="w-full md:w-auto px-8 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition hover:scale-[1.01] shadow-lg shadow-brand-600/10 cursor-pointer shrink-0"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -344,7 +338,7 @@ export function HomePage() {
       </section>
 
       {/* Newsletter */}
-      <section className="bg-brand-700 text-white py-16 w-full">
+      <section className="bg-brand-800 text-white py-16 w-full">
         <div className="mx-auto max-w-4xl px-4 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-2">Sẵn sàng cho chuyến đi tiếp theo?</h2>
           <p className="text-slate-300 text-sm mb-8">Đăng ký để nhận những thông tin khuyến mãi mới nhất và các ưu đãi bí mật dành riêng cho thành viên.</p>
