@@ -250,20 +250,37 @@ export function HotelDetailPage() {
           </div>
         </div>
 
-        {/* Hotel image supplied by the API */}
-        <div className="rounded-2xl overflow-hidden shadow-md mb-8 h-[460px] bg-slate-100">
-          {hotelImages[0] ? (
-            <img
-              src={hotelImages[0]}
-              alt={hotel.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center text-sm font-semibold text-slate-400">
-              Khách sạn chưa có ảnh
+        {/* Hotel image gallery grid */}
+        {hotelImages && hotelImages.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-2 rounded-2xl overflow-hidden shadow-md mb-8 h-[240px] sm:h-[360px] md:h-[420px] bg-slate-100">
+            {/* Left large featured image */}
+            <div className="md:col-span-2 md:row-span-2 relative overflow-hidden h-full">
+              <img
+                src={hotelImages[0]}
+                alt={hotel.name}
+                className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
+              />
+              <button className="absolute bottom-4 left-4 bg-white/90 hover:bg-white text-slate-800 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-lg shadow-md flex items-center gap-1.5 transition cursor-pointer">
+                📷 <span>Xem mọi bức ảnh</span>
+              </button>
             </div>
-          )}
-        </div>
+
+            {/* Right smaller images (6 items) */}
+            {hotelImages.slice(1, 7).map((imgUrl, i) => (
+              <div key={i} className="hidden md:block overflow-hidden h-full">
+                <img
+                  src={imgUrl}
+                  alt={`${hotel.name} ${i + 2}`}
+                  className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl overflow-hidden shadow-md mb-8 h-[460px] bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-400">
+            Khách sạn chưa có ảnh
+          </div>
+        )}
 
         {/* Hotel Details layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
@@ -308,7 +325,16 @@ export function HotelDetailPage() {
               ) : (
                 <div className="flex flex-col gap-4">
                   {rooms.map((room: any) => (
-                    <div key={room.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-2">
+                    <div key={room.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-3">
+                      {room.images && room.images[0] && (
+                        <div className="h-32 w-full rounded-lg overflow-hidden bg-slate-100">
+                          <img
+                            src={room.images[0]}
+                            alt={`Phòng ${room.roomNumber}`}
+                            className="h-full w-full object-cover hover:scale-105 transition duration-300"
+                          />
+                        </div>
+                      )}
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="font-bold text-slate-800 text-sm">Phòng {room.roomNumber} ({room.type})</h4>
