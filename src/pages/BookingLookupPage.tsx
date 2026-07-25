@@ -266,7 +266,7 @@ export function BookingLookupPage() {
                 <div className="text-right">
                   <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Tổng chi phí</p>
                   <p className="text-base font-extrabold text-brand-600">
-                    {(bookingDetails.totalPrice * 20000).toLocaleString("vi-VN")} VNĐ
+                    {(bookingDetails.totalPrice).toLocaleString("vi-VN")} VNĐ
                   </p>
                 </div>
               </div>

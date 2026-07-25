@@ -3,6 +3,7 @@ import type { User } from "./auth";
 export interface ReviewResponseDTO {
   id: number;
   userId: number;
+  username: string;
   hotelId?: number;
   roomId?: number;
   rating: number;
@@ -13,7 +14,6 @@ export interface ReviewResponseDTO {
 }
 
 export interface ReviewCreateDTO {
-  userId: number;
   hotelId?: number;
   roomId?: number;
   rating: number;

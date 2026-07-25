@@ -96,17 +96,6 @@ export function HotelsPage() {
   const totalPages = data?.data?.totalPages || 0;
   const totalElements = data?.data?.totalElements || 0;
 
-  // Render mock images since the backend seed doesn't have image list fields in list endpoint.
-  const getMockHotelImage = (id: number) => {
-    const images = [
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=800",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=800",
-    ];
-    return images[(id - 1) % images.length];
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
@@ -142,9 +131,9 @@ export function HotelsPage() {
               Giá thấp nhất
             </button>
             <button
-              onClick={() => handleSortChange("stars,desc")}
+              onClick={() => handleSortChange("averageRating,desc")}
               className={`px-3 py-1.5 rounded-lg font-semibold text-xs transition ${
-                sortParam.includes("stars") && sortParam.includes("desc")
+                sortParam.includes("averageRating") && sortParam.includes("desc")
                   ? "bg-brand-50 text-brand-600"
                   : "bg-slate-50 text-slate-600 hover:bg-slate-100"
               }`}
@@ -312,19 +301,22 @@ export function HotelsPage() {
                     >
                       {/* Image Container */}
                       <div className="relative w-full md:w-80 h-56 md:h-auto overflow-hidden">
-                        <img
-                          src={getMockHotelImage(hotel.id)}
-                          alt={hotel.name}
-                          className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
-                        />
+                        {hotel.images?.[0] ? (
+                          <img
+                            src={hotel.images[0]}
+                            alt={hotel.name}
+                            className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
+                          />
+                        ) : (
+                          <div className="h-full w-full min-h-56 bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
+                            Chưa có ảnh
+                          </div>
+                        )}
                         <button className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white text-slate-600 hover:text-red-500 rounded-full transition shadow-sm cursor-pointer">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
                         </button>
-                        <span className="absolute top-4 left-4 bg-brand-600 text-white text-[10px] uppercase font-bold py-1 px-2.5 rounded shadow-sm">
-                          Phổ biến nhất
-                        </span>
                       </div>
 
                       {/* Info Container */}
@@ -364,10 +356,10 @@ export function HotelsPage() {
                         {/* Booking CTA Row */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-t border-slate-50 pt-5 mt-6">
                           <div className="flex items-center gap-2">
-                            <span className="bg-emerald-50 text-emerald-600 font-bold text-xs px-2.5 py-1 rounded-lg">9.8</span>
+                            <span className="bg-emerald-50 text-emerald-600 font-bold text-xs px-2.5 py-1 rounded-lg">{hotel.averageRating.toFixed(1)}</span>
                             <div>
-                              <p className="text-xs font-bold text-slate-700">Tuyệt hảo</p>
-                              <p className="text-[10px] text-slate-400">1.2k đánh giá</p>
+                              <p className="text-xs font-bold text-slate-700">Điểm đánh giá</p>
+                              <p className="text-[10px] text-slate-400">Dữ liệu từ hệ thống</p>
                             </div>
                           </div>
 

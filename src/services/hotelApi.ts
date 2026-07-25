@@ -26,7 +26,7 @@ export const hotelApi = {
 
   search: (params?: HotelSearchQuery) =>
     apiClient
-      .get<StandardResponse<PageResponse<HotelResponseDTO>>>("/hotels/1/search", { params }) // Note: Spec shows GET /hotels/{hotelId}/search, we use static ID 1 or search endpoint mapping as defined in the spec.
+      .get<StandardResponse<PageResponse<HotelResponseDTO>>>("/hotels/search", { params })
       .then((res) => res.data),
 
   create: (body: HotelCreateDTO) =>

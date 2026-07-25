@@ -3,6 +3,11 @@ import type { StandardResponse } from "../types/common";
 import type { ReviewResponseDTO, ReviewCreateDTO, ReviewUpdateDTO } from "../types/review";
 
 export const reviewApi = {
+  getAll: (params: { hotelId?: number; roomId?: number }) =>
+    apiClient
+      .get<StandardResponse<ReviewResponseDTO[]>>("/reviews", { params })
+      .then((res) => res.data),
+
   create: (body: ReviewCreateDTO) =>
     apiClient
       .post<StandardResponse<ReviewResponseDTO>>("/reviews", body)

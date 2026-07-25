@@ -46,7 +46,7 @@ export function BookingDetailPage() {
 
   // Payment mutation
   const paymentMutation = useMutation({
-    mutationFn: (body: { bookingId: number; amount: number; paymentMethod: PaymentMethod }) =>
+    mutationFn: (body: { bookingId: number; paymentMethod: PaymentMethod }) =>
       paymentApi.create(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["booking", bookingId] });
@@ -79,11 +79,8 @@ export function BookingDetailPage() {
       return;
     }
 
-    const amount = bookingData.data.room.price * 20000 * 2; // Fixed conversion or base total price
-
     paymentMutation.mutate({
       bookingId,
-      amount,
       paymentMethod,
     });
   };
@@ -124,14 +121,14 @@ export function BookingDetailPage() {
   const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
   const nights = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-  const basePriceVND = room.price * 20000;
+  const basePriceVND = room.price;
   const roomTotal = basePriceVND * nights;
-  const tax = roomTotal * 0.1;
+  const tax = roomTotal * 0.15;
   const total = roomTotal + tax;
 
   const getStatusBadgeClass = () => {
     switch (status) {
-      case "pending":
+      case "pending_payment":
         return "bg-amber-50 text-amber-700 border-amber-100";
       case "confirmed":
         return "bg-blue-50 text-blue-700 border-blue-100";
@@ -146,7 +143,7 @@ export function BookingDetailPage() {
 
   const getStatusLabel = () => {
     switch (status) {
-      case "pending":
+      case "pending_payment":
         return "Chờ xác nhận";
       case "confirmed":
         return "Đã xác nhận";
@@ -159,10 +156,6 @@ export function BookingDetailPage() {
     }
   };
 
-  const getMockHotelName = (id: number) => {
-    if (id === 1 || id % 2 === 1) return "InterContinental Danang Sun Peninsula";
-    return "Ocean Breeze Resort";
-  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -319,7 +312,7 @@ export function BookingDetailPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="font-bold text-sm">{getMockHotelName(room.hotelId)}</h3>
+                  <h3 className="font-bold text-sm">{booking.hotelName}</h3>
                   <p className="text-[10px] text-slate-300 mt-0.5 flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -388,7 +381,7 @@ export function BookingDetailPage() {
             </div>
 
             {/* Cancel Booking Action */}
-            {(status === "pending" || status === "confirmed") && (
+            {(status === "pending_payment" || status === "confirmed") && (
               <button
                 onClick={() => {
                   if (confirm("Bạn có chắc chắn muốn hủy đặt phòng này không?")) {

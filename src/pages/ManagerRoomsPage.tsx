@@ -28,6 +28,7 @@ export function ManagerRoomsPage() {
   const [roomNumber, setRoomNumber] = useState("");
   const [type, setType] = useState("Standard");
   const [price, setPrice] = useState(50);
+  const [capacity, setCapacity] = useState(1);
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("active");
   const [formError, setFormError] = useState<string | null>(null);
@@ -99,6 +100,7 @@ export function ManagerRoomsPage() {
       setRoomNumber(room.roomNumber);
       setType(room.type);
       setPrice(room.price);
+      setCapacity(room.capacity);
       setDescription(room.description);
       setStatus(room.status);
     } else {
@@ -107,6 +109,7 @@ export function ManagerRoomsPage() {
       setRoomNumber("");
       setType("Standard");
       setPrice(50);
+      setCapacity(1);
       setDescription("");
       setStatus("active");
     }
@@ -120,7 +123,7 @@ export function ManagerRoomsPage() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hotelId || !roomNumber || price <= 0) {
+    if (!hotelId || !roomNumber || price <= 0 || capacity < 1 || capacity > 20) {
       setFormError("Vui lòng chọn khách sạn, nhập số phòng và đơn giá.");
       return;
     }
@@ -130,6 +133,7 @@ export function ManagerRoomsPage() {
       roomNumber,
       type,
       price,
+      capacity,
       description,
       status,
     };
@@ -230,6 +234,7 @@ export function ManagerRoomsPage() {
                       <td className="py-4.5 px-6 font-bold text-slate-800">{getHotelName(room.hotelId)}</td>
                       <td className="py-4.5 px-6 font-bold text-slate-600">Phòng {room.roomNumber}</td>
                       <td className="py-4.5 px-6 font-semibold">{room.type}</td>
+                      <td className="py-4.5 px-6 font-semibold">{room.capacity} khách</td>
                       <td className="py-4.5 px-6 text-brand-600 font-bold">{room.price} USD</td>
                       <td className="py-4.5 px-6">
                         <span className={`px-2.5 py-0.5 border rounded-full text-[9px] uppercase font-bold ${
@@ -354,6 +359,18 @@ export function ManagerRoomsPage() {
                     className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sức chứa (khách)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={capacity}
+                  onChange={(e) => setCapacity(parseInt(e.target.value, 10) || 1)}
+                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
+                />
               </div>
 
               {/* Type & Status */}

@@ -56,7 +56,7 @@ export function StaffBookingsPage() {
 
   const getStatusLabel = (status: BookingStatus) => {
     switch (status) {
-      case "pending":
+      case "pending_payment":
         return { text: "Chờ xác nhận", className: "bg-amber-50 text-amber-700 border-amber-100" };
       case "confirmed":
         return { text: "Đã xác nhận", className: "bg-blue-50 text-blue-700 border-blue-100" };
@@ -98,7 +98,7 @@ export function StaffBookingsPage() {
           <div className="flex border-b border-slate-100 gap-1 overflow-x-auto pb-px text-xs font-semibold">
             {[
               { id: "all", label: "Tất cả" },
-              { id: "pending", label: "Chờ xác nhận" },
+              { id: "pending_payment", label: "Chờ xác nhận" },
               { id: "confirmed", label: "Đã xác nhận" },
               { id: "completed", label: "Đã hoàn thành" },
               { id: "cancelled", label: "Đã hủy" },
@@ -182,7 +182,7 @@ export function StaffBookingsPage() {
                         </td>
                         <td className="py-4.5 px-6 text-right flex justify-end gap-1.5">
                           {/* Confirm action */}
-                          {booking.status === "pending" && (
+                          {booking.status === "pending_payment" && (
                             <button
                               onClick={() => handleStatusChange(booking.id, "confirmed")}
                               className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 rounded-lg transition cursor-pointer"
@@ -202,7 +202,7 @@ export function StaffBookingsPage() {
                           )}
 
                           {/* Cancel action */}
-                          {(booking.status === "pending" || booking.status === "confirmed") && (
+                          {(booking.status === "pending_payment" || booking.status === "confirmed") && (
                             <button
                               onClick={() => handleCancelClick(booking.id)}
                               className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-100 rounded-lg transition cursor-pointer"
