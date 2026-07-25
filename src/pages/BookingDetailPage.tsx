@@ -266,11 +266,10 @@ export function BookingDetailPage() {
                     ].map((method) => (
                       <label
                         key={method.id}
-                        className={`flex items-start gap-3 p-4 rounded-xl border transition cursor-pointer hover:bg-slate-50 ${
-                          paymentMethod === method.id
+                        className={`flex items-start gap-3 p-4 rounded-xl border transition cursor-pointer hover:bg-slate-50 ${paymentMethod === method.id
                             ? "border-brand-600 bg-brand-50/20"
                             : "border-slate-200"
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"

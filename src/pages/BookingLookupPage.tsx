@@ -82,7 +82,7 @@ export function BookingLookupPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-16 sm:px-6 w-full flex-grow flex items-center justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 w-full max-w-5xl items-center">
-          
+
           {/* Left Column - Content */}
           <div className="lg:col-span-7 flex flex-col gap-6 text-slate-700">
             <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full w-fit border border-emerald-100">
@@ -138,8 +138,8 @@ export function BookingLookupPage() {
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                       🔑
                     </span>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       required
                       placeholder="VD: HB-15 hoặc 15"
                       value={bookingIdInput}
@@ -157,8 +157,8 @@ export function BookingLookupPage() {
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                       ✉️
                     </span>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       required
                       placeholder="Nhập email đã dùng đặt phòng"
                       value={emailInput}
@@ -174,7 +174,7 @@ export function BookingLookupPage() {
                   </div>
                 )}
 
-                <button 
+                <button
                   type="submit"
                   disabled={isLoading}
                   className="w-full bg-[#0b1528] hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl transition duration-200 cursor-pointer shadow-md flex items-center justify-center gap-2 text-xs disabled:bg-slate-400"
@@ -188,7 +188,7 @@ export function BookingLookupPage() {
               </form>
 
               <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                <button 
+                <button
                   onClick={() => alert("Vui lòng liên hệ Hotline 1900 6789 để được cấp lại mã đặt phòng.")}
                   className="text-slate-400 hover:text-brand-600 transition font-medium cursor-pointer"
                 >
@@ -221,11 +221,10 @@ export function BookingLookupPage() {
                   <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusBadgeClass(bookingDetails.status)}`}>
                     {getStatusLabel(bookingDetails.status)}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                    bookingDetails.paymentStatus === "completed" 
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${bookingDetails.paymentStatus === "completed"
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                       : "bg-amber-50 text-amber-700 border-amber-100"
-                  }`}>
+                    }`}>
                     {bookingDetails.paymentStatus === "completed" ? "Đã thanh toán" : "Chờ thanh toán"}
                   </span>
                 </div>
