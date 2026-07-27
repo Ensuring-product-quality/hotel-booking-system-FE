@@ -108,7 +108,12 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6">
         {/* Logo */}
-        <Link to={ROUTES.HOME} className="flex items-center gap-2">
+        <Link to={ROUTES.HOME} className="flex items-center gap-2 group">
+          <img
+            src="/logo.png"
+            alt="HotelBooking Logo"
+            className="h-8 w-8 object-contain rounded-lg transition-transform group-hover:scale-105"
+          />
           <span className="text-2xl font-bold tracking-tight text-brand-600 transition hover:text-brand-700">
             HotelBooking
           </span>

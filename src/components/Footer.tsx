@@ -6,9 +6,16 @@ export function Footer() {
     <footer className="bg-[#0b1528] text-slate-400 pt-16 pb-8 border-t border-slate-800 w-full mt-auto">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
         <div>
-          <h3 className="text-white font-extrabold text-xl tracking-tight mb-4">
-            HotelBooking
-          </h3>
+          <div className="flex items-center gap-2 mb-4">
+            <img
+              src="/logo.png"
+              alt="HotelBooking Logo"
+              className="h-7 w-7 object-contain rounded-lg"
+            />
+            <h3 className="text-white font-extrabold text-xl tracking-tight">
+              HotelBooking
+            </h3>
+          </div>
           <p className="text-xs leading-relaxed mb-4 text-slate-400">
             Kiến tạo những trải nghiệm lưu trú thượng lưu tại Việt Nam. Nâng tầm trải nghiệm du lịch của bạn với dịch vụ đặt phòng khách sạn và biệt thự sang trọng hàng đầu.
           </p>
