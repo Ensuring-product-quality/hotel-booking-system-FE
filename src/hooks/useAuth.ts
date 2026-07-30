@@ -4,12 +4,12 @@ import { authApi } from "../services/authApi";
 import { getErrorMessage } from "../services/apiClient";
 import { useAuthStore } from "../store/authStore";
 import { ROUTES } from "../constants/routes";
+import { Role } from "../types/auth";
 import type {
   LoginRequest,
   RegisterRequest,
   ForgotPasswordRequest,
   VerifyEmailRequest,
-  Role,
 } from "../types/auth";
 
 function decodeJwt(token: string): any {
@@ -62,7 +62,15 @@ export function useAuth() {
         });
         const params = new URLSearchParams(window.location.search);
         const redirect = params.get("redirect");
-        navigate(redirect || ROUTES.HOME);
+        if (redirect) {
+          navigate(redirect);
+        } else if (userObj?.role === Role.ADMIN || userObj?.role === Role.MANAGER) {
+          navigate(ROUTES.ADMIN_DASHBOARD);
+        } else if (userObj?.role === Role.STAFF) {
+          navigate(ROUTES.STAFF_BOOKINGS);
+        } else {
+          navigate(ROUTES.HOME);
+        }
         return true;
       } catch (err) {
         setError(getErrorMessage(err, "Đăng nhập thất bại."));
