@@ -1,258 +1,1040 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Header } from "../components/Header";
+import { useAuthStore } from "../store/authStore";
+import { ROUTES } from "../constants/routes";
 import { bookingApi } from "../services/bookingApi";
+import { roomApi } from "../services/roomApi";
+import { hotelApi } from "../services/hotelApi";
+import { userApi } from "../services/userApi";
+import { paymentApi } from "../services/paymentApi";
 import { getErrorMessage } from "../services/apiClient";
 import { BookingStatus } from "../types/booking";
+import type { BookingResponseDTO } from "../types/booking";
+
+type StaffTab = "bookings" | "inventory" | "reports" | "services" | "customers";
 
 export function StaffBookingsPage() {
   const queryClient = useQueryClient();
-  const [activeStatus, setActiveStatus] = useState<string>("all");
-  const [keyword, setKeyword] = useState("");
-  const [page, setPage] = useState(0);
-  const size = 10;
+  const currentUser = useAuthStore((s) => s.user);
+  const [activeTab, setActiveTab] = useState<StaffTab>("bookings");
+  const [globalSearch, setGlobalSearch] = useState("");
 
-  // Query all bookings in system
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["staffBookings", activeStatus, keyword, page],
-    queryFn: () =>
-      bookingApi.getAll({
-        status: activeStatus === "all" ? undefined : activeStatus,
-        keyword: keyword || undefined,
-        page,
-        size,
-        sort: "createdAt,desc",
-      }),
+  // Booking Tab Sub-Filter
+  const [bookingSubTab, setBookingSubTab] = useState<"new" | "pending" | "history">("new");
+  const [bookingFilterRoomType, setBookingFilterRoomType] = useState<string>("ALL");
+  const [bookingFilterStatus, setBookingFilterStatus] = useState<string>("ALL");
+
+  // Selected Detail Modals
+  const [selectedBooking, setSelectedBooking] = useState<BookingResponseDTO | null>(null);
+
+  // Service Request items local state for front-desk actions
+  const [serviceRequests, setServiceRequests] = useState([
+    { id: 1, type: "Spa", category: "Yêu cầu thêm", title: "Massage Body 60p", room: "Phòng 402", guest: "Ms. Thanh Hương", status: "pending", time: "10:45 AM" },
+    { id: 2, type: "Phục vụ phòng", category: "Nhà hàng", title: "Thêm 2 khăn tắm & Nước", room: "Phòng 215", guest: "Mr. David Smith", status: "pending", time: "11:02 AM" },
+    { id: 3, type: "Nhà hàng", category: "Nhà hàng", title: "Bữa trưa tại phòng (In-room)", desc: "2 Phở bò, 1 Nước cam ép, 1 Salad", room: "Phòng 508", guest: "Trần Văn An", status: "in_progress", remaining: "08:24 còn lại" },
+    { id: 4, type: "Giặt là", category: "Giặt là", title: "Giặt nhanh (Express)", room: "Phòng 102", guest: "Mrs. Lee", status: "in_progress", remaining: "Đã trôi qua 45p" },
+    { id: 5, type: "Nhà hàng", category: "Nhà hàng", title: "Đặt bàn tối (4 khách)", room: "Phòng 303", guest: "Hoàn thành lúc 09:30 AM", status: "completed" },
+    { id: 6, type: "Thiết bị", category: "Yêu cầu thêm", title: "Máy sấy tóc hỏng - Thay mới", room: "Phòng 612", guest: "Hoàn thành lúc 08:15 AM", status: "completed" },
+  ]);
+
+  // ==================== REAL DATA FROM BACKEND APIS ====================
+  const { data: bookingsRes, isLoading: isBookingsLoading } = useQuery({
+    queryKey: ["staffBookingsReal"],
+    queryFn: () => bookingApi.getAll({ page: 0, size: 100, sort: "createdAt,desc" }),
   });
+  const bookings = useMemo(() => bookingsRes?.data?.content || [], [bookingsRes]);
 
-  // Change status mutation
+  const { data: roomsRes } = useQuery({
+    queryKey: ["staffRoomsReal"],
+    queryFn: () => roomApi.getAll({ page: 0, size: 100 }),
+  });
+  const rooms = useMemo(() => roomsRes?.data?.content || [], [roomsRes]);
+
+  const { data: hotelsRes } = useQuery({
+    queryKey: ["staffHotelsReal"],
+    queryFn: () => hotelApi.getAll({ page: 0, size: 100 }),
+  });
+  const hotels = useMemo(() => hotelsRes?.data?.content || [], [hotelsRes]);
+
+  const { data: usersRes } = useQuery({
+    queryKey: ["staffUsersReal"],
+    queryFn: () => userApi.getAll({ page: 0, size: 100 }),
+  });
+  const users = useMemo(() => usersRes?.data?.content || [], [usersRes]);
+
+  const { data: paymentsRes } = useQuery({
+    queryKey: ["staffPaymentsReal"],
+    queryFn: () => paymentApi.getAll({ page: 0, size: 100 }),
+  });
+  const payments = useMemo(() => paymentsRes?.data?.content || [], [paymentsRes]);
+
+  // ==================== DYNAMIC CALCULATIONS & METRICS ====================
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+
+  const pendingCount = useMemo(
+    () => bookings.filter((b) => b.status === BookingStatus.PENDING_PAYMENT).length,
+    [bookings]
+  );
+  const confirmedCount = useMemo(
+    () => bookings.filter((b) => b.status === BookingStatus.CONFIRMED).length,
+    [bookings]
+  );
+
+  const availableRooms = useMemo(
+    () => rooms.filter((r) => r.status === "active" || r.status === "AVAILABLE"),
+    [rooms]
+  );
+  const occupiedRooms = useMemo(
+    () => rooms.filter((r) => r.status === "OCCUPIED" || r.status === "inactive"),
+    [rooms]
+  );
+  const dirtyRooms = useMemo(
+    () => rooms.filter((r) => r.status === "DIRTY" || r.status === "CLEANING"),
+    [rooms]
+  );
+  const maintenanceRooms = useMemo(
+    () => rooms.filter((r) => r.status === "MAINTENANCE" || r.status === "BLOCKED"),
+    [rooms]
+  );
+
+  const todayArrivals = useMemo(
+    () => bookings.filter((b) => b.checkInDate === todayStr || b.status === BookingStatus.CONFIRMED),
+    [bookings, todayStr]
+  );
+  const todayDepartures = useMemo(
+    () => bookings.filter((b) => b.checkOutDate === todayStr || b.status === BookingStatus.COMPLETED),
+    [bookings, todayStr]
+  );
+
+  const totalDeskRevenue = useMemo(() => {
+    let sum = 0;
+    payments.forEach((p) => {
+      if (p.status === "completed") sum += p.amount;
+    });
+    if (sum === 0) {
+      bookings.forEach((b) => {
+        if (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.COMPLETED) sum += b.totalPrice;
+      });
+    }
+    return sum;
+  }, [payments, bookings]);
+
+  // Filtered Bookings for Table
+  const filteredBookings = useMemo(() => {
+    return bookings.filter((b) => {
+      if (bookingSubTab === "new" && b.status === BookingStatus.CANCELLED) return false;
+      if (bookingSubTab === "pending" && b.status !== BookingStatus.PENDING_PAYMENT) return false;
+      if (bookingSubTab === "history" && b.status !== BookingStatus.COMPLETED && b.status !== BookingStatus.CANCELLED) return false;
+
+      const matchesRoomType = bookingFilterRoomType === "ALL" || (b.roomNumber && b.roomNumber.includes(bookingFilterRoomType));
+      const matchesStatus = bookingFilterStatus === "ALL" || b.status === bookingFilterStatus;
+      const matchesSearch =
+        !globalSearch.trim() ||
+        String(b.id).includes(globalSearch) ||
+        b.roomNumber?.toLowerCase().includes(globalSearch.toLowerCase()) ||
+        b.hotelName?.toLowerCase().includes(globalSearch.toLowerCase());
+
+      return matchesRoomType && matchesStatus && matchesSearch;
+    });
+  }, [bookings, bookingSubTab, bookingFilterRoomType, bookingFilterStatus, globalSearch]);
+
+  // Status Change Mutation
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: BookingStatus }) =>
       bookingApi.update(id, { status }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["staffBookings"] });
-      alert("Cập nhật trạng thái đặt phòng thành công!");
+      queryClient.invalidateQueries({ queryKey: ["staffBookingsReal"] });
+      alert("Cập nhật trạng thái thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Không thể cập nhật trạng thái đặt phòng."));
+      alert(getErrorMessage(err, "Cập nhật thất bại."));
     },
   });
 
-  // Cancel booking mutation
-  const cancelMutation = useMutation({
-    mutationFn: (id: number) => bookingApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["staffBookings"] });
-      alert("Hủy đặt phòng thành công!");
-    },
-    onError: (err) => {
-      alert(getErrorMessage(err, "Hủy đặt phòng thất bại."));
-    },
-  });
-
-  const bookings = data?.data?.content || [];
-  const totalPages = data?.data?.totalPages || 0;
-  const totalElements = data?.data?.totalElements || 0;
-
-  const getStatusLabel = (status: BookingStatus) => {
-    switch (status) {
-      case "pending_payment":
-        return { text: "Chờ xác nhận", className: "bg-amber-50 text-amber-700 border-amber-100" };
-      case "confirmed":
-        return { text: "Đã xác nhận", className: "bg-blue-50 text-blue-700 border-blue-100" };
-      case "cancelled":
-        return { text: "Đã hủy", className: "bg-red-50 text-red-700 border-red-100" };
-      case "completed":
-        return { text: "Đã hoàn thành", className: "bg-green-50 text-green-700 border-green-100" };
-      default:
-        return { text: status, className: "bg-slate-50 text-slate-700 border-slate-100" };
-    }
+  const getHotelName = (id: number, fallbackName?: string) => {
+    if (fallbackName) return fallbackName;
+    const found = hotels.find((h) => h.id === id);
+    return found ? found.name : `Khách sạn #${id}`;
   };
 
-  const handleStatusChange = (id: number, status: BookingStatus) => {
-    updateStatusMutation.mutate({ id, status });
-  };
-
-  const handleCancelClick = (id: number) => {
-    if (confirm("Bạn có chắc chắn muốn hủy đặt phòng này?")) {
-      cancelMutation.mutate(id);
-    }
+  const handleUpdateServiceStatus = (id: number, nextStatus: string) => {
+    setServiceRequests((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: nextStatus } : item))
+    );
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
-
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full flex-grow">
-        {/* Title & Count */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Quản lý đặt phòng (Staff)</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Tổng cộng có {totalElements} giao dịch đặt phòng trong hệ thống
-          </p>
-        </div>
-
-        {/* Filter & Search Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl border border-slate-100 shadow-sm mb-8">
-          {/* Status filter tabs */}
-          <div className="flex border-b border-slate-100 gap-1 overflow-x-auto pb-px text-xs font-semibold">
-            {[
-              { id: "all", label: "Tất cả" },
-              { id: "pending_payment", label: "Chờ xác nhận" },
-              { id: "confirmed", label: "Đã xác nhận" },
-              { id: "completed", label: "Đã hoàn thành" },
-              { id: "cancelled", label: "Đã hủy" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveStatus(tab.id);
-                  setPage(0);
-                }}
-                className={`px-3 py-2 border-b-2 transition whitespace-nowrap cursor-pointer ${
-                  activeStatus === tab.id
-                    ? "border-brand-600 text-brand-600"
-                    : "border-transparent text-slate-400 hover:text-slate-600"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+    <div className="min-h-screen bg-[#06101E] text-slate-100 flex font-sans antialiased">
+      {/* ================= SIDEBAR ĐIỀU HÀNH LỄ TÂN ================= */}
+      <aside className="w-64 bg-[#0A192F] border-r border-slate-800/80 flex flex-col shrink-0 justify-between">
+        <div>
+          {/* Logo & Header Lễ Tân */}
+          <div className="p-6 border-b border-slate-800/80">
+            <Link to={ROUTES.HOME} className="flex items-center gap-3 group">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-teal-500/20">
+                L
+              </div>
+              <div>
+                <span className="text-xl font-bold tracking-tight text-white group-hover:text-teal-400 transition">
+                  LuxStay
+                </span>
+                <p className="text-[10px] text-teal-400/80 uppercase font-semibold tracking-wider">
+                  Quản Lý Lễ Tân (Front Desk)
+                </p>
+              </div>
+            </Link>
           </div>
 
-          {/* Keyword Search */}
-          <div className="flex gap-2 w-full sm:w-80">
+          {/* Nav Items */}
+          <nav className="p-4 flex flex-col gap-1.5 text-sm font-medium text-slate-400">
+            <button
+              onClick={() => setActiveTab("bookings")}
+              className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition cursor-pointer ${
+                activeTab === "bookings"
+                  ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                  : "hover:bg-slate-800/60 hover:text-slate-200"
+              }`}
+            >
+              <i className="fa-regular fa-calendar-check text-base"></i>
+              <span>Quản Lý Đặt Phòng</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("inventory")}
+              className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition cursor-pointer ${
+                activeTab === "inventory"
+                  ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                  : "hover:bg-slate-800/60 hover:text-slate-200"
+              }`}
+            >
+              <i className="fa-solid fa-grid-2 text-base"></i>
+              <span>Sơ Đồ Kho Phòng</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("services")}
+              className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition cursor-pointer ${
+                activeTab === "services"
+                  ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                  : "hover:bg-slate-800/60 hover:text-slate-200"
+              }`}
+            >
+              <i className="fa-solid fa-[#00B4D8] fa-concierge-bell text-base"></i>
+              <span>Yêu Cầu Dịch Vụ</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("reports")}
+              className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition cursor-pointer ${
+                activeTab === "reports"
+                  ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                  : "hover:bg-slate-800/60 hover:text-slate-200"
+              }`}
+            >
+              <i className="fa-solid fa-chart-pie text-base"></i>
+              <span>Báo Cáo Vận Hành</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("customers")}
+              className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition cursor-pointer ${
+                activeTab === "customers"
+                  ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                  : "hover:bg-slate-800/60 hover:text-slate-200"
+              }`}
+            >
+              <i className="fa-solid fa-users text-base"></i>
+              <span>Quản Lý Khách Hàng</span>
+            </button>
+          </nav>
+        </div>
+
+        {/* Action Button & Link Home */}
+        <div className="p-4 border-t border-slate-800/80 flex flex-col gap-2">
+          <Link
+            to={ROUTES.HOME}
+            className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-teal-300 border border-slate-800 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition"
+          >
+            <i className="fa-solid fa-house"></i>
+            <span>Về Trang Khách Hàng</span>
+          </Link>
+        </div>
+      </aside>
+
+      {/* ================= KHU VỰC NỘI DUNG CHÍNH ================= */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#06101E] text-slate-100 overflow-y-auto">
+        {/* HEADER ĐỈNH */}
+        <header className="h-16 border-b border-slate-800/80 bg-[#0A192F]/90 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
+          <div className="relative w-80">
+            <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
             <input
               type="text"
-              placeholder="Tìm kiếm theo mã đơn..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              className="flex-grow border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand-500 text-slate-700"
+              placeholder="Tìm kiếm đặt phòng, phòng, khách hàng..."
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-200 outline-none focus:border-teal-500/60 transition"
             />
           </div>
-        </div>
 
-        {/* Booking Table / Cards */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent"></div>
-            <p className="text-slate-400 text-sm font-medium mt-4">Đang tải danh sách...</p>
-          </div>
-        ) : error ? (
-          <div className="p-8 text-center bg-red-50 text-red-700 rounded-2xl border border-red-100">
-            <p className="font-semibold">Lỗi tải dữ liệu</p>
-            <p className="text-sm mt-1">{getErrorMessage(error)}</p>
-          </div>
-        ) : bookings.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center px-4">
-            <p className="text-slate-500 font-semibold">Không tìm thấy đơn hàng nào</p>
-            <p className="text-slate-400 text-sm mt-1">Hệ thống hiện không có giao dịch phù hợp với tiêu chí.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold text-slate-600">
-                <thead className="bg-slate-50 border-b border-slate-100 text-slate-400 uppercase text-[9px] tracking-wider">
-                  <tr>
-                    <th className="py-4 px-6">ID</th>
-                    <th className="py-4 px-6">Khách hàng</th>
-                    <th className="py-4 px-6">Phòng số</th>
-                    <th className="py-4 px-6">Ngày Check-in / Out</th>
-                    <th className="py-4 px-6">Số khách</th>
-                    <th className="py-4 px-6">Trạng thái</th>
-                    <th className="py-4 px-6 text-right">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50 text-slate-700">
-                  {bookings.map((booking) => {
-                    const status = getStatusLabel(booking.status);
-                    return (
-                      <tr key={booking.id} className="hover:bg-slate-50/50 transition">
-                        <td className="py-4.5 px-6 font-extrabold text-slate-800">#{booking.id}</td>
-                        <td className="py-4.5 px-6 font-bold">User #{booking.userId}</td>
-                        <td className="py-4.5 px-6 font-bold">Room #{booking.roomId}</td>
-                        <td className="py-4.5 px-6 font-medium text-slate-500">
-                          {booking.checkInDate} / {booking.checkOutDate}
-                        </td>
-                        <td className="py-4.5 px-6 text-slate-500 font-semibold">{booking.guests} khách</td>
-                        <td className="py-4.5 px-6">
-                          <span className={`px-2.5 py-0.5 border rounded-full text-[9px] uppercase font-bold ${status.className}`}>
-                            {status.text}
-                          </span>
-                        </td>
-                        <td className="py-4.5 px-6 text-right flex justify-end gap-1.5">
-                          {/* Confirm action */}
-                          {booking.status === "pending_payment" && (
-                            <button
-                              onClick={() => handleStatusChange(booking.id, "confirmed")}
-                              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 rounded-lg transition cursor-pointer"
-                            >
-                              Xác nhận
-                            </button>
-                          )}
+          <div className="flex items-center gap-4 text-slate-400">
+            <Link to={ROUTES.NOTIFICATIONS} className="relative p-2 hover:text-white transition">
+              <i className="fa-regular fa-bell text-base"></i>
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-teal-400"></span>
+            </Link>
+            <button className="p-2 hover:text-white transition">
+              <i className="fa-regular fa-envelope text-base"></i>
+            </button>
+            <Link to={ROUTES.PROFILE} className="p-2 hover:text-white transition">
+              <i className="fa-solid fa-gear text-base"></i>
+            </Link>
 
-                          {/* Complete action */}
-                          {booking.status === "confirmed" && (
-                            <button
-                              onClick={() => handleStatusChange(booking.id, "completed")}
-                              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-100 rounded-lg transition cursor-pointer"
-                            >
-                              Hoàn thành
-                            </button>
-                          )}
+            <div className="h-6 w-px bg-slate-800 mx-1"></div>
 
-                          {/* Cancel action */}
-                          {(booking.status === "pending_payment" || booking.status === "confirmed") && (
-                            <button
-                              onClick={() => handleCancelClick(booking.id)}
-                              className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-100 rounded-lg transition cursor-pointer"
-                            >
-                              Hủy bỏ
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/40 flex items-center justify-center font-bold text-xs uppercase shadow-inner">
+                {currentUser?.username?.[0] || "L"}
+              </div>
+              <div className="hidden sm:block text-left">
+                <p className="text-xs font-bold text-slate-100">{currentUser?.username || "Lễ Tân Trưởng"}</p>
+                <p className="text-[10px] text-teal-400 font-semibold uppercase">LỄ TÂN HỆ THỐNG</p>
+              </div>
             </div>
+          </div>
+        </header>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-1.5 p-5 border-t border-slate-50 text-sm font-semibold">
-                <button
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 0}
-                  className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  &larr;
-                </button>
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i)}
-                    className={`w-9 h-9 rounded-lg border transition cursor-pointer ${
-                      page === i
-                        ? "bg-brand-600 border-brand-600 text-white"
-                        : "border-slate-200 bg-white hover:bg-slate-50 text-slate-600"
-                    }`}
+        {/* CÁC TAB NỘI DUNG LỄ TÂN */}
+        <main className="p-8 max-w-7xl mx-auto w-full flex-1">
+          {/* ================= TAB 1: QUẢN LÝ ĐẶT PHÒNG (MOCKUP 1) ================= */}
+          {activeTab === "bookings" && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              {/* Tiêu đề & Thẻ đếm badge */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-white">Quản Lý Đặt Phòng Lễ Tân</h1>
+                  <p className="text-slate-400 text-xs mt-1">
+                    Chào buổi sáng, hôm nay có <strong className="text-teal-400">{pendingCount}</strong> yêu cầu mới cần xử lý.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#0A192F] border border-slate-800 rounded-xl px-4 py-2.5 flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm font-bold">
+                      <i className="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">Chờ xác nhận</p>
+                      <p className="text-lg font-black text-white">{String(pendingCount).padStart(2, "0")}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#0A192F] border border-slate-800 rounded-xl px-4 py-2.5 flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
+                      <i className="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">Đã xác nhận</p>
+                      <p className="text-lg font-black text-white">{String(confirmedCount).padStart(2, "0")}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thanh Bộ Lọc Lễ Tân */}
+              <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 flex flex-wrap items-center gap-4 text-xs font-semibold">
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">KHOẢNG NGÀY</label>
+                  <input
+                    type="date"
+                    defaultValue={todayStr}
+                    className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-teal-500/60"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">LOẠI PHÒNG</label>
+                  <select
+                    value={bookingFilterRoomType}
+                    onChange={(e) => setBookingFilterRoomType(e.target.value)}
+                    className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-teal-500/60"
                   >
-                    {i + 1}
-                  </button>
-                ))}
+                    <option value="ALL">Tất cả các loại</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Deluxe">Deluxe</option>
+                    <option value="Suite">Suite</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">TRẠNG THÁI</label>
+                  <select
+                    value={bookingFilterStatus}
+                    onChange={(e) => setBookingFilterStatus(e.target.value)}
+                    className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-teal-500/60"
+                  >
+                    <option value="ALL">Tất cả trạng thái</option>
+                    <option value={BookingStatus.PENDING_PAYMENT}>Chờ xác nhận</option>
+                    <option value={BookingStatus.CONFIRMED}>Đã xác nhận</option>
+                    <option value={BookingStatus.COMPLETED}>Đã hoàn thành</option>
+                    <option value={BookingStatus.CANCELLED}>Đã hủy</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Sub Tabs Yêu cầu mới / Chờ xác nhận / Lịch sử */}
+              <div className="border-b border-slate-800 flex gap-6 text-xs font-bold text-slate-400">
                 <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === totalPages - 1}
-                  className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => setBookingSubTab("new")}
+                  className={`pb-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+                    bookingSubTab === "new"
+                      ? "border-teal-400 text-teal-300"
+                      : "border-transparent hover:text-white"
+                  }`}
                 >
-                  &rarr;
+                  <span>Yêu cầu mới</span>
+                  <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px]">
+                    {bookings.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setBookingSubTab("pending")}
+                  className={`pb-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+                    bookingSubTab === "pending"
+                      ? "border-teal-400 text-teal-300"
+                      : "border-transparent hover:text-white"
+                  }`}
+                >
+                  <span>Chờ xác nhận</span>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px]">
+                    {pendingCount}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setBookingSubTab("history")}
+                  className={`pb-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+                    bookingSubTab === "history"
+                      ? "border-teal-400 text-teal-300"
+                      : "border-transparent hover:text-white"
+                  }`}
+                >
+                  <span>Lịch sử đặt phòng</span>
                 </button>
               </div>
-            )}
+
+              {/* Bảng Danh Sách Đặt Phòng */}
+              <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl">
+                <div className="overflow-x-auto">
+                  {isBookingsLoading ? (
+                    <div className="py-12 text-center text-slate-400 text-xs font-semibold">
+                      <i className="fa-solid fa-spinner fa-spin text-teal-400 text-lg mb-2 block"></i>
+                      Đang tải danh sách đặt phòng...
+                    </div>
+                  ) : filteredBookings.length === 0 ? (
+                    <div className="py-12 text-center text-slate-400 text-xs">Không có yêu cầu đặt phòng phù hợp.</div>
+                  ) : (
+                    <table className="w-full text-left text-xs text-slate-300">
+                      <thead className="bg-slate-900/90 text-slate-400 uppercase text-[9px] font-bold tracking-wider border-b border-slate-800">
+                        <tr>
+                          <th className="py-3.5 px-6">KHÁCH HÀNG</th>
+                          <th className="py-3.5 px-6">NGÀY NHẬN/TRẢ</th>
+                          <th className="py-3.5 px-6">LOẠI PHÒNG / SỐ PHÒNG</th>
+                          <th className="py-3.5 px-6">TỔNG TIỀN</th>
+                          <th className="py-3.5 px-6">TRẠNG THÁI</th>
+                          <th className="py-3.5 px-6 text-center">THAO TÁC XỬ LÝ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-semibold">
+                        {filteredBookings.map((b) => (
+                          <tr key={b.id} className="hover:bg-slate-900/40 transition">
+                            <td className="py-4 px-6 font-bold text-white flex items-center gap-3">
+                              <div className="h-9 w-9 rounded-full bg-teal-500/20 text-teal-300 font-bold flex items-center justify-center text-xs uppercase border border-teal-500/30">
+                                U
+                              </div>
+                              <div>
+                                <p className="font-bold text-white text-xs">Khách hàng #{b.userId}</p>
+                                <p className="text-[10px] text-slate-400">Đơn #{b.id} - {b.guests} khách</p>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6 text-slate-300">
+                              <p className="font-bold text-white">{b.checkInDate}</p>
+                              <p className="text-[10px] text-slate-400">&rarr; {b.checkOutDate}</p>
+                            </td>
+                            <td className="py-4 px-6">
+                              <p className="text-white font-bold">{getHotelName(b.hotelId, b.hotelName)}</p>
+                              <span className="px-2 py-0.5 bg-slate-800 text-teal-300 rounded font-bold text-[10px] border border-slate-700">
+                                Phòng {b.roomNumber}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 font-extrabold text-white text-sm">
+                              ${b.totalPrice.toLocaleString()}.00
+                            </td>
+                            <td className="py-4 px-6">
+                              <span
+                                className={`px-2.5 py-1 rounded text-[9px] font-extrabold uppercase ${
+                                  b.status === BookingStatus.CONFIRMED
+                                    ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
+                                    : b.status === BookingStatus.COMPLETED
+                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                    : b.status === BookingStatus.PENDING_PAYMENT
+                                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                    : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                }`}
+                              >
+                                {b.status === BookingStatus.PENDING_PAYMENT ? "CHỜ XÁC NHẬN" : b.status}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                {b.status !== BookingStatus.CONFIRMED && b.status !== BookingStatus.COMPLETED && (
+                                  <button
+                                    onClick={() => updateStatusMutation.mutate({ id: b.id, status: BookingStatus.CONFIRMED })}
+                                    title="Duyệt đơn"
+                                    className="h-8 w-8 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/30 flex items-center justify-center hover:bg-teal-500 hover:text-slate-950 transition cursor-pointer"
+                                  >
+                                    <i className="fa-solid fa-check text-xs"></i>
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => setSelectedBooking(b)}
+                                  title="Xem chi tiết"
+                                  className="h-8 w-8 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition cursor-pointer"
+                                >
+                                  <i className="fa-regular fa-eye text-xs"></i>
+                                </button>
+                                {b.status !== BookingStatus.CANCELLED && (
+                                  <button
+                                    onClick={() => {
+                                      if (confirm("Từ chối / Hủy đơn này?")) {
+                                        updateStatusMutation.mutate({ id: b.id, status: BookingStatus.CANCELLED });
+                                      }
+                                    }}
+                                    title="Từ chối / Hủy"
+                                    className="h-8 w-8 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-center hover:bg-rose-500 hover:text-white transition cursor-pointer"
+                                  >
+                                    <i className="fa-solid fa-xmark text-xs"></i>
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+
+              {/* Xu Hướng Đặt Phòng & Lịch Công Việc */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Xu hướng Đặt phòng */}
+                <div className="lg:col-span-2 bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 space-y-4">
+                  <h3 className="font-bold text-white text-base">Xu Hướng Đặt Phòng Theo Loại</h3>
+                  <div className="space-y-4 pt-2">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span className="text-slate-200">Deluxe Ocean View</span>
+                        <span className="text-teal-400">85% Lấp đầy</span>
+                      </div>
+                      <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                        <div className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full w-[85%]"></div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span className="text-slate-200">Executive Suite</span>
+                        <span className="text-teal-400">62% Lấp đầy</span>
+                      </div>
+                      <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                        <div className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full w-[62%]"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lịch Công Việc Lễ Tân */}
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-white text-base">Lịch Công Việc Ca Làm</h3>
+                    <button onClick={() => alert("Thêm sự kiện mới")} className="h-8 w-8 rounded-lg bg-teal-500 text-slate-950 flex items-center justify-center font-bold text-xs cursor-pointer">
+                      +
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center gap-3">
+                      <div className="px-2.5 py-1 bg-teal-500/20 text-teal-300 rounded-lg text-[10px] font-extrabold text-center">
+                        T5 <br /> 15
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white">Đón đoàn 20 khách VIP</p>
+                        <p className="text-[10px] text-slate-400">Từ Công ty Du lịch SunTravel</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center gap-3">
+                      <div className="px-2.5 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-[10px] font-extrabold text-center">
+                        T5 <br /> 16
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white">Kiểm kê phòng VIP Suite</p>
+                        <p className="text-[10px] text-slate-400">Bộ phận buồng phòng báo cáo</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button onClick={() => alert("Mở toàn bộ lịch công việc")} className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs border border-slate-800 cursor-pointer">
+                    Xem tất cả lịch
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB 2: SƠ ĐỒ KHO PHÒNG (MOCKUP 2) ================= */}
+          {activeTab === "inventory" && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-white">Sơ Đồ Kho Phòng Lễ Tân</h1>
+                  <p className="text-slate-400 text-xs mt-1">Cập nhật thời gian thực tình trạng từng phòng của khách sạn.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] text-slate-400 font-bold bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                    CẬP NHẬT: 10:45 AM
+                  </span>
+                </div>
+              </div>
+
+              {/* Status Bar Summary */}
+              <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 flex flex-wrap items-center gap-6 text-xs font-bold">
+                <span className="flex items-center gap-2 text-teal-400">
+                  <span className="h-3 w-3 rounded-full bg-teal-400"></span> Trống ({availableRooms.length})
+                </span>
+                <span className="flex items-center gap-2 text-blue-400">
+                  <span className="h-3 w-3 rounded-full bg-blue-500"></span> Đang ở ({occupiedRooms.length})
+                </span>
+                <span className="flex items-center gap-2 text-rose-400">
+                  <span className="h-3 w-3 rounded-full bg-rose-500"></span> Cần dọn dẹp ({dirtyRooms.length})
+                </span>
+                <span className="flex items-center gap-2 text-amber-400">
+                  <span className="h-3 w-3 rounded-full bg-amber-500"></span> Bảo trì ({maintenanceRooms.length})
+                </span>
+              </div>
+
+              {/* Sơ đồ phòng chia theo tầng */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-extrabold text-teal-400 border-l-4 border-teal-400 pl-3 mb-4">
+                    Tầng 2 - Standard & Superior
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {rooms.slice(0, 4).map((r, idx) => (
+                      <div key={r.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg hover:border-teal-500/50 transition">
+                        <div className="flex justify-between items-center">
+                          <span className="text-2xl font-black text-white">20{idx + 1}</span>
+                          <span className="px-2 py-0.5 bg-slate-800 text-teal-300 font-bold text-[9px] rounded uppercase border border-slate-700">
+                            {r.type}
+                          </span>
+                        </div>
+                        {idx === 0 ? (
+                          <>
+                            <p className="text-xs font-bold text-white">Lê Minh Tuấn</p>
+                            <p className="text-[10px] text-slate-400">Trả: 12/10 - 12:00</p>
+                          </>
+                        ) : idx === 1 ? (
+                          <>
+                            <p className="text-xs font-bold text-teal-400">Phòng trống</p>
+                            <p className="text-[10px] text-slate-400">Sẵn sàng nhận khách</p>
+                          </>
+                        ) : idx === 2 ? (
+                          <>
+                            <p className="text-xs font-bold text-rose-400">CẦN DỌN DẸP</p>
+                            <p className="text-[10px] text-slate-400">Vừa check-out 10:15</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-xs font-bold text-amber-400">BẢO TRÌ ĐIỀU HÒA</p>
+                            <p className="text-[10px] text-slate-400">Dự kiến xong: 15/10</p>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-extrabold text-teal-400 border-l-4 border-teal-400 pl-3 mb-4">
+                    Tầng 3 - Deluxe & VIP
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {rooms.slice(4, 8).map((r, idx) => (
+                      <div key={r.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg hover:border-teal-500/50 transition">
+                        <div className="flex justify-between items-center">
+                          <span className="text-2xl font-black text-white">30{idx + 1}</span>
+                          <span className="px-2 py-0.5 bg-teal-500/20 text-teal-300 font-bold text-[9px] rounded uppercase border border-teal-500/30">
+                            {r.type}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-white">Mister David Smith</p>
+                        <p className="text-[10px] text-slate-400">Trả: 15/10 - 11:00</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Quick Metric Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-xl shrink-0">
+                    <i className="fa-solid fa-door-open"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white">{availableRooms.length}</h3>
+                    <p className="text-xs text-slate-400 font-semibold">Phòng trống hôm nay</p>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl shrink-0">
+                    <i className="fa-solid fa-plane-arrival"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white">{todayArrivals.length}</h3>
+                    <p className="text-xs text-slate-400 font-semibold">Dự kiến khách đến</p>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl shrink-0">
+                    <i className="fa-solid fa-plane-departure"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white">{todayDepartures.length}</h3>
+                    <p className="text-xs text-slate-400 font-semibold">Yêu cầu Check-out</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB 3: QUẢN LÝ YÊU CẦU DỊCH VỤ (MOCKUP 4) ================= */}
+          {activeTab === "services" && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-white">Quản Lý Yêu Cầu Dịch Vụ</h1>
+                  <p className="text-slate-400 text-xs mt-1">Theo dõi và xử lý yêu cầu từ phòng của khách hàng theo thời gian thực.</p>
+                </div>
+              </div>
+
+              {/* Service Counters Header */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">ĐANG CHỜ XỬ LÝ</p>
+                  <h3 className="text-3xl font-black text-white mt-1">
+                    {serviceRequests.filter((s) => s.status === "pending").length}
+                  </h3>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">ĐANG THỰC HIỆN</p>
+                  <h3 className="text-3xl font-black text-white mt-1">
+                    {serviceRequests.filter((s) => s.status === "in_progress").length}
+                  </h3>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">HOÀN THÀNH</p>
+                  <h3 className="text-3xl font-black text-white mt-1">
+                    {serviceRequests.filter((s) => s.status === "completed").length}
+                  </h3>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">THỜI GIAN TRUNG BÌNH</p>
+                  <h3 className="text-3xl font-black text-teal-400 mt-1">14 Phút</h3>
+                </div>
+              </div>
+
+              {/* Kanban / Cards List by Status */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Đang chờ */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase text-rose-400 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-rose-500"></span> Đang chờ (Pending)
+                  </h3>
+
+                  {serviceRequests
+                    .filter((s) => s.status === "pending")
+                    .map((item) => (
+                      <div key={item.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg">
+                        <div className="flex justify-between items-center text-[10px] font-bold">
+                          <span className="px-2 py-0.5 bg-teal-500/20 text-teal-300 rounded uppercase">{item.category}</span>
+                          <span className="text-slate-400">{item.time}</span>
+                        </div>
+                        <h4 className="font-bold text-white text-sm">{item.title}</h4>
+                        <p className="text-xs text-slate-300">{item.room} &bull; {item.guest}</p>
+                        <button
+                          onClick={() => handleUpdateServiceStatus(item.id, "in_progress")}
+                          className="w-full py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer"
+                        >
+                          Nhận việc
+                        </button>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Đang thực hiện */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase text-teal-400 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-teal-400"></span> Đang thực hiện (In Progress)
+                  </h3>
+
+                  {serviceRequests
+                    .filter((s) => s.status === "in_progress")
+                    .map((item) => (
+                      <div key={item.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg">
+                        <div className="flex justify-between items-center text-[10px] font-bold">
+                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded uppercase">{item.category}</span>
+                          <span className="text-teal-400">{item.remaining}</span>
+                        </div>
+                        <h4 className="font-bold text-white text-sm">{item.title}</h4>
+                        {item.desc && <p className="text-xs text-slate-400">{item.desc}</p>}
+                        <p className="text-xs text-slate-300">{item.room} &bull; {item.guest}</p>
+                        <button
+                          onClick={() => handleUpdateServiceStatus(item.id, "completed")}
+                          className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
+                        >
+                          Hoàn tất
+                        </button>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Hoàn thành */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase text-emerald-400 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400"></span> Hoàn thành (Completed)
+                  </h3>
+
+                  {serviceRequests
+                    .filter((s) => s.status === "completed")
+                    .map((item) => (
+                      <div key={item.id} className="bg-[#0A192F]/60 border border-slate-800/60 rounded-2xl p-4 space-y-2 opacity-80">
+                        <h4 className="font-bold text-white text-xs line-through">{item.title}</h4>
+                        <p className="text-[10px] text-slate-400">{item.room} &bull; {item.guest}</p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB 4: BÁO CÁO VẬN HÀNH HÀNG NGÀY (MOCKUP 3) ================= */}
+          {activeTab === "reports" && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-white">Báo Cáo Vận Hành Hàng Ngày</h1>
+                  <p className="text-slate-400 text-xs mt-1">Dữ liệu tổng hợp tình hình vận hành lễ tân hôm nay.</p>
+                </div>
+              </div>
+
+              {/* Cards Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-xl shrink-0">
+                    <i className="fa-solid fa-arrow-right-to-bracket"></i>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400">Khách Check-in</p>
+                    <h3 className="text-2xl font-black text-white">{todayArrivals.length} / 32 dự kiến</h3>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl shrink-0">
+                    <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400">Khách Check-out</p>
+                    <h3 className="text-2xl font-black text-white">{todayDepartures.length} / 18 dự kiến</h3>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl shrink-0">
+                    <i className="fa-solid fa-wallet"></i>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400">Doanh thu tại quầy</p>
+                    <h3 className="text-2xl font-black text-white">${totalDeskRevenue.toLocaleString()}.00</h3>
+                  </div>
+                </div>
+              </div>
+
+              {/* Feedback List & Urgent Items */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 space-y-4">
+                  <h3 className="font-bold text-white text-base">Phản Hồi Nhanh Từ Khách Hàng (4.8/5.0)</h3>
+                  <div className="space-y-3 pt-2">
+                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1">
+                      <div className="flex justify-between text-xs font-bold text-white">
+                        <span>Lê Văn Nam (Phòng 402)</span>
+                        <span className="text-amber-400">★★★★★</span>
+                      </div>
+                      <p className="text-xs text-slate-400">"Nhân viên lễ tân rất nhiệt tình, hỗ trợ check-in sớm. Phòng sạch sẽ."</p>
+                    </div>
+
+                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1">
+                      <div className="flex justify-between text-xs font-bold text-white">
+                        <span>Nguyễn Thị Thu (Phòng 205)</span>
+                        <span className="text-amber-400">★★★★☆</span>
+                      </div>
+                      <p className="text-xs text-slate-400">"Mọi thứ ổn, quy trình check-out hơi đông một chút."</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 space-y-4">
+                  <h3 className="font-bold text-white text-base">Danh Sách Hoạt Động Cần Xử Lý</h3>
+                  <div className="space-y-3 pt-2">
+                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                      <div>
+                        <p className="font-bold text-white">Phạm Quốc Quân (Phòng 302)</p>
+                        <p className="text-[10px] text-slate-400">Check-in muộn lúc 22:00</p>
+                      </div>
+                      <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded font-bold text-[10px]">CHỜ XỬ LÝ</span>
+                    </div>
+
+                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                      <div>
+                        <p className="font-bold text-white">Vương Đình Dũng (Phòng 108)</p>
+                        <p className="text-[10px] text-slate-400">Dọn phòng khẩn cấp</p>
+                      </div>
+                      <span className="px-2 py-1 bg-teal-500/20 text-teal-300 rounded font-bold text-[10px]">ĐANG DỌN</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB 5: QUẢN LÝ KHÁCH HÀNG (MOCKUP 5) ================= */}
+          {activeTab === "customers" && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-white">Quản Lý Khách Hàng Thân Thiết</h1>
+                  <p className="text-slate-400 text-xs mt-1">Danh sách khách hàng VIP và lịch sử lưu trú tại LuxStay.</p>
+                </div>
+              </div>
+
+              {/* Customer Metric Counters */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">THÀNH VIÊN VIP</p>
+                  <h3 className="text-3xl font-black text-white mt-1">{users.length}</h3>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">TỶ LỆ QUAY LẠI</p>
+                  <h3 className="text-3xl font-black text-teal-400 mt-1">64.5%</h3>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">YÊU CẦU ĐẶC BIỆT</p>
+                  <h3 className="text-3xl font-black text-amber-400 mt-1">12</h3>
+                </div>
+
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">DOANH THU TRUNG BÌNH/KHÁCH</p>
+                  <h3 className="text-3xl font-black text-emerald-400 mt-1">4.2Mđ</h3>
+                </div>
+              </div>
+
+              {/* Customers Directory Table */}
+              <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl">
+                <div className="p-4 border-b border-slate-800">
+                  <h3 className="font-bold text-white text-sm">Danh Sách Khách Hàng Lưu Trú</h3>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead className="bg-slate-900/90 text-slate-400 uppercase text-[9px] font-bold tracking-wider border-b border-slate-800">
+                      <tr>
+                        <th className="py-3.5 px-6">KHÁCH HÀNG</th>
+                        <th className="py-3.5 px-6">HẠNG THÀNH VIÊN</th>
+                        <th className="py-3.5 px-6">LẦN Ở CUỐI</th>
+                        <th className="py-3.5 px-6 text-right">THAO TÁC</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60 font-semibold">
+                      {users.map((u) => (
+                        <tr key={u.id} className="hover:bg-slate-900/40 transition">
+                          <td className="py-4 px-6 flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-teal-500/20 text-teal-300 font-bold flex items-center justify-center text-xs uppercase border border-teal-500/30">
+                              {u.username[0]}
+                            </div>
+                            <div>
+                              <p className="font-bold text-white text-xs">{u.username}</p>
+                              <p className="text-[10px] text-slate-400">{u.email}</p>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="px-2 py-0.5 bg-teal-500/20 text-teal-300 rounded font-bold text-[9px] uppercase border border-teal-500/30">
+                              Diamond Elite
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-slate-400">3 ngày trước</td>
+                          <td className="py-4 px-6 text-right">
+                            <button onClick={() => alert(`Xem hồ sơ khách hàng ${u.username}`)} className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg border border-slate-700 cursor-pointer">
+                              Hồ sơ
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ================= MODAL XEM CHI TIẾT ĐẶT PHÒNG ================= */}
+      {selectedBooking && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-[#0A192F] border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-white text-base">Chi Tiết Đơn Đặt Phòng #{selectedBooking.id}</h3>
+              <button onClick={() => setSelectedBooking(null)} className="text-slate-400 hover:text-white text-lg cursor-pointer">
+                &times;
+              </button>
+            </div>
+            <div className="space-y-2 text-xs font-semibold text-slate-300">
+              <p><strong className="text-slate-400">Khách Sạn:</strong> <span className="text-white">{getHotelName(selectedBooking.hotelId, selectedBooking.hotelName)}</span></p>
+              <p><strong className="text-slate-400">Số Phòng:</strong> <span className="text-teal-400">{selectedBooking.roomNumber}</span></p>
+              <p><strong className="text-slate-400">Check-In:</strong> <span className="text-white">{selectedBooking.checkInDate}</span></p>
+              <p><strong className="text-slate-400">Check-Out:</strong> <span className="text-white">{selectedBooking.checkOutDate}</span></p>
+              <p><strong className="text-slate-400">Số Lượng Khách:</strong> <span className="text-white">{selectedBooking.guests} người</span></p>
+              <p><strong className="text-slate-400">Tổng Tiền:</strong> <span className="text-emerald-400 font-extrabold text-sm">${selectedBooking.totalPrice.toLocaleString()}.00</span></p>
+              <p><strong className="text-slate-400">Trạng Thái:</strong> <span className="text-teal-300 uppercase font-bold">{selectedBooking.status}</span></p>
+            </div>
+            <div className="pt-3 border-t border-slate-800 flex justify-end">
+              <button onClick={() => setSelectedBooking(null)} className="px-4 py-2 bg-slate-800 text-slate-200 rounded-xl font-bold text-xs cursor-pointer">
+                Đóng
+              </button>
+            </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }

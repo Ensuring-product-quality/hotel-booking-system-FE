@@ -23,6 +23,13 @@ export function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [globalSearch, setGlobalSearch] = useState("");
 
+  const isAdmin = currentUser?.role === Role.ADMIN || (currentUser?.role as string) === "ADMIN" || (currentUser?.role as string) === "ROLE_ADMIN";
+
+  // Fallback if non-admin tries to access users tab
+  if (!isAdmin && activeTab === "users") {
+    setActiveTab("dashboard");
+  }
+
   // Modal states
   const [isAddBookingModalOpen, setIsAddBookingModalOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
@@ -342,17 +349,19 @@ export function AdminDashboardPage() {
               <span>Quản Lý Phòng & Tình Trạng</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab("users")}
-              className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition cursor-pointer ${
-                activeTab === "users"
-                  ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
-                  : "hover:bg-slate-800/60 hover:text-slate-200"
-              }`}
-            >
-              <i className="fa-solid fa-user-shield text-base"></i>
-              <span>Phân Quyền Nhân Sự</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setActiveTab("users")}
+                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition cursor-pointer ${
+                  activeTab === "users"
+                    ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                    : "hover:bg-slate-800/60 hover:text-slate-200"
+                }`}
+              >
+                <i className="fa-solid fa-user-shield text-base"></i>
+                <span>Phân Quyền Nhân Sự</span>
+              </button>
+            )}
           </nav>
         </div>
 
