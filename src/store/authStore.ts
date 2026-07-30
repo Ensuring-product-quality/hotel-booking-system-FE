@@ -25,14 +25,33 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: ({ accessToken, refreshToken, user }) =>
-        set((state) => ({
-          accessToken,
-          refreshToken,
-          user: user ?? state.user,
-          isAuthenticated: true,
-        })),
+        set((state) => {
+          let finalUser = user ?? state.user;
+          if (finalUser) {
+            finalUser = {
+              ...finalUser,
+              role: String(finalUser.role).replace("ROLE_", "") as any,
+            };
+          }
+          return {
+            accessToken,
+            refreshToken,
+            user: finalUser,
+            isAuthenticated: true,
+          };
+        }),
 
-      setUser: (user) => set({ user }),
+      setUser: (user) =>
+        set(() => {
+          let finalUser = user;
+          if (finalUser) {
+            finalUser = {
+              ...finalUser,
+              role: String(finalUser.role).replace("ROLE_", "") as any,
+            };
+          }
+          return { user: finalUser };
+        }),
 
       clearAuth: () =>
         set({

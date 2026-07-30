@@ -362,6 +362,12 @@ export function Header() {
                   {(user?.role === Role.MANAGER || user?.role === Role.ADMIN) && (
                     <>
                       <Link
+                        to={ROUTES.ADMIN_DASHBOARD}
+                        className="flex w-full items-center px-3 py-2 text-sm font-bold text-teal-600 rounded-lg hover:bg-teal-50 transition bg-teal-50/40 border border-teal-100/50 my-0.5"
+                      >
+                        📊 Dashboard Quản trị
+                      </Link>
+                      <Link
                         to={ROUTES.MANAGER_HOTELS}
                         className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
                       >

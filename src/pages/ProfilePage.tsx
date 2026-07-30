@@ -31,7 +31,7 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export function ProfilePage() {
   const { user, setUser } = useAuthStore();
-  const userId = parseInt(user?.id || "0");
+  const userId = user?.id || 0;
   const [activeTab, setActiveTab] = useState<"info" | "password">("info");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   

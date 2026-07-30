@@ -20,6 +20,7 @@ import { StaffBookingsPage } from "./pages/StaffBookingsPage";
 import { ManagerHotelsPage } from "./pages/ManagerHotelsPage";
 import { ManagerRoomsPage } from "./pages/ManagerRoomsPage";
 import { ManagerUsersPage } from "./pages/ManagerUsersPage";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { Role } from "./types/auth";
@@ -122,6 +123,14 @@ function App() {
             element={
               <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
                 <ManagerUsersPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_DASHBOARD}
+            element={
+              <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
+                <AdminDashboardPage />
               </PrivateRoute>
             }
           />

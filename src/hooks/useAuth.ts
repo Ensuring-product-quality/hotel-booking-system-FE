@@ -9,6 +9,7 @@ import type {
   RegisterRequest,
   ForgotPasswordRequest,
   VerifyEmailRequest,
+  Role,
 } from "../types/auth";
 
 function decodeJwt(token: string): any {
@@ -46,10 +47,10 @@ export function useAuth() {
         const decoded = decodeJwt(res.data.accessToken);
         const userObj = decoded
           ? {
-              id: String(decoded.userId || ""),
+              id: Number(decoded.userId || 0),
               username: decoded.sub || "",
               email: decoded.email || "",
-              role: decoded.role || "",
+              role: ((decoded.role || "") as string).replace("ROLE_", "") as Role,
               status: "active" as const,
             }
           : null;
