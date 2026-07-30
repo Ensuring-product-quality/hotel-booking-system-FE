@@ -397,9 +397,6 @@ export function StaffBookingsPage() {
             <button className="p-2 hover:text-white transition">
               <i className="fa-regular fa-envelope text-base"></i>
             </button>
-            <Link to={ROUTES.PROFILE} className="p-2 hover:text-white transition">
-              <i className="fa-solid fa-gear text-base"></i>
-            </Link>
 
             <div className="h-6 w-px bg-slate-800 mx-1"></div>
 

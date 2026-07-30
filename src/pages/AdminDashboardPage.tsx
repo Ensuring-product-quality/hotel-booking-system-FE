@@ -523,9 +523,6 @@ export function AdminDashboardPage() {
             <button className="p-2 hover:text-white transition cursor-pointer">
               <i className="fa-regular fa-envelope text-base"></i>
             </button>
-            <Link to={ROUTES.PROFILE} className="p-2 hover:text-white transition cursor-pointer">
-              <i className="fa-solid fa-gear text-base"></i>
-            </Link>
 
             <div className="h-6 w-px bg-slate-800 mx-1"></div>
 
@@ -591,18 +588,29 @@ export function AdminDashboardPage() {
 
                   {/* Biểu đồ Cột Doanh Thu Tương Tác */}
                   <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2 border-t border-slate-800/60">
-                    {[
-                      { day: "T2", val: 40, label: `$${Math.round(totalRevenue * 0.12)}` },
-                      { day: "T3", val: 60, label: `$${Math.round(totalRevenue * 0.18)}` },
-                      { day: "T4", val: 50, label: `$${Math.round(totalRevenue * 0.15)}` },
-                      { day: "T5", val: 95, label: `$${Math.round(totalRevenue * 0.28)}`, highlight: true },
-                      { day: "T6", val: 70, label: `$${Math.round(totalRevenue * 0.20)}` },
-                      { day: "T7", val: 85, label: `$${Math.round(totalRevenue * 0.24)}` },
-                      { day: "CN", val: 55, label: `$${Math.round(totalRevenue * 0.16)}` },
-                    ].map((item, idx) => (
-                      <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                        {item.highlight && (
-                          <span className="text-[10px] font-bold text-slate-950 bg-teal-400 px-2 py-0.5 rounded-full shadow">
+                    {(totalRevenue === 0
+                      ? [
+                          { day: "T2", val: 5, label: "$0.00", highlight: false },
+                          { day: "T3", val: 5, label: "$0.00", highlight: false },
+                          { day: "T4", val: 5, label: "$0.00", highlight: false },
+                          { day: "T5", val: 5, label: "$0.00", highlight: false },
+                          { day: "T6", val: 5, label: "$0.00", highlight: false },
+                          { day: "T7", val: 5, label: "$0.00", highlight: false },
+                          { day: "CN", val: 5, label: "$0.00", highlight: false },
+                        ]
+                      : [
+                          { day: "T2", val: 40, label: `$${Math.round(totalRevenue * 0.12).toLocaleString()}`, highlight: false },
+                          { day: "T3", val: 60, label: `$${Math.round(totalRevenue * 0.18).toLocaleString()}`, highlight: false },
+                          { day: "T4", val: 50, label: `$${Math.round(totalRevenue * 0.15).toLocaleString()}`, highlight: false },
+                          { day: "T5", val: 95, label: `$${Math.round(totalRevenue * 0.28).toLocaleString()}`, highlight: true },
+                          { day: "T6", val: 70, label: `$${Math.round(totalRevenue * 0.20).toLocaleString()}`, highlight: false },
+                          { day: "T7", val: 85, label: `$${Math.round(totalRevenue * 0.24).toLocaleString()}`, highlight: false },
+                          { day: "CN", val: 55, label: `$${Math.round(totalRevenue * 0.16).toLocaleString()}`, highlight: false },
+                        ]
+                    ).map((item, idx) => (
+                      <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer" title={item.label}>
+                        {item.highlight && totalRevenue > 0 && (
+                          <span className="text-[10px] font-bold text-slate-950 bg-teal-400 px-2 py-0.5 rounded-full shadow animate-pulse">
                             Top Peak
                           </span>
                         )}
@@ -610,7 +618,7 @@ export function AdminDashboardPage() {
                           <div
                             style={{ height: `${item.val}%` }}
                             className={`w-full rounded-t-lg transition-all duration-500 ${
-                              item.highlight
+                              item.highlight && totalRevenue > 0
                                 ? "bg-gradient-to-t from-teal-500 to-emerald-300 shadow-lg shadow-teal-500/30"
                                 : "bg-teal-600/30 group-hover:bg-teal-500/60"
                             }`}
