@@ -4,7 +4,7 @@
 
 1. HỆ THỐNG TÀI KHOẢN & MẬT KHẨU NỘI BỘ (SEEDED ACCOUNTS & CREDENTIALS)
 --------------------------------------------------------------------------------
-Các tài khoản mặc định đã được khởi tạo sẵn trong cơ sở dữ liệu hệ thống:
+Tất cả các tài khoản mặc định đã được khởi tạo tự động trong cơ sở dữ liệu hệ thống:
 
 * TÀI KHOẢN QUẢN TRỊ VIÊN CAO CẤP (ADMIN):
   - Tên đăng nhập (Username) : admin
@@ -16,59 +16,54 @@ Các tài khoản mặc định đã được khởi tạo sẵn trong cơ sở 
   - Tên đăng nhập (Username) : manager
   - Mật khẩu (Password)      : password
   - Email                     : manager@hotelnow.com
-  - Quyền hạn (Role)          : ROLE_MANAGER (Quản lý khách sạn, quản lý danh sách phòng, phân quyền nhân sự)
+  - Quyền hạn (Role)          : ROLE_MANAGER (Quản lý khách sạn, danh sách phòng, xem báo cáo doanh thu)
 
 * TÀI KHOẢN NHÂN VIÊN LỄ TÂN (STAFF):
   - Tên đăng nhập (Username) : staff
   - Mật khẩu (Password)      : password
   - Email                     : staff@hotelnow.com
-  - Quyền hạn (Role)          : ROLE_STAFF (Quản lý danh sách đặt phòng, cập nhật trạng thái nhận/trả phòng)
+  - Quyền hạn (Role)          : ROLE_STAFF (Quản lý lễ tân, duyệt đặt phòng, sơ đồ kho phòng, dịch vụ)
 
 * TÀI KHOẢN KHÁCH HÀNG (CUSTOMER / USER):
   - Tên đăng nhập (Username) : customer
   - Mật khẩu (Password)      : password
   - Email                     : customer@hotelnow.com
-  - Quyền hạn (Role)          : ROLE_CUSTOMER (Tìm kiếm phòng, đặt phòng, thanh toán, viết đánh giá)
+  - Quyền hạn (Role)          : ROLE_CUSTOMER (Tìm kiếm phòng, đặt phòng, thanh toán, đánh giá)
 
 
 2. TỔNG HỢP CÁC CẬP NHẬT MỚI NHẤT (RECENT SYSTEM UPDATES)
 --------------------------------------------------------------------------------
 
-[Cập nhật 1] Xây dựng Portal Dashboard Quản trị mới (Admin Management Portal)
-- Đường dẫn hệ thống: /admin/dashboard (Tên tuyến đường: ROUTES.ADMIN_DASHBOARD).
-- File giao diện chính: src/pages/AdminDashboardPage.tsx.
-- Phân khu 1 - Executive Dashboard:
-  + Thống kê Tổng doanh thu ($124,592.00, +12.4%), biểu đồ cột doanh thu 7 ngày tương tác.
-  + Thống kê Tỷ lệ lấp đầy phòng (Occupancy Rate 78%, 156/200 Rooms) với vòng tròn SVG gauge.
-  + Thống kê vận hành trong ngày: Lượt khách đến (Today's Arrivals: 24), Lượt khách đi (Today's Departures: 12).
-  + Phím tắt thao tác nhanh (Add Booking, Update Room, New Staff, Shift Notes).
-  + Bảng đặt phòng gần đây (Recent Bookings) kèm trạng thái đơn hàng.
-- Phân khu 2 - Quản lý đặt phòng (Booking Management):
-  + Bộ lọc đa tiêu chí: Khoảng thời gian, Chi nhánh khách sạn, Trạng thái đơn, Loại phòng.
-  + Bảng danh sách đặt phòng chi tiết kèm số đêm nghỉ, tổng tiền và Avatar khách hàng.
-  + Modal tiếp nhận yêu cầu đặt phòng mới trực tiếp.
-- Phân khu 3 - Quản lý phòng & Dịch vụ (Inventory Management):
-  + 4 thẻ KPI trạng thái phòng: AVAILABLE (24), OCCUPIED (58), DIRTY/IN-REVIEW (12), MAINTENANCE (04).
-  + Ma trận dự báo phòng trống 7 ngày (7-Day Availability Forecast Matrix).
-  + Lưới quản lý trạng thái thực tế theo phân loại phòng (Luxury Suites, Deluxe Rooms).
-- Phân khu 4 - Hệ thống phân quyền (Staff & Permissions):
-  + Thẻ cảnh báo an toàn mã hóa & audit an ninh hệ thống.
-  + Thống kê số lượng nhân sự (128 thành viên) & các vai trò hoạt động (8 vai trò).
-  + Bảng quản lý nhân sự kèm trạng thái kết nối Online/Offline.
-  + Modal khởi tạo và cấp quyền cho nhân viên mới.
+[Cập nhật 1] Cơ Chế Tự Động Chuyển Hướng Đăng Nhập Theo Vai Trò (Auto-Redirect)
+- Khi đăng nhập bằng tài khoản ADMIN hoặc MANAGER: Tự động chuyển thẳng sang Portal Quản trị (/admin/dashboard).
+- Khi đăng nhập bằng tài khoản STAFF (Lễ tân): Tự động chuyển thẳng sang Portal Lễ tân (/staff/bookings).
+- Khi đăng nhập bằng tài khoản CUSTOMER: Tự động chuyển sang Trang chủ (/vi-vn/).
 
-[Cập nhật 2] Chuẩn hóa Vai trò & Khắc phục định dạng JWT Claim
-- Xử lý tương thích định dạng vai trò giữa Spring Security backend (`ROLE_ADMIN`, `ROLE_MANAGER`) và Frontend (`ADMIN`, `MANAGER`).
-- Cập nhật bộ lọc tự động làm sạch chuỗi prefix `ROLE_` tại `src/hooks/useAuth.ts` và `src/store/authStore.ts`.
-- Sửa kiểu dữ liệu `userId` trong `src/pages/ProfilePage.tsx` đảm bảo tính nhất quán.
+[Cập nhật 2] Nâng Cấp Hệ Thống Thông Báo Thông Minh (Notification System Upgrade)
+- Chuông thông báo 🔔 chảy xuống (Floating Dropdown Panel):
+  + Nhấp vào chuông tại Admin/Staff Portal KHÔNG bị chuyển sang trang khác.
+  + Hiển thị tối đa 10 thông báo mới nhất kèm thanh cuộn (Scrollbar) xem tiện lợi.
+  + Nút "Đọc tất cả" và nút "Xem tất cả thông báo ->" ở chân dropdown.
+- Trang / Tab Thông Báo Riêng Không Giới Hạn:
+  + Thêm mục "Thông Báo System / Lễ Tân" vào menu bên trái (Sidebar).
+  + Cho phép xem lại toàn bộ lịch sử thông báo bị trôi không giới hạn, lọc theo trạng thái Chưa đọc / Đã đọc.
 
-[Cập nhật 3] Cấu hình Tiền tố Đường dẫn & Domain Sản xuất
-- Cấu hình BrowserRouter basename: `/vi-vn`.
-- Cấu hình VITE_API_BASE_URL: `http://localhost:8080/api` (Local) / `https://www.hotelnow.com/vi-vn/api` (Production).
+[Cập nhật 3] Portal Quản Trị Hợp Nhất & Phân Quyền Vai Trò (Admin & Manager RBAC)
+- Địa chỉ trang: /admin/dashboard (File: src/pages/AdminDashboardPage.tsx).
+- Việt hóa 100% toàn bộ giao diện & kết nối 100% Backend API (Zero hardcode).
+- Cơ chế Phân quyền (Role-Based Access Control):
+  + ADMIN: Truy cập đủ 4 tab (Dashboard Quản Trị, Quản Lý Đặt Phòng, Quản Lý Phòng & Tình Trạng, Phân Quyền Nhân Sự).
+  + MANAGER: Truy cập 3 tab vận hành & báo cáo, tự động ẩn tab Phân Quyền Nhân Sự để đảm bảo an toàn bảo mật.
 
-[Cập nhật 4] Đổi tên Thương hiệu thành HotelNow
-- Cập nhật đồng bộ thương hiệu HotelNow trên tất cả các trang: Header, Footer, HomePage, BookingDetailPage, MyBookingsPage, ManagerHotelsPage,...
+[Cập nhật 4] Portal Quản Lý Lễ Tân Mới Bám Sát 100% 5 Thiết Kế Mockup (Front Desk Portal)
+- Địa chỉ trang: /staff/bookings (File: src/pages/StaffBookingsPage.tsx).
+- Phân khu 1 - Quản Lý Đặt Phòng (Bookings): Thẻ đếm "Chờ xác nhận (08)", "Đã xác nhận (24)", bộ lọc khoảng ngày/loại phòng, bảng dữ liệu duyệt đơn nhanh (✔/👁/✖), Biểu đồ xu hướng đặt phòng & Lịch công việc ca làm.
+- Phân khu 2 - Sơ Đồ Kho Phòng (Room Grid): Thanh đếm trạng thái Trống/Đang ở/Cần dọn/Bảo trì, Sơ đồ phòng theo tầng (Tầng 2, Tầng 3), icon tiện ích & huy hiệu trạng thái.
+- Phân khu 3 - Quản Lý Yêu Cầu Dịch Vụ (Service Requests): Thẻ đếm thời gian phản hồi TB (14 phút), danh sách Kanban (Đang chờ, Đang thực hiện, Hoàn thành) cho Massage, Bữa trưa tại phòng, Khăn tắm, Giặt nhanh.
+- Phân khu 4 - Báo Cáo Vận Hành Hàng Ngày (Daily Operations): Chỉ số Check-in/out, Doanh thu tại quầy, Phản hồi 5 sao từ khách & Danh sách hoạt động cần xử lý gấp.
+- Phân khu 5 - Quản Lý Khách Hàng (Customer CRM): Thống kê VIP, Tỷ lệ quay lại 64.5%, Danh sách khách hàng lưu trú kèm hạng Diamond Elite/Gold/Silver.
 
-[Cập nhật 5] Kiểm tra & Đóng gói Mã nguồn
+[Cập nhật 5] Khắc Phục Tài Khoản Staff Ở Backend & Đóng Gói
+- Đã bổ sung mã tự động khởi tạo tài khoản `staff` / `password` trong `DevDataInitializer.java` ở Spring Boot Backend.
 - Kiểm tra biên dịch `npm run build`: Thành công 100%.
 - Kiểm tra linter `oxlint`: 0 warnings, 0 errors trên toàn bộ 55 file nguồn.
