@@ -15,7 +15,9 @@ import type { BookingResponseDTO, BookingCreateDTO } from "../types/booking";
 import type { RoomCreateDTO } from "../types/room";
 import type { UserCreateDTO } from "../services/userApi";
 
-type ActiveTab = "dashboard" | "bookings" | "inventory" | "users";
+import { notificationApi } from "../services/notificationApi";
+
+type ActiveTab = "dashboard" | "bookings" | "inventory" | "users" | "notifications";
 
 export function AdminDashboardPage() {
   const queryClient = useQueryClient();
@@ -63,7 +65,34 @@ export function AdminDashboardPage() {
   const [bookingFilterStatus, setBookingFilterStatus] = useState<string>("ALL");
   const [bookingFilterHotelId, setBookingFilterHotelId] = useState<string>("ALL");
 
+  // Notification Dropdown & Tab States
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notificationFilterStatus, setNotificationFilterStatus] = useState<"ALL" | "unread" | "read">("ALL");
+
   // ==================== REAL DATA FETCHING VIA BACKEND APIS ====================
+  // 0. Fetch Notifications
+  const { data: notificationsRes } = useQuery({
+    queryKey: ["adminNotificationsReal"],
+    queryFn: () => notificationApi.getAll({ page: 0, size: 50 }),
+    refetchInterval: 10000,
+  });
+  const notifications = useMemo(() => notificationsRes?.data?.content || [], [notificationsRes]);
+  const unreadCount = useMemo(() => notifications.filter((n) => n.status === "unread").length, [notifications]);
+
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: number) => notificationApi.markAsRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminNotificationsReal"] });
+    },
+  });
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: () => notificationApi.markAllAsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminNotificationsReal"] });
+    },
+  });
+
   // 1. Fetch All Bookings
   const { data: bookingsRes, isLoading: isBookingsLoading } = useQuery({
     queryKey: ["adminBookingsReal"],
@@ -362,6 +391,25 @@ export function AdminDashboardPage() {
                 <span>Phân Quyền Nhân Sự</span>
               </button>
             )}
+
+            <button
+              onClick={() => setActiveTab("notifications")}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl transition cursor-pointer ${
+                activeTab === "notifications"
+                  ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                  : "hover:bg-slate-800/60 hover:text-slate-200"
+              }`}
+            >
+              <div className="flex items-center gap-3.5">
+                <i className="fa-regular fa-bell text-base"></i>
+                <span>Thông Báo System</span>
+              </div>
+              {unreadCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-teal-500 text-slate-950 text-[10px] font-extrabold shadow">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
           </nav>
         </div>
 
@@ -403,10 +451,75 @@ export function AdminDashboardPage() {
 
           {/* Thông Tin Người Dùng & Nút Thao Tác */}
           <div className="flex items-center gap-4 text-slate-400">
-            <Link to={ROUTES.NOTIFICATIONS} className="relative p-2 hover:text-white transition cursor-pointer">
-              <i className="fa-regular fa-bell text-base"></i>
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-teal-400"></span>
-            </Link>
+            {/* Chuông thông báo chảy xuống (Notification Dropdown) */}
+            <div className="relative">
+              <button
+                onClick={() => setIsNotificationOpen((prev) => !prev)}
+                className="relative p-2 hover:text-white transition cursor-pointer"
+                title="Thông báo mới nhất"
+              >
+                <i className="fa-regular fa-bell text-base"></i>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-teal-400"></span>
+                )}
+              </button>
+
+              {/* Dropdown Panel hiển thị tối đa 10 thông báo mới nhất */}
+              {isNotificationOpen && (
+                <div className="absolute right-0 top-11 z-50 w-80 sm:w-96 bg-[#0A192F] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+                  <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/80">
+                    <h4 className="font-bold text-white text-xs flex items-center gap-2">
+                      <i className="fa-solid fa-bell text-teal-400"></i>
+                      Thông Báo System ({unreadCount} chưa đọc)
+                    </h4>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={() => markAllAsReadMutation.mutate()}
+                        className="text-[10px] text-teal-400 hover:text-teal-300 font-semibold cursor-pointer"
+                      >
+                        Đọc tất cả
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Danh sách 10 thông báo lăn chuột */}
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/60 font-semibold">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-slate-400 text-xs">Chưa có thông báo nào.</div>
+                    ) : (
+                      notifications.slice(0, 10).map((n) => (
+                        <div
+                          key={n.id}
+                          onClick={() => markAsReadMutation.mutate(n.id)}
+                          className={`p-3.5 hover:bg-slate-900/50 transition cursor-pointer flex items-start gap-3 text-xs ${
+                            n.status === "unread" ? "bg-teal-500/5" : ""
+                          }`}
+                        >
+                          <span className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${n.status === "unread" ? "bg-teal-400" : "bg-slate-700"}`}></span>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-slate-200 leading-snug ${n.status === "unread" ? "font-bold text-white" : ""}`}>{n.message}</p>
+                            <p className="text-[10px] text-slate-400 mt-1">{n.createdAt || "Vừa xong"}</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Nút Xem Tất Cả Thông Báo không giới hạn */}
+                  <div className="p-3 border-t border-slate-800 bg-slate-900/80 text-center">
+                    <button
+                      onClick={() => {
+                        setIsNotificationOpen(false);
+                        setActiveTab("notifications");
+                      }}
+                      className="text-xs font-bold text-teal-400 hover:text-teal-300 transition cursor-pointer"
+                    >
+                      Xem Tất Cả Thông Báo ({notifications.length}) &rarr;
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             <button className="p-2 hover:text-white transition cursor-pointer">
               <i className="fa-regular fa-envelope text-base"></i>
             </button>
@@ -1132,6 +1245,109 @@ export function AdminDashboardPage() {
                     </table>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB 5: NHẬT KÝ THÔNG BÁO SYSTEM (XEM TẤT CẢ KHÔNG GIỚI HẠN) ================= */}
+          {activeTab === "notifications" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-white">Nhật Ký Thông Báo Hệ Thống</h1>
+                  <p className="text-slate-400 text-xs mt-1">
+                    Xem lại toàn bộ lịch sử thông báo, cảnh báo an ninh và biến động đơn hàng không giới hạn.
+                  </p>
+                </div>
+                <button
+                  onClick={() => markAllAsReadMutation.mutate()}
+                  disabled={unreadCount === 0}
+                  className="px-4 py-2.5 bg-teal-500 hover:bg-teal-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 transition cursor-pointer"
+                >
+                  <i className="fa-solid fa-check-double"></i>
+                  <span>Đánh Dấu Tất Cả Đã Đọc ({unreadCount})</span>
+                </button>
+              </div>
+
+              {/* Bộ lọc thông báo */}
+              <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between text-xs font-semibold">
+                <div className="flex gap-2">
+                  {(["ALL", "unread", "read"] as const).map((st) => (
+                    <button
+                      key={st}
+                      onClick={() => setNotificationFilterStatus(st)}
+                      className={`px-3 py-1.5 rounded-lg border transition cursor-pointer ${
+                        notificationFilterStatus === st
+                          ? "bg-teal-500/20 text-teal-300 border-teal-500/40 font-bold"
+                          : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+                      }`}
+                    >
+                      {st === "ALL" ? "Tất cả thông báo" : st === "unread" ? "Chưa đọc" : "Đã đọc"}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-slate-400 text-xs">
+                  Hiển thị <strong className="text-teal-400">{notifications.length}</strong> thông báo
+                </span>
+              </div>
+
+              {/* Danh sách thông báo dạng Card */}
+              <div className="space-y-3">
+                {notifications.length === 0 ? (
+                  <div className="p-12 text-center bg-[#0A192F] border border-slate-800/80 rounded-2xl text-slate-400 text-xs font-semibold">
+                    Không tìm thấy thông báo nào trong nhật ký.
+                  </div>
+                ) : (
+                  notifications
+                    .filter((n) => (notificationFilterStatus === "ALL" ? true : n.status === notificationFilterStatus))
+                    .map((n) => (
+                      <div
+                        key={n.id}
+                        onClick={() => markAsReadMutation.mutate(n.id)}
+                        className={`bg-[#0A192F] border rounded-2xl p-5 transition cursor-pointer flex items-center justify-between gap-4 ${
+                          n.status === "unread"
+                            ? "border-teal-500/40 bg-teal-500/5 shadow-lg"
+                            : "border-slate-800/80 opacity-85"
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`h-10 w-10 rounded-xl flex items-center justify-center text-base shrink-0 font-bold ${
+                              n.status === "unread"
+                                ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                                : "bg-slate-800 text-slate-400 border border-slate-700"
+                            }`}
+                          >
+                            <i className="fa-solid fa-bell"></i>
+                          </div>
+                          <div>
+                            <p className={`text-sm ${n.status === "unread" ? "font-bold text-white" : "text-slate-300"}`}>
+                              {n.message}
+                            </p>
+                            <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-2">
+                              <span><i className="fa-regular fa-clock"></i> {n.createdAt || "Hôm nay"}</span>
+                              &bull;
+                              <span className={n.status === "unread" ? "text-teal-400 font-bold" : "text-slate-500"}>
+                                {n.status === "unread" ? "Chưa đọc" : "Đã đọc"}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+
+                        {n.status === "unread" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsReadMutation.mutate(n.id);
+                            }}
+                            className="px-3 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 text-xs font-bold rounded-xl transition cursor-pointer shrink-0"
+                          >
+                            Đánh dấu đã đọc
+                          </button>
+                        )}
+                      </div>
+                    ))
+                )}
               </div>
             </div>
           )}
