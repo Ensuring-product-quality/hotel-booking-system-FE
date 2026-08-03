@@ -315,28 +315,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="bg-brand-800 text-white py-16 w-full">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Sẵn sàng cho chuyến đi tiếp theo?</h2>
-          <p className="text-slate-300 text-sm mb-8">Đăng ký để nhận những thông tin khuyến mãi mới nhất và các ưu đãi bí mật dành riêng cho thành viên.</p>
-
-          <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-            <input
-              type="email"
-              placeholder="Địa chỉ email của bạn"
-              className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-brand-500"
-            />
-            <button
-              type="submit"
-              onClick={(e) => e.preventDefault()}
-              className="bg-brand-500 hover:bg-brand-600 transition px-6 py-3 rounded-xl font-bold shadow-lg"
-            >
-              Đăng ký ngay
-            </button>
-          </form>
-        </div>
-      </section>
 
     </div>
   );
