@@ -111,7 +111,7 @@ export const router = createBrowserRouter(
         {
           path: ROUTES.STAFF_BOOKINGS,
           element: (
-            <PrivateRoute allowedRoles={[Role.STAFF, Role.MANAGER, Role.ADMIN]}>
+            <PrivateRoute allowedRoles={[Role.STAFF, Role.ADMIN]}>
               <SuspenseWrapper><StaffBookingsPage /></SuspenseWrapper>
             </PrivateRoute>
           ),
@@ -119,7 +119,7 @@ export const router = createBrowserRouter(
         {
           path: ROUTES.MANAGER_HOTELS,
           element: (
-            <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
+            <PrivateRoute allowedRoles={[Role.ADMIN]}>
               <SuspenseWrapper><ManagerHotelsPage /></SuspenseWrapper>
             </PrivateRoute>
           ),
@@ -127,7 +127,7 @@ export const router = createBrowserRouter(
         {
           path: ROUTES.MANAGER_ROOMS,
           element: (
-            <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
+            <PrivateRoute allowedRoles={[Role.ADMIN]}>
               <SuspenseWrapper><ManagerRoomsPage /></SuspenseWrapper>
             </PrivateRoute>
           ),
@@ -135,7 +135,7 @@ export const router = createBrowserRouter(
         {
           path: ROUTES.MANAGER_USERS,
           element: (
-            <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
+            <PrivateRoute allowedRoles={[Role.ADMIN]}>
               <SuspenseWrapper><ManagerUsersPage /></SuspenseWrapper>
             </PrivateRoute>
           ),
@@ -143,7 +143,7 @@ export const router = createBrowserRouter(
         {
           path: ROUTES.ADMIN_DASHBOARD,
           element: (
-            <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
+            <PrivateRoute allowedRoles={[Role.ADMIN]}>
               <SuspenseWrapper><AdminDashboardPage /></SuspenseWrapper>
             </PrivateRoute>
           ),

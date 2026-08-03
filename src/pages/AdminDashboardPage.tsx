@@ -1173,8 +1173,8 @@ export function AdminDashboardPage() {
                     <h2 className="text-3xl font-black text-white">{ALL_ROLES.length}</h2>
                     <div className="flex gap-1.5">
                       <span className="px-2 py-0.5 bg-teal-500/20 text-teal-300 rounded font-bold text-[9px]">ADMIN</span>
-                      <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded font-bold text-[9px]">MANAGER</span>
                       <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded font-bold text-[9px]">STAFF</span>
+                      <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded font-bold text-[9px]">CUSTOMER</span>
                     </div>
                   </div>
                 </div>
@@ -1223,8 +1223,6 @@ export function AdminDashboardPage() {
                                 className={`px-2.5 py-1 rounded text-[9px] font-extrabold uppercase border ${
                                   u.role === Role.ADMIN
                                     ? "bg-teal-500/20 text-teal-300 border-teal-500/30"
-                                    : u.role === Role.MANAGER
-                                    ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
                                     : u.role === Role.STAFF
                                     ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
                                     : "bg-slate-800 text-slate-300 border-slate-700"
@@ -1496,7 +1494,6 @@ export function AdminDashboardPage() {
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 outline-none text-white focus:border-teal-500"
                 >
                   <option value={Role.STAFF}>STAFF (Nhân viên lễ tân)</option>
-                  <option value={Role.MANAGER}>MANAGER (Quản lý)</option>
                   <option value={Role.ADMIN}>ADMIN (Quản trị viên)</option>
                   <option value={Role.CUSTOMER}>CUSTOMER (Khách hàng)</option>
                 </select>
