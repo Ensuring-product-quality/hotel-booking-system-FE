@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 import { ROUTES } from "../constants/routes";
 
 interface SearchFormState {
@@ -42,8 +40,7 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+    <div className="flex flex-col">
 
       {/* Hero Section */}
       <section className="relative h-[560px] flex items-center justify-center text-center bg-cover bg-center overflow-hidden" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1920')" }}>
@@ -341,8 +338,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

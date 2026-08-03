@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 import { bookingApi } from "../services/bookingApi";
 import { getErrorMessage } from "../services/apiClient";
 import type { BookingDetailDTO } from "../types/booking";
@@ -77,8 +75,7 @@ export function BookingLookupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="flex flex-col flex-1 font-sans">
 
       <main className="mx-auto max-w-7xl px-4 py-16 sm:px-6 w-full flex-grow flex items-center justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 w-full max-w-5xl items-center">
@@ -275,7 +272,6 @@ export function BookingLookupPage() {
         </section>
       )}
 
-      <Footer />
     </div>
   );
 }

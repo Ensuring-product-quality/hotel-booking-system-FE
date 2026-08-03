@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 
 export function ContactPage() {
   const [fullName, setFullName] = useState("");
@@ -23,8 +21,7 @@ export function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="flex flex-col flex-1 font-sans">
 
       {/* Banner Header Image */}
       <section className="relative h-80 flex items-center justify-center text-center bg-cover bg-center overflow-hidden" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1920')" }}>
@@ -205,7 +202,6 @@ export function ContactPage() {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 }

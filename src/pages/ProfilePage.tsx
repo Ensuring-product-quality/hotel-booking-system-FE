@@ -3,8 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 import { useAuthStore } from "../store/authStore";
 import { userApi } from "../services/userApi";
 import { getErrorMessage } from "../services/apiClient";
@@ -136,8 +134,7 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="flex flex-col flex-1 font-sans">
 
       <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 w-full flex-grow">
         <div className="mb-8">
@@ -326,7 +323,6 @@ export function ProfilePage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "../components/Header";
 import { hotelApi } from "../services/hotelApi";
 import { getErrorMessage } from "../services/apiClient";
 import { ROUTES } from "../constants/routes";
@@ -97,8 +96,7 @@ export function HotelsPage() {
   const totalElements = data?.data?.totalElements || 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+    <div className="flex flex-col flex-1">
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full flex-grow">
         {/* Breadcrumbs */}

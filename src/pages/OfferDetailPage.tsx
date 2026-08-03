@@ -1,6 +1,4 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 import { ROUTES } from "../constants/routes";
 
 interface OfferDetails {
@@ -103,8 +101,7 @@ export function OfferDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="flex flex-col flex-1 font-sans">
 
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 w-full flex-grow">
         {/* Back Link */}
@@ -193,7 +190,6 @@ export function OfferDetailPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

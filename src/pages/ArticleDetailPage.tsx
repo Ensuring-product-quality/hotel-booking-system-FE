@@ -1,7 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 import { ROUTES } from "../constants/routes";
 
 interface ContentBlock {
@@ -252,8 +250,7 @@ export function ArticleDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="flex flex-col flex-1 font-sans">
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full flex-grow">
         {/* Breadcrumbs */}
@@ -460,7 +457,6 @@ export function ArticleDetailPage() {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Header } from "../components/Header";
 import { notificationApi } from "../services/notificationApi";
 import { getErrorMessage } from "../services/apiClient";
 
@@ -52,8 +51,7 @@ export function NotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+    <div className="flex flex-col flex-1">
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 w-full flex-grow">
         {/* Title and Action Row */}

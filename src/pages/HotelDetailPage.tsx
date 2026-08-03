@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Header } from "../components/Header";
 import { hotelApi } from "../services/hotelApi";
 import { bookingApi } from "../services/bookingApi";
 import { reviewApi } from "../services/reviewApi";
@@ -180,24 +179,18 @@ export function HotelDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent"></div>
-        </div>
+      <div className="flex-1 flex items-center justify-center py-20">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent"></div>
       </div>
     );
   }
 
   if (error || !hotelData?.data) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <Header />
-        <div className="flex-grow max-w-xl mx-auto px-4 py-20 text-center">
-          <div className="p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100">
-            <h2 className="font-bold text-lg">Lỗi tải chi tiết khách sạn</h2>
-            <p className="text-sm mt-1">{getErrorMessage(error)}</p>
-          </div>
+      <div className="flex-1 max-w-xl mx-auto px-4 py-20 text-center">
+        <div className="p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100">
+          <h2 className="font-bold text-lg">Lỗi tải chi tiết khách sạn</h2>
+          <p className="text-sm mt-1">{getErrorMessage(error)}</p>
         </div>
       </div>
     );
@@ -209,8 +202,7 @@ export function HotelDetailPage() {
   const hotelImages = hotel.images ?? [];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+    <div className="flex flex-col flex-1">
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full flex-grow">
         {/* Title and Address Row */}

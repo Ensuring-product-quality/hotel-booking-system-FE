@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 
 export function WellnessPage() {
   const [fullName, setFullName] = useState("");
@@ -71,8 +69,7 @@ export function WellnessPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="flex flex-col flex-1 font-sans">
 
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 w-full flex-grow flex flex-col gap-12">
           
@@ -301,7 +298,6 @@ export function WellnessPage() {
           </section>
       </main>
 
-      <Footer />
     </div>
   );
 }

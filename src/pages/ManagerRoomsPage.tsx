@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Header } from "../components/Header";
 import { roomApi } from "../services/roomApi";
 import { hotelApi } from "../services/hotelApi";
 import { useAuthStore } from "../store/authStore";
@@ -157,8 +156,7 @@ export function ManagerRoomsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+    <div className="flex flex-col flex-1">
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full flex-grow">
         {/* Title and Action */}

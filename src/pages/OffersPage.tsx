@@ -1,6 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 import { ROUTES } from "../constants/routes";
 
 interface OfferCard {
@@ -51,8 +49,7 @@ export function OffersPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="flex flex-col flex-1 font-sans">
 
       {/* Hero Section */}
       <section className="relative h-[480px] flex items-center justify-center text-center bg-cover bg-center overflow-hidden" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=1920')" }}>
@@ -207,7 +204,6 @@ export function OffersPage() {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 }

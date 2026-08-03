@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "../components/Header";
 import { bookingApi } from "../services/bookingApi";
 import { useAuthStore } from "../store/authStore";
 import { getErrorMessage } from "../services/apiClient";
@@ -50,8 +49,7 @@ export function MyBookingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+    <div className="flex flex-col flex-1">
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 w-full flex-grow">
         {/* Title */}
