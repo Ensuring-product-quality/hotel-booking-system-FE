@@ -7,19 +7,22 @@ import type { StandardResponse } from "../types/common";
 import type { RefreshTokenRequest, LoginResponseData } from "../types/auth";
 import { ROUTES } from "../constants/routes";
 
-const rawBaseURL = import.meta.env.VITE_API_BASE_URL as string;
+const envViteURL = import.meta.env.VITE_API_BASE_URL as string;
+const envReactURL = (import.meta.env as Record<string, string>).REACT_APP_API_URL;
 const APP_BASENAME = "/vi-vn";
 
 function getEffectiveBaseURL(): string {
+  const configuredURL = envViteURL || envReactURL;
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
     const isProductionHost = hostname.includes("up.railway.app") || (hostname !== "localhost" && hostname !== "127.0.0.1");
-    if (isProductionHost && (!rawBaseURL || rawBaseURL.includes("localhost") || rawBaseURL.includes("127.0.0.1"))) {
-      // Tự động suy luận domain BE tương ứng trên Railway hoặc dùng domain BE mặc định
-      return "https://hotel-booking-system-be-production.up.railway.app/api";
+    if (isProductionHost) {
+      if (!configuredURL || configuredURL.includes("localhost") || configuredURL.includes("127.0.0.1")) {
+        return "https://hotel-booking-system-be-production.up.railway.app/api";
+      }
     }
   }
-  return rawBaseURL || "http://localhost:8080/api";
+  return configuredURL || "https://hotel-booking-system-be-production.up.railway.app/api";
 }
 
 const baseURL = getEffectiveBaseURL();
