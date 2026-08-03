@@ -1142,23 +1142,8 @@ export function AdminDashboardPage() {
                 </button>
               </div>
 
-              {/* Thẻ Chỉ Số An Ninh & Nhân Sự */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg border border-teal-500/30">
-                      <i className="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white text-sm">Bảo Mật Hệ Thống</h3>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Xác thực mã hóa JWT & Bcrypt</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-4 leading-relaxed">
-                    Mọi hành thao tác quản trị được kiểm soát chặt chẽ theo vai trò (Role-Based Access Control).
-                  </p>
-                </div>
-
+              {/* Thẻ Chỉ Số Nhân Sự */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
                   <p className="text-[10px] font-bold uppercase text-slate-400">TỔNG SỐ TÀI KHOẢN HỆ THỐNG</p>
                   <div className="flex items-baseline justify-between mt-2">
