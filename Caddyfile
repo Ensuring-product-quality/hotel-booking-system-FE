@@ -1,3 +1,7 @@
+{
+	auto_https off
+}
+
 :{$PORT:8080} {
 	root * /srv
 	encode gzip
