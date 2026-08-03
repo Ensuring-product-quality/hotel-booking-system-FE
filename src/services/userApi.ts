@@ -21,6 +21,7 @@ export interface UserCreateDTO {
 export interface UserUpdateDTO {
   email?: string;
   status?: string;
+  role?: string;
 }
 
 export const userApi = {

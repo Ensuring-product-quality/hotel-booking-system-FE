@@ -9,7 +9,7 @@ import { hotelApi } from "../services/hotelApi";
 import { userApi } from "../services/userApi";
 import { paymentApi } from "../services/paymentApi";
 import { getErrorMessage } from "../services/apiClient";
-import { Role, ALL_ROLES } from "../types/auth";
+import { Role, ALL_ROLES, type User } from "../types/auth";
 import { BookingStatus } from "../types/booking";
 import type { BookingResponseDTO, BookingCreateDTO } from "../types/booking";
 import type { RoomCreateDTO } from "../types/room";
@@ -228,6 +228,11 @@ export function AdminDashboardPage() {
     },
   });
 
+  // User Update Role & Status State
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUserRole, setEditUserRole] = useState<string>(Role.CUSTOMER);
+  const [editUserStatus, setEditUserStatus] = useState<string>("active");
+
   const createStaffMutation = useMutation({
     mutationFn: (body: UserCreateDTO) => userApi.create(body),
     onSuccess: () => {
@@ -237,6 +242,19 @@ export function AdminDashboardPage() {
     },
     onError: (err) => {
       setStaffFormError(getErrorMessage(err, "Không thể tạo nhân viên mới."));
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: { email: string; role: string; status: string } }) =>
+      userApi.update(id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsersReal"] });
+      setEditingUser(null);
+      alert("Cập nhật phân quyền tài khoản thành công!");
+    },
+    onError: (err) => {
+      alert(getErrorMessage(err, "Không thể cập nhật phân quyền tài khoản."));
     },
   });
 
@@ -1224,10 +1242,14 @@ export function AdminDashboardPage() {
                             </td>
                             <td className="py-4 px-6 text-right">
                               <button
-                                onClick={() => alert(`Đã gửi yêu cầu chỉnh sửa quyền tài khoản ${u.username}`)}
-                                className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold rounded-lg border border-slate-700 cursor-pointer"
+                                onClick={() => {
+                                  setEditingUser(u);
+                                  setEditUserRole(u.role);
+                                  setEditUserStatus(u.status);
+                                }}
+                                className="px-3 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 text-xs font-bold rounded-lg border border-teal-500/40 transition cursor-pointer"
                               >
-                                Thao Tác
+                                <i className="fa-solid fa-user-gear mr-1"></i> Phân Quyền
                               </button>
                             </td>
                           </tr>
@@ -1644,6 +1666,101 @@ export function AdminDashboardPage() {
             <div className="pt-3 border-t border-slate-800 flex justify-end">
               <button onClick={() => setSelectedBookingDetails(null)} className="px-4 py-2 bg-slate-800 text-slate-200 rounded-xl font-bold text-xs cursor-pointer">
                 Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Chỉnh Sửa Phân Quyền Người Dùng */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0A192F] border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <i className="fa-solid fa-user-gear text-teal-400"></i>
+                Phân Quyền Tài Khoản: #{editingUser.id}
+              </h3>
+              <button
+                onClick={() => setEditingUser(null)}
+                className="text-slate-400 hover:text-white text-lg font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[10px] uppercase text-slate-400 mb-1 font-bold">Tên Đăng Nhập</label>
+                <input
+                  type="text"
+                  disabled
+                  value={editingUser.username}
+                  className="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 outline-none text-slate-400 cursor-not-allowed text-xs font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-slate-400 mb-1 font-bold">Email</label>
+                <input
+                  type="text"
+                  disabled
+                  value={editingUser.email}
+                  className="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 outline-none text-slate-400 cursor-not-allowed text-xs font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-teal-400 mb-1 font-bold">Vai Trò Hệ Thống (Role)</label>
+                <select
+                  value={editUserRole}
+                  onChange={(e) => setEditUserRole(e.target.value)}
+                  className="w-full bg-slate-900 border border-teal-500/50 rounded-xl p-2.5 outline-none text-white font-bold text-xs focus:border-teal-400"
+                >
+                  <option value={Role.CUSTOMER}>CUSTOMER (Khách hàng)</option>
+                  <option value={Role.STAFF}>STAFF (Nhân viên lễ tân)</option>
+                  <option value={Role.ADMIN}>ADMIN (Quản trị viên)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-teal-400 mb-1 font-bold">Trạng Thái Hoạt Động</label>
+                <select
+                  value={editUserStatus}
+                  onChange={(e) => setEditUserStatus(e.target.value)}
+                  className="w-full bg-slate-900 border border-teal-500/50 rounded-xl p-2.5 outline-none text-white font-bold text-xs focus:border-teal-400"
+                >
+                  <option value="active">Hoạt động (Active)</option>
+                  <option value="inactive">Tạm ngưng (Inactive)</option>
+                  <option value="banned">Khóa tài khoản (Banned)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="flex-1 py-2.5 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                Hủy Bỏ
+              </button>
+              <button
+                type="button"
+                disabled={updateUserMutation.isPending}
+                onClick={() =>
+                  updateUserMutation.mutate({
+                    id: editingUser.id,
+                    body: {
+                      email: editingUser.email,
+                      role: editUserRole,
+                      status: editUserStatus,
+                    },
+                  })
+                }
+                className="flex-1 py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs transition shadow-lg cursor-pointer"
+              >
+                {updateUserMutation.isPending ? "Đang lưu..." : "Lưu Phân Quyền"}
               </button>
             </div>
           </div>

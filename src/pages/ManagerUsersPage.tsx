@@ -64,7 +64,7 @@ export function ManagerUsersPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, body }: { id: number; body: { email: string; status: string } }) =>
+    mutationFn: ({ id, body }: { id: number; body: { email: string; status: string; role?: string } }) =>
       userApi.update(id, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerUsers"] });
@@ -122,7 +122,7 @@ export function ManagerUsersPage() {
     if (editingUser) {
       updateMutation.mutate({
         id: editingUser.id,
-        body: { email, status },
+        body: { email, status, role },
       });
     } else {
       if (!password) {
@@ -396,14 +396,13 @@ export function ManagerUsersPage() {
                 />
               </div>
 
-              {/* Role (Only when creating, update is restricted in backend) */}
+              {/* Role */}
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Vai trò hệ thống</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  disabled={!!editingUser}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none text-slate-700 disabled:bg-slate-50"
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none text-slate-700"
                 >
                   {ALL_ROLES.map((r) => (
                     <option key={r} value={r}>{r.replace("ROLE_", "")}</option>
