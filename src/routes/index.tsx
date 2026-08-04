@@ -111,7 +111,7 @@ export const router = createBrowserRouter(
         {
           path: ROUTES.STAFF_BOOKINGS,
           element: (
-            <PrivateRoute allowedRoles={[Role.STAFF, Role.MANAGER, Role.ADMIN]}>
+            <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
               <SuspenseWrapper><StaffBookingsPage /></SuspenseWrapper>
             </PrivateRoute>
           ),

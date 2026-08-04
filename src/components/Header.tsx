@@ -296,9 +296,7 @@ export function Header() {
                 )}
               </Link>
 
-              {/* Nút vào trang quản lý đối với Staff/Manager/Admin */}
-              {(user?.role === Role.STAFF ||
-                user?.role === Role.MANAGER ||
+              {(user?.role === Role.MANAGER ||
                 user?.role === Role.ADMIN) && (
                 <Link
                   to={ROUTES.STAFF_BOOKINGS}
@@ -360,9 +358,8 @@ export function Header() {
                     </Link>
                   )}
 
-                  {/* Staff & Manager specific links */}
-                  {(user?.role === Role.STAFF ||
-                    user?.role === Role.MANAGER ||
+                  {/* Manager & Admin specific links */}
+                  {(user?.role === Role.MANAGER ||
                     user?.role === Role.ADMIN) && (
                     <Link
                       to={ROUTES.STAFF_BOOKINGS}
