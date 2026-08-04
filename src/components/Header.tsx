@@ -330,86 +330,17 @@ export function Header() {
                   </span>
                 </button>
 
-                {/* Dropdown menu */}
-                <div className="absolute right-0 mt-1 w-52 rounded-xl border border-slate-100 bg-white p-1.5 shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50 before:absolute before:content-[''] before:-top-2 before:left-0 before:right-0 before:h-2">
-                  <div className="px-3 py-2 border-b border-slate-50 mb-1">
-                    <p className="text-xs text-slate-400">Tài khoản</p>
-                    <p className="text-sm font-bold text-slate-700 truncate">{user?.username}</p>
-                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
-                    <p className="text-[10px] inline-flex mt-1 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase font-semibold">
-                      {user?.role?.replace("ROLE_", "")}
-                    </p>
+                {/* Dropdown menu - chỉ hiện tên và đăng xuất */}
+                <div className="absolute right-0 mt-1 w-44 rounded-xl border border-slate-100 bg-white p-1.5 shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50 before:absolute before:content-[''] before:-top-2 before:left-0 before:right-0 before:h-2">
+                  <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                    <p className="text-xs text-slate-400 mb-0.5">Đã đăng nhập</p>
+                    <p className="text-sm font-bold text-slate-800 truncate">{user?.username}</p>
                   </div>
-
-                  <Link
-                    to={ROUTES.PROFILE}
-                    className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
-                  >
-                    Hồ sơ cá nhân
-                  </Link>
-
-                  {/* Customer specific links */}
-                  {user?.role === Role.CUSTOMER && (
-                    <Link
-                      to={ROUTES.MY_BOOKINGS}
-                      className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
-                    >
-                      Đơn đặt phòng của tôi
-                    </Link>
-                  )}
-
-                  {/* Manager & Admin specific links */}
-                  {(user?.role === Role.MANAGER ||
-                    user?.role === Role.ADMIN) && (
-                    <Link
-                      to={ROUTES.STAFF_BOOKINGS}
-                      className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition font-medium text-brand-700 bg-brand-50/50"
-                    >
-                      Quản lý đặt phòng
-                    </Link>
-                  )}
-
-                  {/* Admin specific links */}
-                  {user?.role === Role.ADMIN && (
-                    <>
-                      <Link
-                        to={ROUTES.MANAGER_HOTELS}
-                        className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
-                      >
-                        Quản lý khách sạn
-                      </Link>
-                      <Link
-                        to={ROUTES.MANAGER_ROOMS}
-                        className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
-                      >
-                        Quản lý phòng
-                      </Link>
-                    </>
-                  )}
-
-                  {/* Admin specific links */}
-                  {user?.role === Role.ADMIN && (
-                    <>
-                      <Link
-                        to={ROUTES.ADMIN_DASHBOARD}
-                        className="flex w-full items-center px-3 py-2 text-sm font-bold text-teal-600 rounded-lg hover:bg-teal-50 transition bg-teal-50/40 border border-teal-100/50 my-0.5"
-                      >
-                        📊 Dashboard Quản trị
-                      </Link>
-                      <Link
-                        to={ROUTES.MANAGER_USERS}
-                        className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
-                      >
-                        Quản lý người dùng
-                      </Link>
-                    </>
-                  )}
-
-                  <hr className="my-1 border-slate-50" />
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition cursor-pointer font-semibold"
                   >
+                    <i className="fa-solid fa-right-from-bracket text-xs"></i>
                     Đăng xuất
                   </button>
                 </div>
