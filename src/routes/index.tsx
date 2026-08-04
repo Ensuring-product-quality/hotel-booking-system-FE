@@ -19,8 +19,6 @@ const HotelDetailPage = lazy(() => import("../pages/HotelDetailPage").then((m) =
 const MyBookingsPage = lazy(() => import("../pages/MyBookingsPage").then((m) => ({ default: m.MyBookingsPage })));
 const OffersPage = lazy(() => import("../pages/OffersPage").then((m) => ({ default: m.OffersPage })));
 const OfferDetailPage = lazy(() => import("../pages/OfferDetailPage").then((m) => ({ default: m.OfferDetailPage })));
-const TravelGuidePage = lazy(() => import("../pages/TravelGuidePage").then((m) => ({ default: m.TravelGuidePage })));
-const ArticleDetailPage = lazy(() => import("../pages/ArticleDetailPage").then((m) => ({ default: m.ArticleDetailPage })));
 const BookingLookupPage = lazy(() => import("../pages/BookingLookupPage").then((m) => ({ default: m.BookingLookupPage })));
 const ContactPage = lazy(() => import("../pages/ContactPage").then((m) => ({ default: m.ContactPage })));
 const BookingDetailPage = lazy(() => import("../pages/BookingDetailPage").then((m) => ({ default: m.BookingDetailPage })));
@@ -50,8 +48,6 @@ export const router = createBrowserRouter(
         { path: ROUTES.HOTEL_DETAIL, element: <SuspenseWrapper><HotelDetailPage /></SuspenseWrapper> },
         { path: ROUTES.OFFERS, element: <SuspenseWrapper><OffersPage /></SuspenseWrapper> },
         { path: ROUTES.OFFER_DETAIL, element: <SuspenseWrapper><OfferDetailPage /></SuspenseWrapper> },
-        { path: ROUTES.TRAVEL_GUIDE, element: <SuspenseWrapper><TravelGuidePage /></SuspenseWrapper> },
-        { path: ROUTES.ARTICLE_DETAIL, element: <SuspenseWrapper><ArticleDetailPage /></SuspenseWrapper> },
         { path: ROUTES.BOOKING_LOOKUP, element: <SuspenseWrapper><BookingLookupPage /></SuspenseWrapper> },
         { path: ROUTES.CONTACT, element: <SuspenseWrapper><ContactPage /></SuspenseWrapper> },
         { path: "/dining", element: <SuspenseWrapper><DiningPage /></SuspenseWrapper> },

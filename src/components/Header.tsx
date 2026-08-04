@@ -247,15 +247,7 @@ export function Header() {
 
 
 
-          {/* Cẩm nang du lịch */}
-          <Link
-            to={ROUTES.TRAVEL_GUIDE}
-            className={`transition hover:text-brand-600 ${
-              isLinkActive(ROUTES.TRAVEL_GUIDE) ? "text-brand-600 font-semibold" : ""
-            }`}
-          >
-            Cẩm nang
-          </Link>
+
 
           {/* Tra cứu đặt phòng */}
           <Link
@@ -546,16 +538,7 @@ export function Header() {
               )}
             </div>
 
-            {/* Cẩm nang du lịch */}
-            <Link
-              to={ROUTES.TRAVEL_GUIDE}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg hover:bg-slate-50 transition ${
-                isLinkActive(ROUTES.TRAVEL_GUIDE) ? "text-brand-600 bg-brand-50/30" : "text-slate-700"
-              }`}
-            >
-              Cẩm nang du lịch
-            </Link>
+
 
             {/* Tra cứu đặt phòng */}
             <Link
