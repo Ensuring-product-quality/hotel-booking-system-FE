@@ -49,7 +49,7 @@ export function AdminDashboardPage() {
   const [staffUsername, setStaffUsername] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
   const [staffEmail, setStaffEmail] = useState("");
-  const [staffRole, setStaffRole] = useState<string>(Role.STAFF);
+  const [staffRole, setStaffRole] = useState<string>(Role.MANAGER);
   const [staffFormError, setStaffFormError] = useState<string | null>(null);
 
   // Form states for Add Room Modal
@@ -1226,7 +1226,7 @@ export function AdminDashboardPage() {
                                 className={`px-2.5 py-1 rounded text-[9px] font-extrabold uppercase border ${
                                   u.role === Role.ADMIN
                                     ? "bg-teal-500/20 text-teal-300 border-teal-500/30"
-                                    : u.role === Role.STAFF
+                                    : u.role === Role.MANAGER
                                     ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
                                     : "bg-slate-800 text-slate-300 border-slate-700"
                                 }`}
@@ -1500,7 +1500,7 @@ export function AdminDashboardPage() {
                   onChange={(e) => setStaffRole(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 outline-none text-white focus:border-teal-500"
                 >
-                  <option value={Role.STAFF}>STAFF (Nhân viên lễ tân)</option>
+                  <option value={Role.MANAGER}>MANAGER (Quản lý khách sạn)</option>
                   <option value={Role.ADMIN}>ADMIN (Quản trị viên)</option>
                   <option value={Role.CUSTOMER}>CUSTOMER (Khách hàng)</option>
                 </select>
@@ -1718,7 +1718,7 @@ export function AdminDashboardPage() {
                   className="w-full bg-slate-900 border border-teal-500/50 rounded-xl p-2.5 outline-none text-white font-bold text-xs focus:border-teal-400"
                 >
                   <option value={Role.CUSTOMER}>CUSTOMER (Khách hàng)</option>
-                  <option value={Role.STAFF}>STAFF (Nhân viên lễ tân)</option>
+                  <option value={Role.MANAGER}>MANAGER (Quản lý khách sạn)</option>
                   <option value={Role.ADMIN}>ADMIN (Quản trị viên)</option>
                 </select>
               </div>

@@ -1,6 +1,6 @@
 export const Role = {
   ADMIN: "ADMIN",
-  STAFF: "STAFF",
+  MANAGER: "MANAGER",
   CUSTOMER: "CUSTOMER",
 } as const;
 
@@ -8,7 +8,7 @@ export type Role = (typeof Role)[keyof typeof Role];
 
 export const ALL_ROLES: Role[] = [
   Role.ADMIN,
-  Role.STAFF,
+  Role.MANAGER,
   Role.CUSTOMER,
 ];
 

@@ -338,8 +338,8 @@ export function Header() {
                     </Link>
                   )}
 
-                  {/* Staff specific links */}
-                  {(user?.role === Role.STAFF ||
+                  {/* Staff/Manager specific links */}
+                  {(user?.role === Role.MANAGER ||
                     user?.role === Role.ADMIN) && (
                     <Link
                       to={ROUTES.STAFF_BOOKINGS}

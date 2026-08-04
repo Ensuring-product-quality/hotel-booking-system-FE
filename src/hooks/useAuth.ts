@@ -64,10 +64,8 @@ export function useAuth() {
         const redirect = params.get("redirect");
         if (redirect) {
           navigate(redirect);
-        } else if (userObj?.role === Role.ADMIN) {
+        } else if (userObj?.role === Role.ADMIN || userObj?.role === Role.MANAGER) {
           navigate(ROUTES.ADMIN_DASHBOARD);
-        } else if (userObj?.role === Role.STAFF) {
-          navigate(ROUTES.STAFF_BOOKINGS);
         } else {
           navigate(ROUTES.HOME);
         }
