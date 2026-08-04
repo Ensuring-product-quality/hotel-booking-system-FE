@@ -49,6 +49,7 @@ export function ManagerHotelsPage() {
     mutationFn: (body: HotelCreateDTO) => hotelApi.create(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       closeModal();
       alert("Tạo khách sạn mới thành công!");
     },
@@ -62,6 +63,7 @@ export function ManagerHotelsPage() {
       hotelApi.update(id, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       closeModal();
       alert("Cập nhật thông tin khách sạn thành công!");
     },
@@ -74,6 +76,7 @@ export function ManagerHotelsPage() {
     mutationFn: (id: number) => hotelApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       alert("Xóa khách sạn thành công!");
     },
     onError: (err) => {
@@ -86,6 +89,7 @@ export function ManagerHotelsPage() {
       hotelApi.uploadImage(id, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       setUploadingId(null);
       alert("Tải ảnh lên thành công!");
     },
@@ -169,12 +173,14 @@ export function ManagerHotelsPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Quản lý khách sạn</h1>
             <p className="text-slate-400 text-sm mt-1">Danh sách hệ thống khách sạn trực thuộc HotelBooking</p>
           </div>
-          <button
-            onClick={() => openModal(null)}
-            className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition hover:scale-[1.01] cursor-pointer"
-          >
-            + Thêm khách sạn
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => openModal(null)}
+              className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition hover:scale-[1.01] cursor-pointer"
+            >
+              + Thêm khách sạn
+            </button>
+          )}
         </div>
 
         {/* Hotels Table List */}

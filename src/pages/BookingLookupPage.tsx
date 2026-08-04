@@ -22,28 +22,23 @@ export function BookingLookupPage() {
       return;
     }
 
-    if (!emailInput || !emailInput.trim()) {
-      setError("Vui lòng nhập Email hoặc Số điện thoại đã dùng đặt phòng.");
+    if (!emailInput) {
+      setError("Vui lòng nhập địa chỉ email đã dùng đặt phòng.");
       return;
     }
 
     const bookingId = parseInt(numericIdStr);
-    const inputTrimmed = emailInput.trim();
-    const isEmail = inputTrimmed.includes("@");
-    const label = isEmail ? "email" : "số điện thoại";
-    const defaultNotFoundMsg = `Không tìm thấy đơn đặt phòng với mã HB-${bookingId} và ${label} "${inputTrimmed}"`;
-
     setIsLoading(true);
 
     try {
-      const response = await bookingApi.publicLookup(bookingId, inputTrimmed);
+      const response = await bookingApi.publicLookup(bookingId, emailInput);
       if (response.success && response.data) {
         setBookingDetails(response.data);
       } else {
-        setError(response.message || defaultNotFoundMsg);
+        setError(response.message || "Không tìm thấy thông tin đặt phòng.");
       }
     } catch (err: any) {
-      setError(getErrorMessage(err, defaultNotFoundMsg));
+      setError(getErrorMessage(err, "Không tìm thấy thông tin đặt phòng với thông tin đã nhập."));
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +129,7 @@ export function BookingLookupPage() {
               <form onSubmit={handleLookupSubmit} className="flex flex-col gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Mã đặt phòng
+                    Mã đặt phòng (Booking ID)
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -160,9 +155,9 @@ export function BookingLookupPage() {
                       ✉️
                     </span>
                     <input
-                      type="text"
+                      type="email"
                       required
-                      placeholder="Nhập email hoặc số điện thoại đã dùng đặt phòng"
+                      placeholder="Nhập email đã dùng đặt phòng"
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none transition text-slate-800"

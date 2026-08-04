@@ -38,8 +38,13 @@ export function BookingDetailPage() {
   // Pre-fill user data
   useEffect(() => {
     if (user) {
-      setFullName(user.username);
-      setEmail(user.email);
+      setFullName(user.fullName || user.username);
+      if (user.phone) {
+        setPhone(user.phone);
+      }
+      if (user.email) {
+        setEmail(user.email);
+      }
     }
   }, [user]);
 

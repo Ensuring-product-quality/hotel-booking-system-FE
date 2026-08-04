@@ -247,7 +247,15 @@ export function Header() {
 
 
 
-
+          {/* Cẩm nang du lịch */}
+          <Link
+            to={ROUTES.TRAVEL_GUIDE}
+            className={`transition hover:text-brand-600 ${
+              isLinkActive(ROUTES.TRAVEL_GUIDE) ? "text-brand-600 font-semibold" : ""
+            }`}
+          >
+            Cẩm nang
+          </Link>
 
           {/* Tra cứu đặt phòng */}
           <Link
@@ -287,6 +295,20 @@ export function Header() {
                   </span>
                 )}
               </Link>
+
+              {/* Nút vào trang quản lý đối với Staff/Manager/Admin */}
+              {(user?.role === Role.STAFF ||
+                user?.role === Role.MANAGER ||
+                user?.role === Role.ADMIN) && (
+                <Link
+                  to={ROUTES.STAFF_BOOKINGS}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold rounded-lg border border-brand-100 transition shadow-sm cursor-pointer shrink-0"
+                  title="Quay Lại Trang Quản Lý"
+                >
+                  <i className="fa-solid fa-gauge-high"></i>
+                  <span>Trang Quản Lý</span>
+                </Link>
+              )}
 
               {/* User Dropdown/Display */}
               <div className="relative group">
@@ -338,8 +360,9 @@ export function Header() {
                     </Link>
                   )}
 
-                  {/* Staff/Manager specific links */}
-                  {(user?.role === Role.MANAGER ||
+                  {/* Staff & Manager specific links */}
+                  {(user?.role === Role.STAFF ||
+                    user?.role === Role.MANAGER ||
                     user?.role === Role.ADMIN) && (
                     <Link
                       to={ROUTES.STAFF_BOOKINGS}
@@ -353,12 +376,6 @@ export function Header() {
                   {user?.role === Role.ADMIN && (
                     <>
                       <Link
-                        to={ROUTES.ADMIN_DASHBOARD}
-                        className="flex w-full items-center px-3 py-2 text-sm font-bold text-teal-600 rounded-lg hover:bg-teal-50 transition bg-teal-50/40 border border-teal-100/50 my-0.5"
-                      >
-                        📊 Dashboard Quản trị
-                      </Link>
-                      <Link
                         to={ROUTES.MANAGER_HOTELS}
                         className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
                       >
@@ -369,6 +386,18 @@ export function Header() {
                         className="flex w-full items-center px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
                       >
                         Quản lý phòng
+                      </Link>
+                    </>
+                  )}
+
+                  {/* Admin specific links */}
+                  {user?.role === Role.ADMIN && (
+                    <>
+                      <Link
+                        to={ROUTES.ADMIN_DASHBOARD}
+                        className="flex w-full items-center px-3 py-2 text-sm font-bold text-teal-600 rounded-lg hover:bg-teal-50 transition bg-teal-50/40 border border-teal-100/50 my-0.5"
+                      >
+                        📊 Dashboard Quản trị
                       </Link>
                       <Link
                         to={ROUTES.MANAGER_USERS}
@@ -538,7 +567,16 @@ export function Header() {
               )}
             </div>
 
-
+            {/* Cẩm nang du lịch */}
+            <Link
+              to={ROUTES.TRAVEL_GUIDE}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg hover:bg-slate-50 transition ${
+                isLinkActive(ROUTES.TRAVEL_GUIDE) ? "text-brand-600 bg-brand-50/30" : "text-slate-700"
+              }`}
+            >
+              Cẩm nang du lịch
+            </Link>
 
             {/* Tra cứu đặt phòng */}
             <Link

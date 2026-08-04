@@ -45,11 +45,18 @@ export function useAuth() {
         if (!res.data) throw new Error("Phản hồi đăng nhập không hợp lệ");
 
         const decoded = decodeJwt(res.data.accessToken);
-        const userObj = decoded
+        const userObj = res.data.user
+          ? {
+              ...res.data.user,
+              role: String(res.data.user.role).replace("ROLE_", "") as Role,
+            }
+          : decoded
           ? {
               id: Number(decoded.userId || 0),
               username: decoded.sub || "",
               email: decoded.email || "",
+              fullName: decoded.fullName || "",
+              phone: decoded.phone || "",
               role: ((decoded.role || "") as string).replace("ROLE_", "") as Role,
               status: "active" as const,
             }
@@ -64,8 +71,10 @@ export function useAuth() {
         const redirect = params.get("redirect");
         if (redirect) {
           navigate(redirect);
-        } else if (userObj?.role === Role.ADMIN || userObj?.role === Role.MANAGER) {
+        } else if (userObj?.role === Role.ADMIN) {
           navigate(ROUTES.ADMIN_DASHBOARD);
+        } else if (userObj?.role === Role.MANAGER || userObj?.role === Role.STAFF) {
+          navigate(ROUTES.STAFF_BOOKINGS);
         } else {
           navigate(ROUTES.HOME);
         }

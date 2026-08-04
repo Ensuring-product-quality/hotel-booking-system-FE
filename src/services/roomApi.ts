@@ -44,4 +44,21 @@ export const roomApi = {
     apiClient
       .delete<StandardResponse<null>>(`/rooms/${id}`)
       .then((res) => res.data),
+
+  updateStatus: (id: number, status: string) =>
+    apiClient
+      .patch<StandardResponse<RoomResponseDTO>>(`/rooms/${id}/status`, { status })
+      .then((res) => res.data),
+
+  uploadImage: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient
+      .post<StandardResponse<string>>(`/rooms/${id}/image`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => res.data);
+  },
 };

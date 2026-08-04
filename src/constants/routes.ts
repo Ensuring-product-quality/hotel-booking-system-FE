@@ -16,6 +16,8 @@ export const ROUTES = {
   ADMIN_DASHBOARD: "/admin/dashboard",
   OFFERS: "/offers",
   OFFER_DETAIL: "/offers/:id",
+  TRAVEL_GUIDE: "/travel-guide",
+  ARTICLE_DETAIL: "/travel-guide/:id",
   BOOKING_LOOKUP: "/booking-lookup",
   CONTACT: "/contact",
   PROFILE: "/profile",

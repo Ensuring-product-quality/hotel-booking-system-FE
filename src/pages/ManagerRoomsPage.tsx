@@ -31,6 +31,7 @@ export function ManagerRoomsPage() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("active");
   const [formError, setFormError] = useState<string | null>(null);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
 
   // Query all hotels to populate dropdown list
   const { data: hotelsData } = useQuery({
@@ -59,6 +60,8 @@ export function ManagerRoomsPage() {
     mutationFn: (body: RoomCreateDTO) => roomApi.create(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel"] });
       closeModal();
       alert("Tạo phòng mới thành công!");
     },
@@ -72,6 +75,8 @@ export function ManagerRoomsPage() {
       roomApi.update(id, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel"] });
       closeModal();
       alert("Cập nhật phòng thành công!");
     },
@@ -84,12 +89,38 @@ export function ManagerRoomsPage() {
     mutationFn: (id: number) => roomApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel"] });
       alert("Xóa phòng thành công!");
     },
     onError: (err) => {
       alert(getErrorMessage(err, "Xóa phòng thất bại."));
     },
   });
+
+  const uploadImageMutation = useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) =>
+      roomApi.uploadImage(id, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["managerRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel"] });
+      setUploadingId(null);
+      alert("Tải ảnh phòng lên thành công!");
+    },
+    onError: (err) => {
+      alert(getErrorMessage(err, "Tải ảnh phòng thất bại."));
+      setUploadingId(null);
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, roomId: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadingId(roomId);
+      uploadImageMutation.mutate({ id: roomId, file });
+    }
+  };
 
   const openModal = (room: RoomResponseDTO | null = null) => {
     setFormError(null);
@@ -220,7 +251,7 @@ export function ManagerRoomsPage() {
                     <th className="py-4 px-6">Khách sạn</th>
                     <th className="py-4 px-6">Số phòng</th>
                     <th className="py-4 px-6">Loại phòng</th>
-                    <th className="py-4 px-6">Đơn giá ($ / đêm)</th>
+                    <th className="py-4 px-6">Đơn giá (VND / đêm)</th>
                     <th className="py-4 px-6">Trạng thái</th>
                     <th className="py-4 px-6 text-right">Thao tác</th>
                   </tr>
@@ -233,24 +264,48 @@ export function ManagerRoomsPage() {
                       <td className="py-4.5 px-6 font-bold text-slate-600">Phòng {room.roomNumber}</td>
                       <td className="py-4.5 px-6 font-semibold">{room.type}</td>
                       <td className="py-4.5 px-6 font-semibold">{room.capacity} khách</td>
-                      <td className="py-4.5 px-6 text-brand-600 font-bold">{room.price} USD</td>
+                      <td className="py-4.5 px-6 text-brand-600 font-bold">{room.price.toLocaleString("vi-VN")} VND</td>
                       <td className="py-4.5 px-6">
                         <span className={`px-2.5 py-0.5 border rounded-full text-[9px] uppercase font-bold ${
-                          room.status === "active"
+                          room.status === "active" || room.status === "available"
                             ? "bg-green-50 text-green-700 border-green-100"
+                            : room.status === "occupied"
+                            ? "bg-blue-50 text-blue-700 border-blue-100"
+                            : room.status === "cleaning"
+                            ? "bg-amber-50 text-amber-700 border-amber-100"
+                            : room.status === "maintenance"
+                            ? "bg-red-50 text-red-700 border-red-100"
                             : "bg-slate-50 text-slate-700 border-slate-100"
                         }`}>
-                          {room.status === "active" ? "Hoạt động" : "Ngừng"}
+                          {room.status === "active" || room.status === "available"
+                            ? "Sẵn sàng"
+                            : room.status === "occupied"
+                            ? "Có khách"
+                            : room.status === "cleaning"
+                            ? "Dọn dẹp"
+                            : room.status === "maintenance"
+                            ? "Bảo trì"
+                            : "Tạm ngưng"}
                         </span>
                       </td>
-                      <td className="py-4.5 px-6 text-right flex justify-end gap-1.5">
+                      <td className="py-4.5 px-6 text-right flex justify-end gap-1.5 items-center">
+                        <label className="px-2 py-1 border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 rounded-lg cursor-pointer transition text-[11px] font-semibold flex items-center gap-1">
+                          {uploadingId === room.id ? "Đang tải..." : "Tải ảnh"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, room.id)}
+                            className="hidden"
+                            disabled={uploadingId === room.id}
+                          />
+                        </label>
                         <button
                           onClick={() => openModal(room)}
                           className="px-2 py-1 border border-brand-100 text-brand-600 bg-brand-50/30 hover:bg-brand-50 rounded-lg transition text-[11px] font-semibold cursor-pointer"
                         >
                           Sửa
                         </button>
-                        {isAdmin && (
+                        {(isAdmin || user?.role === Role.MANAGER) && (
                           <button
                             onClick={() => handleDeleteClick(room.id)}
                             className="px-2 py-1 border border-red-100 text-red-600 bg-red-50/30 hover:bg-red-50 rounded-lg transition text-[11px] font-semibold cursor-pointer"
@@ -347,16 +402,16 @@ export function ManagerRoomsPage() {
                     className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Đơn giá (USD / đêm)</label>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-                    placeholder="120"
-                    className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
-                  />
-                </div>
+                 <div>
+                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Đơn giá (VND / đêm)</label>
+                   <input
+                     type="number"
+                     value={price}
+                     onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                     placeholder="2000000"
+                     className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
+                   />
+                 </div>
               </div>
 
               <div>
@@ -392,7 +447,10 @@ export function ManagerRoomsPage() {
                     onChange={(e) => setStatus(e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none text-slate-700"
                   >
-                    <option value="active">Hoạt động (Active)</option>
+                    <option value="active">Hoạt động / Sẵn sàng (Active)</option>
+                    <option value="occupied">Có khách (Occupied)</option>
+                    <option value="cleaning">Đang dọn dẹp (Cleaning)</option>
+                    <option value="maintenance">Bảo trì (Maintenance)</option>
                     <option value="inactive">Tạm ngưng (Inactive)</option>
                   </select>
                 </div>

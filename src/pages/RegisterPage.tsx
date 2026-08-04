@@ -9,9 +9,9 @@ import { useAuth } from "../hooks/useAuth";
 import { ROUTES } from "../constants/routes";
 
 const registerSchema = z.object({
-  fullName: z.string().min(2, "Họ và tên tối thiểu 2 ký tự"),
-  phone: z.string().min(8, "Số điện thoại tối thiểu 8 số"),
   username: z.string().min(3, "Tên đăng nhập tối thiểu 3 ký tự"),
+  fullName: z.string().min(2, "Họ và tên tối thiểu 2 ký tự"),
+  phone: z.string().regex(/^(0[3|5|7|8|9])[0-9]{8}$/, "Số điện thoại không hợp lệ (VD: 0912345678)"),
   email: z.string().email("Email không hợp lệ"),
   password: z.string().min(6, "Mật khẩu tối thiểu 6 ký tự"),
 });
@@ -56,25 +56,28 @@ export function RegisterPage() {
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
           <FormField
+            id="username"
+            label="Tên đăng nhập"
+            autoComplete="username"
+            error={errors.username?.message}
+            {...register("username")}
+          />
+          <FormField
             id="fullName"
             label="Họ và tên"
-            placeholder="Ví dụ: Nguyễn Văn An"
+            placeholder="Nguyễn Văn A"
+            autoComplete="name"
             error={errors.fullName?.message}
             {...register("fullName")}
           />
           <FormField
             id="phone"
             label="Số điện thoại"
-            placeholder="Ví dụ: 0912345678"
+            placeholder="0912345678"
+            type="tel"
+            autoComplete="tel"
             error={errors.phone?.message}
             {...register("phone")}
-          />
-          <FormField
-            id="username"
-            label="Tên đăng nhập"
-            autoComplete="username"
-            error={errors.username?.message}
-            {...register("username")}
           />
           <FormField
             id="email"

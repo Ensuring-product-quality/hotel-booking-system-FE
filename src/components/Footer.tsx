@@ -1,4 +1,5 @@
-
+import { Link } from "react-router-dom";
+import { ROUTES } from "../constants/routes";
 
 export function Footer() {
   return (
@@ -36,6 +37,7 @@ export function Footer() {
           <ul className="flex flex-col gap-2 text-xs">
             <li><a href="#" className="hover:text-white transition">Giới thiệu</a></li>
             <li><a href="#" className="hover:text-white transition">Tuyển dụng</a></li>
+            <li><Link to={ROUTES.TRAVEL_GUIDE} className="hover:text-white transition">Cẩm nang du lịch</Link></li>
             <li><a href="#" className="hover:text-white transition">Đại sứ thương hiệu</a></li>
           </ul>
         </div>

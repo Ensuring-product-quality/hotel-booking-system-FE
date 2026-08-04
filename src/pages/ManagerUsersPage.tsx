@@ -27,9 +27,9 @@ export function ManagerUsersPage() {
   // Form states
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [role, setRole] = useState<string>(Role.CUSTOMER);
   const [status, setStatus] = useState("active");
   const [formError, setFormError] = useState<string | null>(null);
@@ -95,18 +95,18 @@ export function ManagerUsersPage() {
       setEditingUser(usr);
       setUsername(usr.username);
       setPassword(""); // Password cannot be edited directly this way
-      setEmail(usr.email);
       setFullName(usr.fullName || "");
       setPhone(usr.phone || "");
+      setEmail(usr.email);
       setRole(usr.role);
       setStatus(usr.status);
     } else {
       setEditingUser(null);
       setUsername("");
       setPassword("");
-      setEmail("");
       setFullName("");
       setPhone("");
+      setEmail("");
       setRole(Role.CUSTOMER);
       setStatus("active");
     }
@@ -138,9 +138,9 @@ export function ManagerUsersPage() {
       createMutation.mutate({
         username,
         password,
-        email,
         fullName,
         phone,
+        email,
         role,
         status,
       });
@@ -250,8 +250,8 @@ export function ManagerUsersPage() {
                 <thead className="bg-slate-50 border-b border-slate-100 text-slate-400 uppercase text-[9px] tracking-wider">
                   <tr>
                     <th className="py-4 px-6">ID</th>
-                    <th className="py-4 px-6">Tên đăng nhập</th>
-                    <th className="py-4 px-6">Email</th>
+                    <th className="py-4 px-6">Tên / Username</th>
+                    <th className="py-4 px-6">SĐT & Email</th>
                     <th className="py-4 px-6">Vai trò</th>
                     <th className="py-4 px-6">Trạng thái</th>
                     <th className="py-4 px-6 text-right">Thao tác</th>
@@ -270,17 +270,13 @@ export function ManagerUsersPage() {
                           </span>
                         )}
                         <div className="flex flex-col">
-                          <span>{usr.username}</span>
-                          {usr.fullName && (
-                            <span className="text-[10px] text-slate-400 font-normal">{usr.fullName}</span>
-                          )}
+                          <span>{usr.fullName || usr.username}</span>
+                          <span className="text-[10px] text-slate-400 font-normal">@{usr.username}</span>
                         </div>
                       </td>
                       <td className="py-4.5 px-6 font-medium text-slate-500">
                         <div>{usr.email}</div>
-                        {usr.phone && (
-                          <div className="text-[10px] text-slate-400 font-normal">{usr.phone}</div>
-                        )}
+                        {usr.phone && <div className="text-[10px] text-slate-400">{usr.phone}</div>}
                       </td>
                       <td className="py-4.5 px-6">
                         <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold uppercase text-[9px]">
@@ -409,7 +405,7 @@ export function ManagerUsersPage() {
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Nguyễn Văn An"
+                  placeholder="Nguyễn Văn A"
                   className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
                 />
               </div>
@@ -418,7 +414,7 @@ export function ManagerUsersPage() {
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Số điện thoại</label>
                 <input
-                  type="text"
+                  type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="0912345678"

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuthStore } from "../store/authStore";
 
 export function TransfersPage() {
+  const user = useAuthStore((s) => s.user);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [flightNumber, setFlightNumber] = useState("");
@@ -8,6 +10,13 @@ export function TransfersPage() {
   const [vehicle, setVehicle] = useState("Sedan");
   const [requests, setRequests] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.fullName || user.username);
+      if (user.email) setEmail(user.email);
+    }
+  }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

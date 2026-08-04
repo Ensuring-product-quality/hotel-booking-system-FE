@@ -197,7 +197,9 @@ export function HotelDetailPage() {
   }
 
   const hotel = hotelData.data;
-  const rooms = hotel.rooms || [];
+  const rooms = (hotel.rooms || []).filter(
+    (room) => room.status === "active" || room.status === "available"
+  );
 
   const hotelImages = hotel.images ?? [];
 

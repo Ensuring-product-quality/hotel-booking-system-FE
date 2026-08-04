@@ -10,8 +10,8 @@ import { FormField } from "../components/FormField";
 
 // Validation Schema for Profile
 const profileSchema = z.object({
-  fullName: z.string().optional(),
-  phone: z.string().optional(),
+  fullName: z.string().min(2, "Họ và tên tối thiểu 2 ký tự"),
+  phone: z.string().regex(/^$|^(0[3|5|7|8|9])[0-9]{8}$/, "Số điện thoại không hợp lệ (VD: 0912345678)"),
   email: z.string().email("Email không hợp lệ"),
 });
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -57,7 +57,7 @@ export function ProfilePage() {
     formState: { errors: passwordErrors },
   } = useForm<PasswordFormValues>({ resolver: zodResolver(passwordSchema) });
 
-  // Pre-fill profile info
+  // Pre-fill fields
   useEffect(() => {
     if (user?.email) {
       setProfileValue("email", user.email);
@@ -200,9 +200,6 @@ export function ProfilePage() {
 
             <h3 className="text-lg font-bold text-slate-800 mt-4">{user?.fullName || user?.username}</h3>
             <p className="text-xs text-slate-400 font-semibold">{user?.email}</p>
-            {user?.phone && (
-              <p className="text-xs text-slate-500 font-medium mt-0.5">📞 {user.phone}</p>
-            )}
 
             <span className="mt-3 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold uppercase tracking-wider">
               {user?.role?.replace("ROLE_", "") || "CUSTOMER"}
@@ -258,8 +255,7 @@ export function ProfilePage() {
                   <FormField
                     id="fullName"
                     label="Họ và tên"
-                    type="text"
-                    placeholder="Ví dụ: Nguyễn Văn An"
+                    autoComplete="name"
                     error={profileErrors.fullName?.message}
                     {...registerProfile("fullName")}
                   />
@@ -267,8 +263,8 @@ export function ProfilePage() {
                   <FormField
                     id="phone"
                     label="Số điện thoại"
-                    type="text"
-                    placeholder="Ví dụ: 0912345678"
+                    type="tel"
+                    autoComplete="tel"
                     error={profileErrors.phone?.message}
                     {...registerProfile("phone")}
                   />
