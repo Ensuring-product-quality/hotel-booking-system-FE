@@ -14,12 +14,16 @@ export interface UserCreateDTO {
   username: string;
   password?: string;
   email: string;
+  fullName?: string;
+  phone?: string;
   role: string;
   status: string;
 }
 
 export interface UserUpdateDTO {
   email?: string;
+  fullName?: string;
+  phone?: string;
   status?: string;
   role?: string;
 }

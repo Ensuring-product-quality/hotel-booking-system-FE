@@ -28,6 +28,8 @@ export function ManagerUsersPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState<string>(Role.CUSTOMER);
   const [status, setStatus] = useState("active");
   const [formError, setFormError] = useState<string | null>(null);
@@ -64,7 +66,7 @@ export function ManagerUsersPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, body }: { id: number; body: { email: string; status: string; role?: string } }) =>
+    mutationFn: ({ id, body }: { id: number; body: { email: string; fullName?: string; phone?: string; status: string; role?: string } }) =>
       userApi.update(id, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerUsers"] });
@@ -94,6 +96,8 @@ export function ManagerUsersPage() {
       setUsername(usr.username);
       setPassword(""); // Password cannot be edited directly this way
       setEmail(usr.email);
+      setFullName(usr.fullName || "");
+      setPhone(usr.phone || "");
       setRole(usr.role);
       setStatus(usr.status);
     } else {
@@ -101,6 +105,8 @@ export function ManagerUsersPage() {
       setUsername("");
       setPassword("");
       setEmail("");
+      setFullName("");
+      setPhone("");
       setRole(Role.CUSTOMER);
       setStatus("active");
     }
@@ -122,7 +128,7 @@ export function ManagerUsersPage() {
     if (editingUser) {
       updateMutation.mutate({
         id: editingUser.id,
-        body: { email, status, role },
+        body: { email, fullName, phone, status, role },
       });
     } else {
       if (!password) {
@@ -133,6 +139,8 @@ export function ManagerUsersPage() {
         username,
         password,
         email,
+        fullName,
+        phone,
         role,
         status,
       });
@@ -261,9 +269,19 @@ export function ManagerUsersPage() {
                             {usr.username[0]}
                           </span>
                         )}
-                        <span>{usr.username}</span>
+                        <div className="flex flex-col">
+                          <span>{usr.username}</span>
+                          {usr.fullName && (
+                            <span className="text-[10px] text-slate-400 font-normal">{usr.fullName}</span>
+                          )}
+                        </div>
                       </td>
-                      <td className="py-4.5 px-6 font-medium text-slate-500">{usr.email}</td>
+                      <td className="py-4.5 px-6 font-medium text-slate-500">
+                        <div>{usr.email}</div>
+                        {usr.phone && (
+                          <div className="text-[10px] text-slate-400 font-normal">{usr.phone}</div>
+                        )}
+                      </td>
                       <td className="py-4.5 px-6">
                         <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold uppercase text-[9px]">
                           {usr.role.replace("ROLE_", "")}
@@ -383,6 +401,30 @@ export function ManagerUsersPage() {
                   />
                 </div>
               )}
+
+              {/* Full Name */}
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Họ và tên</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Nguyễn Văn An"
+                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
+                />
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Số điện thoại</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="0912345678"
+                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
+                />
+              </div>
 
               {/* Email */}
               <div>

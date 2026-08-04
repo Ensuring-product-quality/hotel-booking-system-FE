@@ -129,7 +129,7 @@ export function BookingLookupPage() {
               <form onSubmit={handleLookupSubmit} className="flex flex-col gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Mã đặt phòng (Booking ID)
+                    Mã đặt phòng
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">

@@ -9,6 +9,8 @@ import { useAuth } from "../hooks/useAuth";
 import { ROUTES } from "../constants/routes";
 
 const registerSchema = z.object({
+  fullName: z.string().min(2, "Họ và tên tối thiểu 2 ký tự"),
+  phone: z.string().min(8, "Số điện thoại tối thiểu 8 số"),
   username: z.string().min(3, "Tên đăng nhập tối thiểu 3 ký tự"),
   email: z.string().email("Email không hợp lệ"),
   password: z.string().min(6, "Mật khẩu tối thiểu 6 ký tự"),
@@ -53,6 +55,20 @@ export function RegisterPage() {
         </p>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+          <FormField
+            id="fullName"
+            label="Họ và tên"
+            placeholder="Ví dụ: Nguyễn Văn An"
+            error={errors.fullName?.message}
+            {...register("fullName")}
+          />
+          <FormField
+            id="phone"
+            label="Số điện thoại"
+            placeholder="Ví dụ: 0912345678"
+            error={errors.phone?.message}
+            {...register("phone")}
+          />
           <FormField
             id="username"
             label="Tên đăng nhập"

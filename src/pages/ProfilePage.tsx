@@ -10,6 +10,8 @@ import { FormField } from "../components/FormField";
 
 // Validation Schema for Profile
 const profileSchema = z.object({
+  fullName: z.string().optional(),
+  phone: z.string().optional(),
   email: z.string().email("Email không hợp lệ"),
 });
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -55,10 +57,16 @@ export function ProfilePage() {
     formState: { errors: passwordErrors },
   } = useForm<PasswordFormValues>({ resolver: zodResolver(passwordSchema) });
 
-  // Pre-fill email
+  // Pre-fill profile info
   useEffect(() => {
     if (user?.email) {
       setProfileValue("email", user.email);
+    }
+    if (user?.fullName) {
+      setProfileValue("fullName", user.fullName);
+    }
+    if (user?.phone) {
+      setProfileValue("phone", user.phone);
     }
     if (user?.avatarUrl) {
       setAvatarPreview(user.avatarUrl);
@@ -68,12 +76,22 @@ export function ProfilePage() {
   // Mutations
   const updateProfileMutation = useMutation({
     mutationFn: (body: ProfileFormValues) =>
-      userApi.update(userId, { email: body.email, status: user?.status || "active" }),
+      userApi.update(userId, {
+        email: body.email,
+        fullName: body.fullName,
+        phone: body.phone,
+        status: user?.status || "active",
+      }),
     onSuccess: (res) => {
       setProfileSuccessMsg("Cập nhật thông tin cá nhân thành công!");
       setProfileErrorMsg(null);
       if (user && res.data) {
-        setUser({ ...user, email: res.data.email });
+        setUser({
+          ...user,
+          email: res.data.email,
+          fullName: res.data.fullName,
+          phone: res.data.phone,
+        });
       }
     },
     onError: (err) => {
@@ -180,8 +198,11 @@ export function ProfilePage() {
               <p className="text-xs text-red-600 mt-2 font-semibold">{avatarErrorMsg}</p>
             )}
 
-            <h3 className="text-lg font-bold text-slate-800 mt-4">{user?.username}</h3>
+            <h3 className="text-lg font-bold text-slate-800 mt-4">{user?.fullName || user?.username}</h3>
             <p className="text-xs text-slate-400 font-semibold">{user?.email}</p>
+            {user?.phone && (
+              <p className="text-xs text-slate-500 font-medium mt-0.5">📞 {user.phone}</p>
+            )}
 
             <span className="mt-3 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold uppercase tracking-wider">
               {user?.role?.replace("ROLE_", "") || "CUSTOMER"}
@@ -233,6 +254,24 @@ export function ProfilePage() {
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none text-slate-400 cursor-not-allowed font-medium"
                     />
                   </div>
+
+                  <FormField
+                    id="fullName"
+                    label="Họ và tên"
+                    type="text"
+                    placeholder="Ví dụ: Nguyễn Văn An"
+                    error={profileErrors.fullName?.message}
+                    {...registerProfile("fullName")}
+                  />
+
+                  <FormField
+                    id="phone"
+                    label="Số điện thoại"
+                    type="text"
+                    placeholder="Ví dụ: 0912345678"
+                    error={profileErrors.phone?.message}
+                    {...registerProfile("phone")}
+                  />
 
                   <FormField
                     id="email"
