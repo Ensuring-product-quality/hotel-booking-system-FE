@@ -22,23 +22,28 @@ export function BookingLookupPage() {
       return;
     }
 
-    if (!emailInput) {
-      setError("Vui lòng nhập địa chỉ email đã dùng đặt phòng.");
+    if (!emailInput || !emailInput.trim()) {
+      setError("Vui lòng nhập Email hoặc Số điện thoại đã dùng đặt phòng.");
       return;
     }
 
     const bookingId = parseInt(numericIdStr);
+    const inputTrimmed = emailInput.trim();
+    const isEmail = inputTrimmed.includes("@");
+    const label = isEmail ? "email" : "số điện thoại";
+    const defaultNotFoundMsg = `Không tìm thấy đơn đặt phòng với mã HB-${bookingId} và ${label} "${inputTrimmed}"`;
+
     setIsLoading(true);
 
     try {
-      const response = await bookingApi.publicLookup(bookingId, emailInput);
+      const response = await bookingApi.publicLookup(bookingId, inputTrimmed);
       if (response.success && response.data) {
         setBookingDetails(response.data);
       } else {
-        setError(response.message || "Không tìm thấy thông tin đặt phòng.");
+        setError(response.message || defaultNotFoundMsg);
       }
     } catch (err: any) {
-      setError(getErrorMessage(err, "Không tìm thấy thông tin đặt phòng với thông tin đã nhập."));
+      setError(getErrorMessage(err, defaultNotFoundMsg));
     } finally {
       setIsLoading(false);
     }
