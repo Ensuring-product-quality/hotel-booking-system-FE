@@ -1,0 +1,52 @@
+================================================================================
+                    HOTELNOW WEB APPLICATION - UPDATES & CREDENTIALS
+================================================================================
+
+1. HỆ THỐNG TÀI KHOẢN & MẬT KHẨU NỘI BỘ (SEEDED ACCOUNTS & CREDENTIALS)
+--------------------------------------------------------------------------------
+Tất cả các tài khoản mặc định đã được khởi tạo tự động trong cơ sở dữ liệu hệ thống:
+
+* TÀI KHOẢN QUẢN TRỊ VIÊN CAO CẤP (ADMIN):
+  - Tên đăng nhập (Username) : admin
+  - Mật khẩu (Password)      : password
+  - Email                     : admin@hotelnow.com
+  - Họ và tên                 : Lê Quản Trị
+  - Số điện thoại             : 0909090909
+  - Quyền hạn (Role)          : ROLE_ADMIN (Toàn quyền quản trị hệ thống & nhân sự)
+
+* TÀI KHOẢN QUẢN LÝ KHÁCH SẠN (MANAGER):
+  - Tên đăng nhập (Username) : manager
+  - Mật khẩu (Password)      : password
+  - Email                     : manager@hotelnow.com
+  - Họ và tên                 : Trần Thị Hải
+  - Số điện thoại             : 0987654321
+  - Quyền hạn (Role)          : ROLE_MANAGER (Quản lý khách sạn, kho phòng, nhân sự & báo cáo)
+
+* TÀI KHOẢN KHÁCH HÀNG (CUSTOMER / USER):
+  - Tên đăng nhập (Username) : customer
+  - Mật khẩu (Password)      : password
+  - Email                     : customer@hotelnow.com
+  - Họ và tên                 : Nguyễn Văn An
+  - Số điện thoại             : 0912345678
+  - Quyền hạn (Role)          : ROLE_CUSTOMER (Tìm kiếm phòng, đặt phòng, thanh toán, đánh giá)
+
+
+2. TỔNG HỢP CÁC CẬP NHẬT MỚI NHẤT (RECENT SYSTEM UPDATES)
+--------------------------------------------------------------------------------
+
+[Cập nhật 1] Phân Quyền Quản Lý Nhân Sự & Loại Bỏ Vai Trò STAFF
+- Loại bỏ hoàn toàn vai trò `STAFF` khỏi hệ thống (gộp chung toàn bộ tính năng vào `MANAGER`).
+- Sửa triệt để lỗi phân quyền ở `CurrentUserService`: Cấp đầy đủ quyền quản lý (`isManagement` & `isStaff`) cho cả 2 vai trò `ADMIN` và `MANAGER`. Từ đó tài khoản Admin / Manager có thể thoải mái xem, tạo mới và cập nhật bất kỳ tài khoản nào mà không bị báo lỗi từ chối truy cập.
+
+[Cập nhật 2] Bổ Sung Họ & Tên, Số Điện Thoại & Ràng Buộc Trùng Lặp (Unique Phone & Username)
+- Bổ sung 2 ô "Họ và tên" và "Số điện thoại" vào trang Đăng ký (Register), trang Hồ sơ cá nhân (Profile) và trang Quản lý thành viên (Manager Users).
+- Thêm kiểm tra trùng lặp: Tên đăng nhập (Username) và Số điện thoại (Phone) đều là duy nhất, không được phép đăng ký trùng nhau giữa các tài khoản.
+- Hỗ trợ đăng nhập linh hoạt bằng Tên đăng nhập, Email hoặc Số điện thoại.
+
+[Cập nhật 3] Tùy Chỉnh Thông Báo Lỗi Tra Cứu Phòng Theo Đúng Dữ Liệu Đầu Vào
+- Khi tra cứu không thấy đơn đặt phòng:
+  + Nếu nhập Email: "Không tìm thấy đơn đặt phòng với mã HB-[id] và email [email]"
+  + Nếu nhập SDT: "Không tìm thấy đơn đặt phòng với mã HB-[id] và số điện thoại [sdt]"
+
+[Cập nhật 4] Chuyển Cấu Hình Database Sang Cơ Sở Dữ Liệu Truyền Thống (MySQL RDBMS)
+- Loại bỏ hoàn toàn H2 Database. Cấu hình mặc định kết nối MySQL DB `hotelnow_db` tại port 3306.
