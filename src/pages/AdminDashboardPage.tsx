@@ -1148,7 +1148,7 @@ export function AdminDashboardPage() {
                 <div>
                   <h1 className="text-2xl font-extrabold text-white">Hệ Thống Phân Quyền & Quản Lý Nhân Sự</h1>
                   <p className="text-slate-400 text-xs mt-1">
-                    Quản lý danh sách thành viên, phân quyền vai trò (Admin, Manager, Staff, Customer) từ cơ sở dữ liệu.
+                    Quản lý danh sách thành viên, phân quyền vai trò (Admin, Manager, Customer) từ cơ sở dữ liệu.
                   </p>
                 </div>
                 <button
@@ -1176,7 +1176,7 @@ export function AdminDashboardPage() {
                     <h2 className="text-3xl font-black text-white">{ALL_ROLES.length}</h2>
                     <div className="flex gap-1.5">
                       <span className="px-2 py-0.5 bg-teal-500/20 text-teal-300 rounded font-bold text-[9px]">ADMIN</span>
-                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded font-bold text-[9px]">STAFF</span>
+                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded font-bold text-[9px]">MANAGER</span>
                       <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded font-bold text-[9px]">CUSTOMER</span>
                     </div>
                   </div>
