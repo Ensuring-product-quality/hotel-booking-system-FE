@@ -59,4 +59,11 @@ export const bookingApi = {
         params: { bookingId, email },
       })
       .then((res) => res.data),
+
+  getBookedDates: (roomId: number) =>
+    apiClient
+      .get<StandardResponse<{ checkInDate: string; checkOutDate: string }[]>>(
+        `/bookings/public/room/${roomId}/booked-dates`
+      )
+      .then((res) => res.data),
 };

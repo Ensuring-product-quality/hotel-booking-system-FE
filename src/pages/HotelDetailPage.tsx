@@ -88,6 +88,102 @@ export function HotelDetailPage() {
     },
   });
 
+  // Fetch booked dates for the selected room
+  const { data: bookedDatesData } = useQuery({
+    queryKey: ["bookedDates", selectedRoomId],
+    queryFn: () => bookingApi.getBookedDates(selectedRoomId || 0),
+    enabled: !!selectedRoomId && isBookingModalOpen,
+  });
+  const bookedDates = bookedDatesData?.data || [];
+
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+
+  const formatDateStr = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const isDateBooked = (date: Date) => {
+    const dateStr = formatDateStr(date);
+    return bookedDates.some((range) => {
+      return dateStr >= range.checkInDate && dateStr < range.checkOutDate;
+    });
+  };
+
+  const isDateInPast = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
+  const hasBookedDateInRange = (startStr: string, endStr: string) => {
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    while (start < end) {
+      if (isDateBooked(start)) {
+        return true;
+      }
+      start.setDate(start.getDate() + 1);
+    }
+    return false;
+  };
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  const getDaysInMonth = (year: number, month: number) => {
+    const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+    const numDays = new Date(year, month + 1, 0).getDate();
+    const days = [];
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= numDays; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+
+  const handleDayClick = (date: Date) => {
+    if (isDateInPast(date) || isDateBooked(date)) return;
+    const dateStr = formatDateStr(date);
+    
+    if (!checkInDate || (checkInDate && checkOutDate)) {
+      setCheckInDate(dateStr);
+      setCheckOutDate("");
+      setBookingError(null);
+    } else {
+      if (dateStr <= checkInDate) {
+        setCheckInDate(dateStr);
+      } else {
+        if (hasBookedDateInRange(checkInDate, dateStr)) {
+          setBookingError("Khoảng thời gian chọn chứa ngày đã được đặt");
+          return;
+        }
+        setCheckOutDate(dateStr);
+        setBookingError(null);
+      }
+    }
+  };
+
   // Post review mutation
   const reviewMutation = useMutation({
     mutationFn: (body: { hotelId: number; rating: number; comment: string }) =>
@@ -117,6 +213,10 @@ export function HotelDetailPage() {
     setSelectedRoomId(roomId);
     setSelectedRoomNumber(roomNum);
     setSelectedRoomPrice(price);
+    setCheckInDate("");
+    setCheckOutDate("");
+    setCurrentYear(new Date().getFullYear());
+    setCurrentMonth(new Date().getMonth());
     setBookingSuccess(false);
     setBookingError(null);
     setIsBookingModalOpen(true);
@@ -198,7 +298,7 @@ export function HotelDetailPage() {
 
   const hotel = hotelData.data;
   const rooms = (hotel.rooms || []).filter(
-    (room) => room.status === "active" || room.status === "available"
+    (room) => room.status !== "inactive" && room.status !== "maintenance"
   );
 
   const hotelImages = hotel.images ?? [];
@@ -479,25 +579,100 @@ export function HotelDetailPage() {
               </div>
             ) : (
               <form onSubmit={handleBookingSubmit} className="p-5 flex flex-col gap-4">
-                {/* Dates Selection */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Ngày nhận phòng</label>
-                    <input
-                      type="date"
-                      value={checkInDate}
-                      onChange={(e) => setCheckInDate(e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
-                    />
+                {/* Custom Interactive Calendar */}
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-3">
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                    <button
+                      type="button"
+                      onClick={handlePrevMonth}
+                      className="p-1 px-2.5 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg transition"
+                    >
+                      &larr;
+                    </button>
+                    <span>
+                      Tháng {currentMonth + 1} / {currentYear}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleNextMonth}
+                      className="p-1 px-2.5 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg transition"
+                    >
+                      &rarr;
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Ngày trả phòng</label>
-                    <input
-                      type="date"
-                      value={checkOutDate}
-                      onChange={(e) => setCheckOutDate(e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
-                    />
+
+                  {/* Day Names Row */}
+                  <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 uppercase">
+                    <span>CN</span>
+                    <span>T2</span>
+                    <span>T3</span>
+                    <span>T4</span>
+                    <span>T5</span>
+                    <span>T6</span>
+                    <span>T7</span>
+                  </div>
+
+                  {/* Days Grid */}
+                  <div className="grid grid-cols-7 gap-1">
+                    {getDaysInMonth(currentYear, currentMonth).map((date, idx) => {
+                      if (!date) {
+                        return <div key={`empty-${idx}`} />;
+                      }
+
+                      const dateStr = formatDateStr(date);
+                      const isPast = isDateInPast(date);
+                      const isBooked = isDateBooked(date);
+                      const isSelectedCheckIn = checkInDate === dateStr;
+                      const isSelectedCheckOut = checkOutDate === dateStr;
+                      const isWithinRange =
+                        checkInDate &&
+                        checkOutDate &&
+                        dateStr > checkInDate &&
+                        dateStr < checkOutDate;
+
+                      let btnClass = "h-8 w-8 text-xs font-semibold rounded-lg flex items-center justify-center transition ";
+
+                      if (isPast) {
+                        btnClass += "text-slate-300 bg-transparent cursor-not-allowed";
+                      } else if (isBooked) {
+                        btnClass += "bg-red-100 text-red-500 line-through border border-red-100 cursor-not-allowed";
+                      } else if (isSelectedCheckIn || isSelectedCheckOut) {
+                        btnClass += "bg-brand-600 text-white shadow-sm cursor-pointer";
+                      } else if (isWithinRange) {
+                        btnClass += "bg-brand-50 text-brand-700 cursor-pointer";
+                      } else {
+                        btnClass += "bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 cursor-pointer";
+                      }
+
+                      return (
+                        <button
+                          key={dateStr}
+                          type="button"
+                          disabled={isPast || isBooked}
+                          onClick={() => handleDayClick(date)}
+                          className={btnClass}
+                          title={isBooked ? "Ngày đã có người đặt" : isPast ? "Ngày trong quá khứ" : date.getDate().toString()}
+                        >
+                          {date.getDate()}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Date selection summary */}
+                  <div className="flex justify-between items-center text-[11px] font-medium text-slate-500 border-t border-slate-200/60 pt-2.5 mt-1">
+                    <div>
+                      <span>Nhận phòng: </span>
+                      <span className="font-bold text-slate-700">
+                        {checkInDate ? new Date(checkInDate).toLocaleDateString("vi-VN") : "Chưa chọn"}
+                      </span>
+                    </div>
+                    <div>
+                      <span>Trả phòng: </span>
+                      <span className="font-bold text-slate-700">
+                        {checkOutDate ? new Date(checkOutDate).toLocaleDateString("vi-VN") : "Chưa chọn"}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
