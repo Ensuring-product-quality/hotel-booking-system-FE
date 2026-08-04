@@ -336,6 +336,16 @@ export function Header() {
                     <p className="text-xs text-slate-400 mb-0.5">Đã đăng nhập</p>
                     <p className="text-sm font-bold text-slate-800 truncate">{user?.username}</p>
                   </div>
+                  {/* Xem hồ sơ - chỉ hiện với CUSTOMER và MANAGER */}
+                  {(user?.role === Role.CUSTOMER || user?.role === Role.MANAGER) && (
+                    <Link
+                      to={ROUTES.PROFILE}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition"
+                    >
+                      <i className="fa-solid fa-user text-xs text-slate-400"></i>
+                      Xem hồ sơ
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition cursor-pointer font-semibold"
