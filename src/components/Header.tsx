@@ -232,30 +232,8 @@ export function Header() {
             </div>
           </div>
 
-          {/* Ưu đãi - Highlight màu đỏ */}
-          <Link
-            to={ROUTES.OFFERS}
-            className={`flex items-center gap-1 transition hover:text-brand-600 text-rose-600 font-semibold ${
-              isLinkActive(ROUTES.OFFERS) ? "text-brand-600 font-semibold" : ""
-            }`}
-          >
-            <span>Ưu đãi</span>
-            <span className="px-1.5 py-0.5 text-[9px] font-bold text-white bg-rose-500 rounded-full uppercase tracking-wider leading-none">
-              Sale
-            </span>
-          </Link>
 
 
-
-          {/* Cẩm nang du lịch */}
-          <Link
-            to={ROUTES.TRAVEL_GUIDE}
-            className={`transition hover:text-brand-600 ${
-              isLinkActive(ROUTES.TRAVEL_GUIDE) ? "text-brand-600 font-semibold" : ""
-            }`}
-          >
-            Cẩm nang
-          </Link>
 
           {/* Tra cứu đặt phòng */}
           <Link
@@ -505,16 +483,6 @@ export function Header() {
               )}
             </div>
 
-            {/* Cẩm nang du lịch */}
-            <Link
-              to={ROUTES.TRAVEL_GUIDE}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg hover:bg-slate-50 transition ${
-                isLinkActive(ROUTES.TRAVEL_GUIDE) ? "text-brand-600 bg-brand-50/30" : "text-slate-700"
-              }`}
-            >
-              Cẩm nang du lịch
-            </Link>
 
             {/* Tra cứu đặt phòng */}
             <Link
