@@ -155,9 +155,9 @@ export function BookingLookupPage() {
                       ✉️
                     </span>
                     <input
-                      type="email"
+                      type="text"
                       required
-                      placeholder="Nhập email đã dùng đặt phòng"
+                      placeholder="Nhập email hoặc số điện thoại đã dùng đặt phòng"
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none transition text-slate-800"
