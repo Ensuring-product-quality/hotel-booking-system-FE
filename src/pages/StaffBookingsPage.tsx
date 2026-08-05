@@ -178,17 +178,21 @@ export function StaffBookingsPage() {
   // Filtered Bookings for Table
   const filteredBookings = useMemo(() => {
     return bookings.filter((b) => {
-      if (bookingSubTab === "new" && b.status === BookingStatus.CANCELLED) return false;
+      if (bookingSubTab === "new" && (b.status === BookingStatus.CANCELLED || b.status === BookingStatus.CHECKED_OUT || b.status === BookingStatus.COMPLETED)) return false;
       if (bookingSubTab === "pending" && b.status !== BookingStatus.PENDING_PAYMENT) return false;
-      if (bookingSubTab === "history" && b.status !== BookingStatus.COMPLETED && b.status !== BookingStatus.CANCELLED) return false;
+      if (bookingSubTab === "history" && b.status !== BookingStatus.COMPLETED && b.status !== BookingStatus.CHECKED_OUT && b.status !== BookingStatus.CANCELLED) return false;
 
       const matchesRoomType = bookingFilterRoomType === "ALL" || (b.roomNumber && b.roomNumber.includes(bookingFilterRoomType));
       const matchesStatus = bookingFilterStatus === "ALL" || b.status === bookingFilterStatus;
+      
+      const searchLower = globalSearch.trim().toLowerCase();
       const matchesSearch =
-        !globalSearch.trim() ||
-        String(b.id).includes(globalSearch) ||
-        b.roomNumber?.toLowerCase().includes(globalSearch.toLowerCase()) ||
-        b.hotelName?.toLowerCase().includes(globalSearch.toLowerCase());
+        !searchLower ||
+        String(b.id).includes(searchLower) ||
+        b.roomNumber?.toLowerCase().includes(searchLower) ||
+        b.hotelName?.toLowerCase().includes(searchLower) ||
+        b.userFullName?.toLowerCase().includes(searchLower) ||
+        b.userPhone?.includes(searchLower);
 
       return matchesRoomType && matchesStatus && matchesSearch;
     });
@@ -204,6 +208,32 @@ export function StaffBookingsPage() {
     },
     onError: (err) => {
       alert(getErrorMessage(err, "Cập nhật thất bại."));
+    },
+  });
+
+  // Check-in Mutation
+  const checkInMutation = useMutation({
+    mutationFn: (id: number) => bookingApi.checkIn(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staffBookingsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
+      alert("Check-in thành công!");
+    },
+    onError: (err) => {
+      alert(getErrorMessage(err, "Check-in thất bại."));
+    },
+  });
+
+  // Check-out Mutation
+  const checkOutMutation = useMutation({
+    mutationFn: (id: number) => bookingApi.checkOut(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staffBookingsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
+      alert("Check-out thành công! Phòng đã được chuyển sang trạng thái dọn dẹp.");
+    },
+    onError: (err) => {
+      alert(getErrorMessage(err, "Check-out thất bại."));
     },
   });
 
@@ -533,10 +563,12 @@ export function StaffBookingsPage() {
                     className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-teal-500/60"
                   >
                     <option value="ALL">Tất cả trạng thái</option>
-                    <option value={BookingStatus.PENDING_PAYMENT}>Chờ xác nhận</option>
-                    <option value={BookingStatus.CONFIRMED}>Đã xác nhận</option>
-                    <option value={BookingStatus.COMPLETED}>Đã hoàn thành</option>
-                    <option value={BookingStatus.CANCELLED}>Đã hủy</option>
+                    <option value={BookingStatus.PENDING_PAYMENT}>Chờ xác nhận (PENDING_PAYMENT)</option>
+                    <option value={BookingStatus.CONFIRMED}>Đã xác nhận (CONFIRMED)</option>
+                    <option value={BookingStatus.CHECKED_IN}>Đã nhận phòng (CHECKED_IN)</option>
+                    <option value={BookingStatus.CHECKED_OUT}>Đã trả phòng (CHECKED_OUT)</option>
+                    <option value={BookingStatus.COMPLETED}>Đã hoàn thành (COMPLETED)</option>
+                    <option value={BookingStatus.CANCELLED}>Đã hủy (CANCELLED)</option>
                   </select>
                 </div>
               </div>
@@ -607,11 +639,12 @@ export function StaffBookingsPage() {
                           <tr key={b.id} className="hover:bg-slate-900/40 transition">
                             <td className="py-4 px-6 font-bold text-white flex items-center gap-3">
                               <div className="h-9 w-9 rounded-full bg-teal-500/20 text-teal-300 font-bold flex items-center justify-center text-xs uppercase border border-teal-500/30">
-                                U
+                                {b.userFullName?.[0] || "U"}
                               </div>
                               <div>
-                                <p className="font-bold text-white text-xs">Khách hàng #{b.userId}</p>
-                                <p className="text-[10px] text-slate-400">Đơn #{b.id} - {b.guests} khách</p>
+                                <p className="font-bold text-white text-xs">{b.userFullName || `Khách hàng #${b.userId}`}</p>
+                                <p className="text-[10px] text-slate-400">{b.userPhone || "Chưa có SĐT"} • Đơn #{b.id}</p>
+                                <p className="text-[9px] text-teal-400 font-semibold">{b.guests} khách</p>
                               </div>
                             </td>
                             <td className="py-4 px-6 text-slate-300">
@@ -629,29 +662,77 @@ export function StaffBookingsPage() {
                             </td>
                             <td className="py-4 px-6">
                               <span
-                                className={`px-2.5 py-1 rounded text-[9px] font-extrabold uppercase ${b.status === BookingStatus.CONFIRMED
-                                    ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
-                                    : b.status === BookingStatus.COMPLETED
-                                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                      : b.status === BookingStatus.PENDING_PAYMENT
-                                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                                        : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                                  }`}
+                                className={`px-2.5 py-1 rounded text-[9px] font-extrabold uppercase border ${
+                                  b.status === BookingStatus.CONFIRMED
+                                    ? "bg-teal-500/20 text-teal-300 border-teal-500/30"
+                                    : b.status === BookingStatus.CHECKED_IN
+                                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                                      : b.status === BookingStatus.CHECKED_OUT
+                                        ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                                        : b.status === BookingStatus.COMPLETED
+                                          ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                                          : b.status === BookingStatus.PENDING_PAYMENT
+                                            ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                                            : "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                                }`}
                               >
-                                {b.status === BookingStatus.PENDING_PAYMENT ? "CHỜ XÁC NHẬN" : b.status}
+                                {b.status === BookingStatus.PENDING_PAYMENT
+                                  ? "CHỜ XÁC NHẬN"
+                                  : b.status === BookingStatus.CONFIRMED
+                                    ? "ĐÃ XÁC NHẬN"
+                                    : b.status === BookingStatus.CHECKED_IN
+                                      ? "ĐÃ CHECK-IN"
+                                      : b.status === BookingStatus.CHECKED_OUT
+                                        ? "ĐÃ CHECK-OUT"
+                                        : b.status === BookingStatus.COMPLETED
+                                          ? "HOÀN THÀNH"
+                                          : "ĐÃ HỦY"}
                               </span>
                             </td>
                             <td className="py-4 px-6 text-center">
                               <div className="flex items-center justify-center gap-2">
-                                {b.status !== BookingStatus.CONFIRMED && b.status !== BookingStatus.COMPLETED && (
+                                {/* Duyệt đơn (CONFIRMED) - chỉ cho phép đơn PENDING_PAYMENT */}
+                                {b.status === BookingStatus.PENDING_PAYMENT && (
                                   <button
                                     onClick={() => updateStatusMutation.mutate({ id: b.id, status: BookingStatus.CONFIRMED })}
                                     title="Duyệt đơn"
-                                    className="h-8 w-8 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/30 flex items-center justify-center hover:bg-teal-500 hover:text-slate-950 transition cursor-pointer"
+                                    className="h-8 px-2 bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-lg flex items-center justify-center hover:bg-teal-500 hover:text-slate-950 transition cursor-pointer font-bold text-[10px]"
                                   >
-                                    <i className="fa-solid fa-check text-xs"></i>
+                                    <i className="fa-solid fa-check mr-1 text-xs"></i> Duyệt
                                   </button>
                                 )}
+
+                                {/* Check-in button - chỉ cho phép đơn CONFIRMED */}
+                                {b.status === BookingStatus.CONFIRMED && (
+                                  <button
+                                    onClick={() => {
+                                      if (confirm(`Thực hiện Check-in cho đơn #${b.id}?`)) {
+                                        checkInMutation.mutate(b.id);
+                                      }
+                                    }}
+                                    title="Check-in khách"
+                                    className="h-8 px-2.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-lg flex items-center gap-1 hover:bg-emerald-500 hover:text-slate-950 transition cursor-pointer font-bold text-[10px]"
+                                  >
+                                    <i className="fa-solid fa-key text-[10px]"></i> Check-in
+                                  </button>
+                                )}
+
+                                {/* Check-out button - chỉ cho phép đơn CHECKED_IN */}
+                                {b.status === BookingStatus.CHECKED_IN && (
+                                  <button
+                                    onClick={() => {
+                                      if (confirm(`Thực hiện Check-out cho đơn #${b.id}?`)) {
+                                        checkOutMutation.mutate(b.id);
+                                      }
+                                    }}
+                                    title="Check-out khách"
+                                    className="h-8 px-2.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg flex items-center gap-1 hover:bg-indigo-500 hover:text-slate-950 transition cursor-pointer font-bold text-[10px]"
+                                  >
+                                    <i className="fa-solid fa-door-open text-[10px]"></i> Check-out
+                                  </button>
+                                )}
+
+                                {/* Xem chi tiết */}
                                 <button
                                   onClick={() => setSelectedBooking(b)}
                                   title="Xem chi tiết"
@@ -659,7 +740,9 @@ export function StaffBookingsPage() {
                                 >
                                   <i className="fa-regular fa-eye text-xs"></i>
                                 </button>
-                                {b.status !== BookingStatus.CANCELLED && (
+
+                                {/* Từ chối / Hủy đơn - Cho phép hủy nếu chưa check-out hay completed */}
+                                {b.status !== BookingStatus.CANCELLED && b.status !== BookingStatus.CHECKED_OUT && b.status !== BookingStatus.COMPLETED && (
                                   <button
                                     onClick={() => {
                                       if (confirm("Từ chối / Hủy đơn này?")) {
