@@ -68,6 +68,7 @@ export function StaffBookingsPage() {
   const [bookingSubTab, setBookingSubTab] = useState<"new" | "pending" | "history">("new");
   const [bookingFilterRoomType, setBookingFilterRoomType] = useState<string>("ALL");
   const [bookingFilterStatus, setBookingFilterStatus] = useState<string>("ALL");
+  const [bookingFilterDate, setBookingFilterDate] = useState<string>("");
 
   // Selected Detail Modals
   const [selectedBooking, setSelectedBooking] = useState<BookingResponseDTO | null>(null);
@@ -182,9 +183,15 @@ export function StaffBookingsPage() {
       if (bookingSubTab === "pending" && b.status !== BookingStatus.PENDING_PAYMENT) return false;
       if (bookingSubTab === "history" && b.status !== BookingStatus.COMPLETED && b.status !== BookingStatus.CHECKED_OUT && b.status !== BookingStatus.CANCELLED) return false;
 
-      const matchesRoomType = bookingFilterRoomType === "ALL" || (b.roomNumber && b.roomNumber.includes(bookingFilterRoomType));
+      const matchesRoomType = bookingFilterRoomType === "ALL" || (() => {
+        const room = rooms.find((r) => r.id === b.roomId);
+        return room?.type === bookingFilterRoomType;
+      })();
+      
       const matchesStatus = bookingFilterStatus === "ALL" || b.status === bookingFilterStatus;
       
+      const matchesDate = !bookingFilterDate || (bookingFilterDate >= b.checkInDate && bookingFilterDate <= b.checkOutDate);
+
       const searchLower = globalSearch.trim().toLowerCase();
       const matchesSearch =
         !searchLower ||
@@ -194,9 +201,9 @@ export function StaffBookingsPage() {
         b.userFullName?.toLowerCase().includes(searchLower) ||
         b.userPhone?.includes(searchLower);
 
-      return matchesRoomType && matchesStatus && matchesSearch;
+      return matchesRoomType && matchesStatus && matchesDate && matchesSearch;
     });
-  }, [bookings, bookingSubTab, bookingFilterRoomType, bookingFilterStatus, globalSearch]);
+  }, [bookings, bookingSubTab, bookingFilterRoomType, bookingFilterStatus, bookingFilterDate, globalSearch, rooms]);
 
   // Status Change Mutation
   const updateStatusMutation = useMutation({
@@ -536,7 +543,8 @@ export function StaffBookingsPage() {
                   <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">KHOẢNG NGÀY</label>
                   <input
                     type="date"
-                    defaultValue={todayStr}
+                    value={bookingFilterDate}
+                    onChange={(e) => setBookingFilterDate(e.target.value)}
                     className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-teal-500/60"
                   />
                 </div>
