@@ -416,14 +416,6 @@ export function HotelDetailPage() {
                 />
               </>
             )}
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-xl shadow-sm transition">
-              <i className="fa-solid fa-share-nodes"></i>
-              <span>Chia sẻ</span>
-            </button>
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-xl shadow-sm transition">
-              <i className="fa-regular fa-heart"></i>
-              <span>Lưu</span>
-            </button>
           </div>
         </div>
 
