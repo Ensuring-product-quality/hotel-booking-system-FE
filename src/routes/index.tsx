@@ -17,10 +17,7 @@ const VerifyEmailPage = lazy(() => import("../pages/VerifyEmailPage").then((m) =
 const HotelsPage = lazy(() => import("../pages/HotelsPage").then((m) => ({ default: m.HotelsPage })));
 const HotelDetailPage = lazy(() => import("../pages/HotelDetailPage").then((m) => ({ default: m.HotelDetailPage })));
 const MyBookingsPage = lazy(() => import("../pages/MyBookingsPage").then((m) => ({ default: m.MyBookingsPage })));
-const OffersPage = lazy(() => import("../pages/OffersPage").then((m) => ({ default: m.OffersPage })));
-const OfferDetailPage = lazy(() => import("../pages/OfferDetailPage").then((m) => ({ default: m.OfferDetailPage })));
-const TravelGuidePage = lazy(() => import("../pages/TravelGuidePage").then((m) => ({ default: m.TravelGuidePage })));
-const ArticleDetailPage = lazy(() => import("../pages/ArticleDetailPage").then((m) => ({ default: m.ArticleDetailPage })));
+
 const BookingLookupPage = lazy(() => import("../pages/BookingLookupPage").then((m) => ({ default: m.BookingLookupPage })));
 const ContactPage = lazy(() => import("../pages/ContactPage").then((m) => ({ default: m.ContactPage })));
 const BookingDetailPage = lazy(() => import("../pages/BookingDetailPage").then((m) => ({ default: m.BookingDetailPage })));
@@ -31,10 +28,6 @@ const ManagerRoomsPage = lazy(() => import("../pages/ManagerRoomsPage").then((m)
 const ManagerUsersPage = lazy(() => import("../pages/ManagerUsersPage").then((m) => ({ default: m.ManagerUsersPage })));
 const AdminDashboardPage = lazy(() => import("../pages/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
 const ProfilePage = lazy(() => import("../pages/ProfilePage").then((m) => ({ default: m.ProfilePage })));
-const DiningPage = lazy(() => import("../pages/DiningPage").then((m) => ({ default: m.DiningPage })));
-const EventsPage = lazy(() => import("../pages/EventsPage").then((m) => ({ default: m.EventsPage })));
-const TransfersPage = lazy(() => import("../pages/TransfersPage").then((m) => ({ default: m.TransfersPage })));
-const WellnessPage = lazy(() => import("../pages/WellnessPage").then((m) => ({ default: m.WellnessPage })));
 
 function SuspenseWrapper({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>;
@@ -48,16 +41,9 @@ export const router = createBrowserRouter(
         { path: ROUTES.HOME, element: <SuspenseWrapper><HomePage /></SuspenseWrapper> },
         { path: ROUTES.HOTELS, element: <SuspenseWrapper><HotelsPage /></SuspenseWrapper> },
         { path: ROUTES.HOTEL_DETAIL, element: <SuspenseWrapper><HotelDetailPage /></SuspenseWrapper> },
-        { path: ROUTES.OFFERS, element: <SuspenseWrapper><OffersPage /></SuspenseWrapper> },
-        { path: ROUTES.OFFER_DETAIL, element: <SuspenseWrapper><OfferDetailPage /></SuspenseWrapper> },
-        { path: ROUTES.TRAVEL_GUIDE, element: <SuspenseWrapper><TravelGuidePage /></SuspenseWrapper> },
-        { path: ROUTES.ARTICLE_DETAIL, element: <SuspenseWrapper><ArticleDetailPage /></SuspenseWrapper> },
+
         { path: ROUTES.BOOKING_LOOKUP, element: <SuspenseWrapper><BookingLookupPage /></SuspenseWrapper> },
         { path: ROUTES.CONTACT, element: <SuspenseWrapper><ContactPage /></SuspenseWrapper> },
-        { path: "/dining", element: <SuspenseWrapper><DiningPage /></SuspenseWrapper> },
-        { path: "/events", element: <SuspenseWrapper><EventsPage /></SuspenseWrapper> },
-        { path: "/transfers", element: <SuspenseWrapper><TransfersPage /></SuspenseWrapper> },
-        { path: "/wellness", element: <SuspenseWrapper><WellnessPage /></SuspenseWrapper> },
 
         // Protected Customer Routes
         {
@@ -111,7 +97,7 @@ export const router = createBrowserRouter(
         {
           path: ROUTES.STAFF_BOOKINGS,
           element: (
-            <PrivateRoute allowedRoles={[Role.STAFF, Role.MANAGER, Role.ADMIN]}>
+            <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
               <SuspenseWrapper><StaffBookingsPage /></SuspenseWrapper>
             </PrivateRoute>
           ),

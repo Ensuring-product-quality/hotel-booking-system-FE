@@ -344,7 +344,21 @@ export function HotelDetailPage() {
     (room) => room.status !== "inactive" && room.status !== "maintenance"
   );
 
-  const hotelImages = hotel.images ?? [];
+  const rawImages = hotel.images ?? [];
+  const DEFAULT_GALLERY = [
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1546548970-71785318a17b?auto=format&fit=crop&w=1200&q=80",
+  ];
+  const hotelImages = [...rawImages];
+  DEFAULT_GALLERY.forEach((fallbackUrl) => {
+    if (hotelImages.length < 5 && !hotelImages.includes(fallbackUrl)) {
+      hotelImages.push(fallbackUrl);
+    }
+  });
 
   return (
     <div className="flex flex-col flex-1">
@@ -495,21 +509,21 @@ export function HotelDetailPage() {
 
             {/* Amenities */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-800 mb-4">Tiện ích nổi bật</h2>
+              <h2 className="text-xl font-bold text-slate-800 mb-4">Các tiện nghi phổ biến</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold">
                 {[
-                  { name: "Wifi miễn phí", icon: "📶" },
-                  { name: "Bể bơi vô cực", icon: "🏊" },
-                  { name: "Phòng Gym 24/7", icon: "🏋️" },
-                  { name: "Spa & Wellness", icon: "💆" },
-                  { name: "Nhà hàng 5 sao", icon: "🍽️" },
-                  { name: "Bãi đỗ xe", icon: "🚗" },
-                  { name: "Hội nghị", icon: "🤝" },
-                  { name: "Điều hòa", icon: "❄️" },
+                  { name: "Wifi miễn phí", icon: "fa-solid fa-wifi text-brand-600" },
+                  { name: "Bể bơi vô cực", icon: "fa-solid fa-water-ladder text-sky-500" },
+                  { name: "Phòng Gym 24/7", icon: "fa-solid fa-dumbbell text-emerald-600" },
+                  { name: "Spa & Wellness", icon: "fa-solid fa-spa text-pink-500" },
+                  { name: "Nhà hàng 5 sao", icon: "fa-solid fa-utensils text-amber-500" },
+                  { name: "Bãi đỗ xe", icon: "fa-solid fa-car text-indigo-500" },
+                  { name: "Hội nghị", icon: "fa-solid fa-handshake text-purple-500" },
+                  { name: "Điều hòa", icon: "fa-solid fa-snowflake text-cyan-500" },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="text-slate-600">{item.name}</span>
+                  <div key={i} className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-100/80 hover:bg-slate-100/50 transition">
+                    <i className={`${item.icon} text-base shrink-0`}></i>
+                    <span className="text-slate-700">{item.name}</span>
                   </div>
                 ))}
               </div>

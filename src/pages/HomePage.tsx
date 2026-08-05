@@ -175,6 +175,9 @@ export function HomePage() {
                 src={dest.image}
                 alt={dest.name}
                 className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-all duration-500"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600";
+                }}
               />
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
@@ -195,73 +198,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Special Offers */}
-      <section className="bg-slate-100/50 py-16 w-full">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-800">Ưu đãi đặc biệt</h2>
-            <p className="text-slate-500 mt-1">Tiết kiệm nhiều hơn cho chuyến đi tiếp theo của bạn</p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Big Promo Card */}
-            <div className="lg:col-span-2 relative rounded-2xl overflow-hidden h-[340px] shadow-md group">
-              <img
-                src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200"
-                alt="Promo 1"
-                className="absolute inset-0 h-full w-full object-cover group-hover:scale-101 transition-all duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent"></div>
-              <div className="absolute inset-y-0 left-0 flex flex-col justify-center px-8 sm:px-12 text-white max-w-lg">
-                <span className="bg-brand-500 text-white text-xs uppercase font-bold py-1 px-2.5 rounded-md w-fit mb-3">
-                  Giảm tới 20%
-                </span>
-                <h3 className="text-xl sm:text-2xl font-bold mb-2">Đại hội nghỉ dưỡng nội đô HotelBooking</h3>
-                <p className="text-slate-300 text-sm mb-6">
-                  Tận hưởng kỳ nghỉ ngắn ngày tại các khách sạn 5 sao ngay trong lòng thành phố với đặc quyền check-in sớm.
-                </p>
-                <button
-                  onClick={() => navigate(ROUTES.HOTELS)}
-                  className="bg-white text-slate-800 hover:bg-slate-50 transition px-6 py-2.5 rounded-lg text-sm font-semibold w-fit"
-                >
-                  Khám phá ngay
-                </button>
-              </div>
-            </div>
-
-            {/* Small Promo Cards Stack */}
-            <div className="flex flex-col gap-6">
-              {/* Small Promo 1 */}
-              <div className="relative rounded-2xl overflow-hidden flex-1 min-h-[158px] shadow-sm group">
-                <img
-                  src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=600"
-                  alt="Promo 2"
-                  className="absolute inset-0 h-full w-full object-cover group-hover:scale-101 transition-all duration-300"
-                />
-                <div className="absolute inset-0 bg-black/50"></div>
-                <div className="absolute inset-0 flex flex-col justify-center p-6 text-white">
-                  <h4 className="font-bold text-base mb-1">Ưu đãi App mới</h4>
-                  <p className="text-xs text-slate-300 max-w-[240px]">Nhận thêm 10% cho đơn hàng đầu tiên qua ứng dụng di động.</p>
-                </div>
-              </div>
-
-              {/* Small Promo 2 */}
-              <div className="relative rounded-2xl overflow-hidden flex-1 min-h-[158px] shadow-sm group">
-                <img
-                  src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=600"
-                  alt="Promo 3"
-                  className="absolute inset-0 h-full w-full object-cover group-hover:scale-101 transition-all duration-300"
-                />
-                <div className="absolute inset-0 bg-black/50"></div>
-                <div className="absolute inset-0 flex flex-col justify-center p-6 text-white">
-                  <h4 className="font-bold text-base mb-1">Thẻ hội viên thân thiết</h4>
-                  <p className="text-xs text-slate-300 max-w-[240px]">Tích điểm đổi đêm nghỉ miễn phí và quà tặng đặc biệt.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Why Choose Us */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

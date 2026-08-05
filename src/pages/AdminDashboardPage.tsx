@@ -258,6 +258,23 @@ export function AdminDashboardPage() {
     },
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: (id: number) => userApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsersReal"] });
+      alert("Xóa tài khoản thành công!");
+    },
+    onError: (err) => {
+      alert(getErrorMessage(err, "Không thể xóa tài khoản này."));
+    },
+  });
+
+  const handleDeleteUser = (id: number, username: string) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}" không? Thao tác này không thể hoàn tác.`)) {
+      deleteUserMutation.mutate(id);
+    }
+  };
+
   const createRoomMutation = useMutation({
     mutationFn: (body: RoomCreateDTO) => roomApi.create(body),
     onSuccess: () => {
@@ -1148,7 +1165,7 @@ export function AdminDashboardPage() {
                 <div>
                   <h1 className="text-2xl font-extrabold text-white">Hệ Thống Phân Quyền & Quản Lý Nhân Sự</h1>
                   <p className="text-slate-400 text-xs mt-1">
-                    Quản lý danh sách thành viên, phân quyền vai trò (Admin, Manager, Staff, Customer) từ cơ sở dữ liệu.
+                    Quản lý danh sách thành viên, phân quyền vai trò (Admin, Manager, Customer) từ cơ sở dữ liệu.
                   </p>
                 </div>
                 <button
@@ -1176,7 +1193,7 @@ export function AdminDashboardPage() {
                     <h2 className="text-3xl font-black text-white">{ALL_ROLES.length}</h2>
                     <div className="flex gap-1.5">
                       <span className="px-2 py-0.5 bg-teal-500/20 text-teal-300 rounded font-bold text-[9px]">ADMIN</span>
-                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded font-bold text-[9px]">STAFF</span>
+                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded font-bold text-[9px]">MANAGER</span>
                       <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded font-bold text-[9px]">CUSTOMER</span>
                     </div>
                   </div>
@@ -1226,7 +1243,7 @@ export function AdminDashboardPage() {
                                 className={`px-2.5 py-1 rounded text-[9px] font-extrabold uppercase border ${
                                   u.role === Role.ADMIN
                                     ? "bg-teal-500/20 text-teal-300 border-teal-500/30"
-                                    : u.role === Role.MANAGER || u.role === Role.STAFF
+                                    : u.role === Role.MANAGER
                                     ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
                                     : "bg-slate-800 text-slate-300 border-slate-700"
                                 }`}
@@ -1241,16 +1258,26 @@ export function AdminDashboardPage() {
                               </span>
                             </td>
                             <td className="py-4 px-6 text-right">
-                              <button
-                                onClick={() => {
-                                  setEditingUser(u);
-                                  setEditUserRole(u.role);
-                                  setEditUserStatus(u.status);
-                                }}
-                                className="px-3 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 text-xs font-bold rounded-lg border border-teal-500/40 transition cursor-pointer"
-                              >
-                                <i className="fa-solid fa-user-gear mr-1"></i> Phân Quyền
-                              </button>
+                              <div className="flex justify-end items-center gap-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingUser(u);
+                                    setEditUserRole(u.role);
+                                    setEditUserStatus(u.status);
+                                  }}
+                                  className="px-3 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 text-xs font-bold rounded-lg border border-teal-500/40 transition cursor-pointer flex items-center gap-1"
+                                >
+                                  <i className="fa-solid fa-user-gear"></i>
+                                  <span>Phân Quyền</span>
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteUser(u.id, u.username)}
+                                  className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold rounded-lg border border-rose-500/40 transition cursor-pointer flex items-center gap-1"
+                                >
+                                  <i className="fa-solid fa-trash-can"></i>
+                                  <span>Xóa</span>
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1501,7 +1528,6 @@ export function AdminDashboardPage() {
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 outline-none text-white focus:border-teal-500"
                 >
                   <option value={Role.MANAGER}>MANAGER (Quản lý khách sạn)</option>
-                  <option value={Role.STAFF}>STAFF (Nhân viên lễ tân)</option>
                   <option value={Role.ADMIN}>ADMIN (Quản trị viên)</option>
                   <option value={Role.CUSTOMER}>CUSTOMER (Khách hàng)</option>
                 </select>
@@ -1720,7 +1746,6 @@ export function AdminDashboardPage() {
                 >
                   <option value={Role.CUSTOMER}>CUSTOMER (Khách hàng)</option>
                   <option value={Role.MANAGER}>MANAGER (Quản lý khách sạn)</option>
-                  <option value={Role.STAFF}>STAFF (Nhân viên lễ tân)</option>
                   <option value={Role.ADMIN}>ADMIN (Quản trị viên)</option>
                 </select>
               </div>
@@ -1771,3 +1796,4 @@ export function AdminDashboardPage() {
     </div>
   );
 }
+
