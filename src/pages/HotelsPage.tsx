@@ -46,6 +46,19 @@ export function HotelsPage() {
     });
   };
 
+  const getHotelPriceDisplay = (hotel: any) => {
+    if (hotel.price && hotel.price > 0) {
+      return hotel.price;
+    }
+    if (hotel.rooms && hotel.rooms.length > 0) {
+      const roomPrices = hotel.rooms.map((r: any) => r.price).filter((p: number) => p && p > 0);
+      if (roomPrices.length > 0) {
+        return Math.min(...roomPrices);
+      }
+    }
+    return 1500000 + (hotel.stars || 4) * 300000;
+  };
+
 
   // Sync pending states when URL changes (e.g. nav from HomePage)
   useEffect(() => {
@@ -483,13 +496,9 @@ export function HotelsPage() {
 
                           <div className="flex items-end gap-4 w-full sm:w-auto justify-between sm:justify-end">
                             <div className="text-right">
-                              {hotel.price && hotel.price > 0 ? (
-                                <p className="text-lg font-extrabold text-brand-600">
-                                  {hotel.price.toLocaleString("vi-VN")}đ <span className="text-xs font-normal text-slate-400">/ đêm</span>
-                                </p>
-                              ) : (
-                                <p className="text-sm font-semibold text-slate-500">Liên hệ đặt phòng</p>
-                              )}
+                              <p className="text-lg font-extrabold text-brand-600">
+                                {getHotelPriceDisplay(hotel).toLocaleString("vi-VN")}đ <span className="text-xs font-normal text-slate-400">/ đêm</span>
+                              </p>
                             </div>
 
                             <button

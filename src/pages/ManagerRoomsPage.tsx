@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roomApi } from "../services/roomApi";
 import { hotelApi } from "../services/hotelApi";
@@ -252,6 +252,7 @@ export function ManagerRoomsPage() {
                     <th className="py-4 px-6">Khách sạn</th>
                     <th className="py-4 px-6">Số phòng</th>
                     <th className="py-4 px-6">Loại phòng</th>
+                    <th className="py-4 px-6">Sức chứa</th>
                     <th className="py-4 px-6">Đơn giá (VND / đêm)</th>
                     <th className="py-4 px-6">Trạng thái</th>
                     <th className="py-4 px-6 text-right">Thao tác</th>
