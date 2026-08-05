@@ -12,6 +12,7 @@ const STATUS_TABS = [
   { id: "pending_payment", label: "Chờ xác nhận",  icon: "fa-solid fa-clock" },
   { id: "confirmed",       label: "Đã xác nhận",   icon: "fa-solid fa-circle-check" },
   { id: "checked_in",      label: "Đang nhận phòng",icon: "fa-solid fa-key" },
+  { id: "checked_out",     label: "Đã trả phòng",  icon: "fa-solid fa-door-open" },
   { id: "completed",       label: "Hoàn thành",    icon: "fa-solid fa-star" },
   { id: "cancelled",       label: "Đã hủy",        icon: "fa-solid fa-ban" },
 ];
