@@ -275,8 +275,19 @@ export function Header() {
               </Link>
 
 
+              {/* Nút Trang Quản Lý cho Manager / Admin */}
+              {(user?.role === Role.MANAGER || user?.role === Role.ADMIN) && (
+                <Link
+                  to={user?.role === Role.ADMIN ? ROUTES.ADMIN_DASHBOARD : ROUTES.MANAGER_HOTELS}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold rounded-lg border border-brand-100 transition shadow-sm cursor-pointer shrink-0"
+                  title="Trang Quản Lý"
+                >
+                  <i className="fa-solid fa-gauge-high"></i>
+                  <span>Trang Quản Lý</span>
+                </Link>
+              )}
 
-              {/* User Dropdown/Display */}
+
               <div className="relative group">
                 <button 
                   onClick={() => navigate(ROUTES.PROFILE)}
@@ -497,7 +508,20 @@ export function Header() {
             </Link>
           </nav>
           
+          {/* Nút Trang Quản Lý (mobile) */}
+          {isAuthenticated && (user?.role === Role.MANAGER || user?.role === Role.ADMIN) && (
+            <Link
+              to={user?.role === Role.ADMIN ? ROUTES.ADMIN_DASHBOARD : ROUTES.MANAGER_HOTELS}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 text-sm font-bold rounded-lg bg-brand-50 text-brand-700 border border-brand-100 hover:bg-brand-100 transition mt-1"
+            >
+              <i className="fa-solid fa-gauge-high text-brand-600"></i>
+              Trang Quản Lý
+            </Link>
+          )}
+
           {/* Drawer Footer if not authenticated */}
+
           {!isAuthenticated && (
             <div className="pt-4 border-t border-slate-100 flex flex-col gap-2">
               <Link
