@@ -301,7 +301,21 @@ export function HotelDetailPage() {
     (room) => room.status !== "inactive" && room.status !== "maintenance"
   );
 
-  const hotelImages = hotel.images ?? [];
+  const rawImages = hotel.images ?? [];
+  const DEFAULT_GALLERY = [
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1546548970-71785318a17b?auto=format&fit=crop&w=1200&q=80",
+  ];
+  const hotelImages = [...rawImages];
+  DEFAULT_GALLERY.forEach((fallbackUrl) => {
+    if (hotelImages.length < 5 && !hotelImages.includes(fallbackUrl)) {
+      hotelImages.push(fallbackUrl);
+    }
+  });
 
   return (
     <div className="flex flex-col flex-1">
