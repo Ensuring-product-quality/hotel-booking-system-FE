@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 
-if (window.location.pathname === "/" || window.location.pathname === "") {
+if (import.meta.env.PROD && (window.location.pathname === "/" || window.location.pathname === "")) {
   window.location.replace("/vi-vn/");
 }
 
