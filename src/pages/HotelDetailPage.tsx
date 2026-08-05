@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hotelApi } from "../services/hotelApi";
@@ -8,7 +8,12 @@ import { useAuthStore } from "../store/authStore";
 import { getErrorMessage } from "../services/apiClient";
 import { ROUTES } from "../constants/routes";
 import { Role } from "../types/auth";
-
+import {
+  getMediaUrl,
+  handleImageError,
+  DEFAULT_HOTEL_IMAGE,
+  DEFAULT_ROOM_IMAGE,
+} from "../utils/imageUtils";
 
 export function HotelDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +21,44 @@ export function HotelDetailPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
   const queryClient = useQueryClient();
+
+  // Image Upload & Replacement States
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const uploadImageMutation = useMutation({
+    mutationFn: (variables: { file: File; index: number | null }) =>
+      hotelApi.uploadImage(hotelId, variables.file, variables.index ?? undefined),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["hotel", hotelId] });
+      void queryClient.invalidateQueries({ queryKey: ["hotels"] });
+      void queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      setUploadingImage(false);
+      setActiveImageIndex(null);
+      alert("Tải lên hình ảnh khách sạn thành công!");
+    },
+    onError: (err) => {
+      setUploadingImage(false);
+      setActiveImageIndex(null);
+      alert(getErrorMessage(err, "Tải lên hình ảnh thất bại."));
+    },
+  });
+
+  const handleDetailImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setUploadingImage(true);
+      uploadImageMutation.mutate({ file, index: activeImageIndex });
+    }
+  };
+
+  const triggerImageReplacement = (index: number) => {
+    if (user?.role === Role.MANAGER || user?.role === Role.ADMIN) {
+      setActiveImageIndex(index);
+      fileInputRef.current?.click();
+    }
+  };
 
   // Booking Modal States
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -338,7 +381,33 @@ export function HotelDetailPage() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center flex-wrap">
+            {(user?.role === Role.MANAGER || user?.role === Role.ADMIN) && (
+              <>
+                <label 
+                  onClick={() => setActiveImageIndex(null)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 px-3.5 py-2 rounded-xl shadow-md transition cursor-pointer"
+                >
+                  <i className="fa-solid fa-upload"></i>
+                  <span>{uploadingImage ? "Đang tải ảnh..." : "Tải thêm ảnh mới"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleDetailImageUpload}
+                    className="hidden"
+                    disabled={uploadingImage}
+                  />
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleDetailImageUpload}
+                  className="hidden"
+                  disabled={uploadingImage}
+                />
+              </>
+            )}
             <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-xl shadow-sm transition">
               <i className="fa-solid fa-share-nodes"></i>
               <span>Chia sẻ</span>
@@ -354,41 +423,77 @@ export function HotelDetailPage() {
         {hotelImages && hotelImages.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-5 gap-2 rounded-2xl overflow-hidden shadow-md mb-8 h-[240px] sm:h-[360px] md:h-[420px] bg-slate-100">
             {/* Left large featured image */}
-            <div className="md:col-span-2 md:row-span-2 relative overflow-hidden h-full">
+            <div 
+              className={`md:col-span-2 md:row-span-2 relative overflow-hidden h-full ${
+                (user?.role === Role.MANAGER || user?.role === Role.ADMIN) ? "cursor-pointer group" : ""
+              }`}
+              onClick={() => triggerImageReplacement(0)}
+            >
               <img
-                src={hotelImages[0]}
+                src={getMediaUrl(hotelImages[0], DEFAULT_HOTEL_IMAGE)}
+                onError={(e) => handleImageError(e, DEFAULT_HOTEL_IMAGE)}
                 alt={hotel.name}
-                className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  target.onerror = null;
-                  target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
-                }}
+                className="h-full w-full object-cover group-hover:scale-[1.02] transition duration-500"
               />
-              <button className="absolute bottom-4 left-4 bg-white/90 hover:bg-white text-slate-800 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-lg shadow-md flex items-center gap-1.5 transition cursor-pointer">
-                📷 <span>Xem mọi bức ảnh</span>
+              {(user?.role === Role.MANAGER || user?.role === Role.ADMIN) && (
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white gap-2">
+                  <i className="fa-solid fa-camera text-2xl"></i>
+                  <span className="text-sm font-bold">Thay đổi ảnh bìa</span>
+                </div>
+              )}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                className="absolute bottom-4 left-4 bg-white/90 hover:bg-white text-slate-800 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-lg shadow-md flex items-center gap-1.5 transition cursor-pointer z-10"
+              >
+                📷 <span>Xem mọi bức ảnh ({hotelImages.length})</span>
               </button>
             </div>
 
             {/* Right smaller images (6 items) */}
-            {hotelImages.slice(1, 7).map((imgUrl, i) => (
-              <div key={i} className="hidden md:block overflow-hidden h-full">
-                <img
-                  src={imgUrl}
-                  alt={`${hotel.name} ${i + 2}`}
-                  className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    target.onerror = null;
-                    target.src = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80";
-                  }}
-                />
-              </div>
-            ))}
+            {hotelImages.slice(1, 7).map((imgUrl, i) => {
+              const imageIndex = i + 1;
+              return (
+                <div 
+                  key={i} 
+                  className={`hidden md:block overflow-hidden h-full relative ${
+                    (user?.role === Role.MANAGER || user?.role === Role.ADMIN) ? "cursor-pointer group" : ""
+                  }`}
+                  onClick={() => triggerImageReplacement(imageIndex)}
+                >
+                  <img
+                    src={getMediaUrl(imgUrl, DEFAULT_HOTEL_IMAGE)}
+                    onError={(e) => handleImageError(e, DEFAULT_HOTEL_IMAGE)}
+                    alt={`${hotel.name} ${imageIndex + 1}`}
+                    className="h-full w-full object-cover group-hover:scale-[1.02] transition duration-500"
+                  />
+                  {(user?.role === Role.MANAGER || user?.role === Role.ADMIN) && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white gap-1.5 text-center px-2">
+                      <i className="fa-solid fa-camera text-lg"></i>
+                      <span className="text-xs font-bold">Thay đổi ảnh này</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
-          <div className="rounded-2xl overflow-hidden shadow-md mb-8 h-[460px] bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-400">
-            Khách sạn chưa có ảnh
+          <div className="rounded-2xl overflow-hidden shadow-md mb-8 h-[300px] bg-slate-100 flex flex-col items-center justify-center gap-3 text-sm font-semibold text-slate-400">
+            <p>Khách sạn chưa có ảnh</p>
+            {(user?.role === Role.MANAGER || user?.role === Role.ADMIN) && (
+              <label className="flex items-center gap-1.5 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 px-4 py-2.5 rounded-xl shadow-md transition cursor-pointer">
+                <i className="fa-solid fa-upload"></i>
+                <span>Tải ảnh lên ngay</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleDetailImageUpload}
+                  className="hidden"
+                  disabled={uploadingImage}
+                />
+              </label>
+            )}
           </div>
         )}
 
@@ -439,12 +544,10 @@ export function HotelDetailPage() {
                       {room.images && room.images[0] && (
                         <div className="h-32 w-full rounded-lg overflow-hidden bg-slate-100">
                           <img
-                            src={room.images[0]}
+                            src={getMediaUrl(room.images[0], DEFAULT_ROOM_IMAGE)}
+                            onError={(e) => handleImageError(e, DEFAULT_ROOM_IMAGE)}
                             alt={`Phòng ${room.roomNumber}`}
                             className="h-full w-full object-cover hover:scale-105 transition duration-300"
-                            onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=600";
-                            }}
                           />
                         </div>
                       )}

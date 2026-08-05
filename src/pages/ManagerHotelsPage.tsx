@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { hotelApi } from "../services/hotelApi";
 import { useAuthStore } from "../store/authStore";
 import { getErrorMessage } from "../services/apiClient";
 import { Role } from "../types/auth";
 import type { HotelResponseDTO, HotelCreateDTO } from "../types/hotel";
+import { getMediaUrl, handleImageError, DEFAULT_HOTEL_IMAGE } from "../utils/imageUtils";
 
 export function ManagerHotelsPage() {
   const queryClient = useQueryClient();
@@ -89,6 +91,8 @@ export function ManagerHotelsPage() {
       hotelApi.uploadImage(id, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      queryClient.invalidateQueries({ queryKey: ["hotels"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel"] });
       queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       setUploadingId(null);
       alert("Tải ảnh lên thành công!");
@@ -206,6 +210,7 @@ export function ManagerHotelsPage() {
                 <thead className="bg-slate-50 border-b border-slate-100 text-slate-400 uppercase text-[9px] tracking-wider">
                   <tr>
                     <th className="py-4 px-6">ID</th>
+                    <th className="py-4 px-6">Hình ảnh</th>
                     <th className="py-4 px-6">Tên khách sạn</th>
                     <th className="py-4 px-6">Địa chỉ</th>
                     <th className="py-4 px-6">Thành phố</th>
@@ -218,7 +223,21 @@ export function ManagerHotelsPage() {
                   {hotels.map((hotel) => (
                     <tr key={hotel.id} className="hover:bg-slate-50/50 transition">
                       <td className="py-4.5 px-6 font-extrabold text-slate-800">#{hotel.id}</td>
-                      <td className="py-4.5 px-6 font-bold text-slate-800">{hotel.name}</td>
+                      <td className="py-4.5 px-6">
+                        <Link to={`/hotels/${hotel.id}`} className="block h-10 w-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                          <img
+                            src={getMediaUrl(hotel.images?.[0], DEFAULT_HOTEL_IMAGE)}
+                            onError={(e) => handleImageError(e, DEFAULT_HOTEL_IMAGE)}
+                            alt={hotel.name}
+                            className="h-full w-full object-cover hover:scale-105 transition duration-300"
+                          />
+                        </Link>
+                      </td>
+                      <td className="py-4.5 px-6 font-bold text-slate-800">
+                        <Link to={`/hotels/${hotel.id}`} className="hover:text-brand-600 transition">
+                          {hotel.name}
+                        </Link>
+                      </td>
                       <td className="py-4.5 px-6 font-medium text-slate-500">{hotel.address}</td>
                       <td className="py-4.5 px-6 font-semibold">{hotel.city}</td>
                       <td className="py-4.5 px-6 text-amber-500 font-bold">{hotel.stars} ★</td>

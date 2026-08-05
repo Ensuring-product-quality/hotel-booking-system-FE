@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { hotelApi } from "../services/hotelApi";
 import { getErrorMessage } from "../services/apiClient";
 import { ROUTES } from "../constants/routes";
+import { getMediaUrl, handleImageError, DEFAULT_HOTEL_IMAGE } from "../utils/imageUtils";
 
 export function HotelsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -354,23 +355,13 @@ export function HotelsPage() {
                       className="flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 group"
                     >
                       {/* Image Container */}
-                      <div className="relative w-full md:w-80 h-56 md:h-auto overflow-hidden">
-                        {hotel.images?.[0] ? (
-                          <img
-                            src={hotel.images[0]}
-                            alt={hotel.name}
-                            className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.onerror = null;
-                              target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
-                            }}
-                          />
-                        ) : (
-                          <div className="h-full w-full min-h-56 bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
-                            Chưa có ảnh
-                          </div>
-                        )}
+                      <div className="relative w-full md:w-80 h-56 md:h-auto overflow-hidden bg-slate-100">
+                        <img
+                          src={getMediaUrl(hotel.images?.[0], DEFAULT_HOTEL_IMAGE)}
+                          onError={(e) => handleImageError(e, DEFAULT_HOTEL_IMAGE)}
+                          alt={hotel.name}
+                          className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
+                        />
                         <button className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white text-slate-600 hover:text-red-500 rounded-full transition shadow-sm cursor-pointer flex items-center justify-center w-8 h-8">
                           <i className="fa-regular fa-heart text-sm"></i>
                         </button>

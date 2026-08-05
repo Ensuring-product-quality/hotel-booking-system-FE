@@ -4,6 +4,8 @@ import type { RoomResponseDTO } from "./room";
 export const BookingStatus = {
   PENDING_PAYMENT: "pending_payment",
   CONFIRMED: "confirmed",
+  CHECKED_IN: "checked_in",
+  CHECKED_OUT: "checked_out",
   CANCELLED: "cancelled",
   COMPLETED: "completed",
 } as const;
@@ -24,6 +26,8 @@ export interface BookingResponseDTO {
   totalPrice: number;
   createdAt: string;
   updatedAt: string;
+  userFullName?: string;
+  userPhone?: string;
 }
 
 export interface BookingDetailDTO extends BookingResponseDTO {

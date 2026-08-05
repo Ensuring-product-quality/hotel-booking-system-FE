@@ -46,11 +46,14 @@ export const hotelApi = {
       .delete<StandardResponse<null>>(`/hotels/${id}`)
       .then((res) => res.data),
 
-  uploadImage: (id: number, file: File) => {
+  uploadImage: (id: number, file: File, replaceIndex?: number) => {
     const formData = new FormData();
     formData.append("file", file);
+    const url = replaceIndex !== undefined && replaceIndex !== null
+      ? `/hotels/${id}/images?replaceIndex=${replaceIndex}`
+      : `/hotels/${id}/images`;
     return apiClient
-      .post<StandardResponse<string>>(`/hotels/${id}/images`, formData, {
+      .post<StandardResponse<string>>(url, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((res) => res.data);

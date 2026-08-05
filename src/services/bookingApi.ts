@@ -66,4 +66,14 @@ export const bookingApi = {
         `/bookings/public/room/${roomId}/booked-dates`
       )
       .then((res) => res.data),
+
+  checkIn: (id: number) =>
+    apiClient
+      .post<StandardResponse<BookingResponseDTO>>(`/bookings/${id}/check-in`)
+      .then((res) => res.data),
+
+  checkOut: (id: number) =>
+    apiClient
+      .post<StandardResponse<BookingResponseDTO>>(`/bookings/${id}/check-out`)
+      .then((res) => res.data),
 };
