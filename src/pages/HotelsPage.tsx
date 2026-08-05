@@ -20,10 +20,13 @@ export function HotelsPage() {
   const sortParam    = searchParams.get("sort") || "id,asc";
 
   // ── PENDING (UI) states — changed by user but NOT yet applied ──
-  const [pendingCity,     setPendingCity]     = useState(cityParam);
-  const [pendingStars,    setPendingStars]    = useState<number | undefined>(starsParam);
-  const [pendingMinPrice, setPendingMinPrice] = useState<number>(minPriceParam ?? 0);
-  const [pendingMaxPrice, setPendingMaxPrice] = useState<number>(maxPriceParam ?? 20000000);
+  const [pendingCity,       setPendingCity]       = useState(cityParam);
+  const [pendingStars,      setPendingStars]      = useState<number | undefined>(starsParam);
+  const [pendingMinPrice,   setPendingMinPrice]   = useState<number>(minPriceParam ?? 0);
+  const [pendingMaxPrice,   setPendingMaxPrice]   = useState<number>(maxPriceParam ?? 20000000);
+  const [pendingAmenities,  setPendingAmenities]  = useState<string[]>([]);
+  const [pendingTypes,      setPendingTypes]      = useState<string[]>([]);
+
 
   // Sync pending states when URL changes (e.g. nav from HomePage)
   useEffect(() => {
@@ -75,6 +78,8 @@ export function HotelsPage() {
     setPendingStars(undefined);
     setPendingMinPrice(0);
     setPendingMaxPrice(20000000);
+    setPendingAmenities([]);
+    setPendingTypes([]);
     const newParams = new URLSearchParams();
     newParams.set("page", "0");
     setSearchParams(newParams);
@@ -255,6 +260,46 @@ export function HotelsPage() {
                       ))}
                     </span>
                     <span className="text-xs text-slate-500">{stars} sao</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Amenities Filter */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-3">Tiện nghi</label>
+              <div className="flex flex-col gap-2.5">
+                {["Bể bơi vô cực", "Wifi miễn phí", "Phòng Gym", "Bữa sáng miễn phí"].map((amenity) => (
+                  <label key={amenity} className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={pendingAmenities.includes(amenity)}
+                      onChange={() => setPendingAmenities((prev) =>
+                        prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+                      )}
+                      className="h-4 w-4 rounded border-slate-200 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                    />
+                    <span>{amenity}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Accommodation Type */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-3">Loại chỗ ở</label>
+              <div className="flex flex-col gap-2.5">
+                {["Khách sạn", "Resort & Spa", "Căn hộ dịch vụ"].map((type) => (
+                  <label key={type} className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={pendingTypes.includes(type)}
+                      onChange={() => setPendingTypes((prev) =>
+                        prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+                      )}
+                      className="h-4 w-4 rounded border-slate-200 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                    />
+                    <span>{type}</span>
                   </label>
                 ))}
               </div>
