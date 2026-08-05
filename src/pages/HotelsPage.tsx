@@ -63,7 +63,6 @@ export function HotelsPage() {
         city:     cityParam || undefined,
         stars:    starsParam,
         keyword:  keywordParam || undefined,
-        status:   "active",
         minPrice: minPriceParam,
         maxPrice: maxPriceParam,
         checkInDate: checkInParam || undefined,
@@ -125,6 +124,21 @@ export function HotelsPage() {
   const hotels       = data?.data?.content || [];
   const totalPages   = data?.data?.totalPages || 0;
   const totalElements = data?.data?.totalElements || 0;
+
+  // Sort hotels by highest rating, highest stars, and highest likes
+  const displayHotels = (hotels || []).slice().sort((a, b) => {
+    const ratingA = a.averageRating ?? 0;
+    const ratingB = b.averageRating ?? 0;
+    if (ratingB !== ratingA) return ratingB - ratingA;
+
+    const starsA = a.stars ?? 0;
+    const starsB = b.stars ?? 0;
+    if (starsB !== starsA) return starsB - starsA;
+
+    const likesA = likeCounts[a.id] ?? ((a.id * 7) % 30 + 12);
+    const likesB = likeCounts[b.id] ?? ((b.id * 7) % 30 + 12);
+    return likesB - likesA;
+  });
 
 
   return (
@@ -369,7 +383,7 @@ export function HotelsPage() {
             ) : (
               <>
                 <div className="flex flex-col gap-6">
-                  {hotels.map((hotel) => (
+                  {displayHotels.map((hotel) => (
                     <div
                       key={hotel.id}
                       className="flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 group"
@@ -382,6 +396,11 @@ export function HotelsPage() {
                           alt={hotel.name}
                           className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
                         />
+                        {hotel.status === "inactive" && (
+                          <div className="absolute top-4 left-4 bg-slate-800/80 text-slate-200 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md backdrop-blur-sm border border-slate-600">
+                            Tạm ngưng
+                          </div>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -399,10 +418,17 @@ export function HotelsPage() {
                       {/* Info Container */}
                       <div className="flex-1 p-6 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-0.5 text-amber-400 mb-1.5">
-                            {Array.from({ length: hotel.stars }).map((_, i) => (
-                              <i key={i} className="fa-solid fa-star text-xs"></i>
-                            ))}
+                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                            <div className="flex items-center gap-0.5 text-amber-400">
+                              {Array.from({ length: hotel.stars }).map((_, i) => (
+                                <i key={i} className="fa-solid fa-star text-xs"></i>
+                              ))}
+                            </div>
+                            {hotel.status === "inactive" && (
+                              <span className="px-2 py-0.5 bg-slate-200 text-slate-600 font-bold rounded text-[10px] uppercase border border-slate-300">
+                                TẠM NGƯNG HOẠT ĐỘNG
+                              </span>
+                            )}
                           </div>
 
                           <h3 className="text-xl font-bold text-slate-800 hover:text-brand-600 transition">

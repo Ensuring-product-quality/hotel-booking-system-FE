@@ -341,9 +341,8 @@ export function HotelDetailPage() {
   }
 
   const hotel = hotelData.data;
-  const rooms = (hotel.rooms || []).filter(
-    (room) => room.status !== "inactive" && room.status !== "maintenance"
-  );
+  const isHotelInactive = hotel.status === "inactive";
+  const rooms = hotel.rooms || [];
 
   const rawImages = hotel.images ?? [];
   const DEFAULT_GALLERY = [
@@ -365,6 +364,14 @@ export function HotelDetailPage() {
     <div className="flex flex-col flex-1">
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full flex-grow">
+        {/* Inactive Hotel Banner */}
+        {isHotelInactive && (
+          <div className="mb-6 p-4 bg-slate-200 border border-slate-300 rounded-2xl text-slate-700 font-bold text-xs flex items-center gap-3 shadow-sm">
+            <i className="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i>
+            <span>Khách sạn này hiện đang ở trạng thái TẠM NGƯNG HOẠT ĐỘNG. Tất cả các phòng đã chuyển sang tạm ngưng và không thể đặt.</span>
+          </div>
+        )}
+
         {/* Title and Address Row */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
@@ -540,36 +547,67 @@ export function HotelDetailPage() {
                 <p className="text-slate-400 text-sm">Hiện tại khách sạn này đã hết phòng trống.</p>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {rooms.map((room: any) => (
-                    <div key={room.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-3">
-                      {room.images && room.images[0] && (
-                        <div className="h-32 w-full rounded-lg overflow-hidden bg-slate-100">
-                          <img
-                            src={getMediaUrl(room.images[0], DEFAULT_ROOM_IMAGE)}
-                            onError={(e) => handleImageError(e, DEFAULT_ROOM_IMAGE)}
-                            alt={`Phòng ${room.roomNumber}`}
-                            className="h-full w-full object-cover hover:scale-105 transition duration-300"
-                          />
-                        </div>
-                      )}
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-bold text-slate-800 text-sm">Phòng {room.roomNumber} ({room.type})</h4>
-                          <p className="text-[10px] text-slate-400 font-medium">Tiêu chuẩn • Giường lớn</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-extrabold text-brand-600">{(room.price).toLocaleString("vi-VN")}đ</p>
-                          <p className="text-[9px] text-slate-400">/ đêm</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleBookClick(room.id, room.roomNumber, room.price)}
-                        className="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg text-xs transition cursor-pointer"
+                  {rooms.map((room: any) => {
+                    const isRoomInactive = isHotelInactive || room.status === "inactive" || room.status === "maintenance";
+                    return (
+                      <div
+                        key={room.id}
+                        className={`p-4 rounded-xl border flex flex-col gap-3 transition ${
+                          isRoomInactive ? "bg-slate-100/80 border-slate-200" : "bg-slate-50 border-slate-100"
+                        }`}
                       >
-                        Đặt ngay
-                      </button>
-                    </div>
-                  ))}
+                        {room.images && room.images[0] && (
+                          <div className="h-32 w-full rounded-lg overflow-hidden bg-slate-100 relative">
+                            <img
+                              src={getMediaUrl(room.images[0], DEFAULT_ROOM_IMAGE)}
+                              onError={(e) => handleImageError(e, DEFAULT_ROOM_IMAGE)}
+                              alt={`Phòng ${room.roomNumber}`}
+                              className="h-full w-full object-cover hover:scale-105 transition duration-300"
+                            />
+                            {isRoomInactive && (
+                              <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-[1px] flex items-center justify-center">
+                                <span className="bg-slate-700/90 text-white font-extrabold text-xs px-3 py-1 rounded-md border border-slate-500 shadow">
+                                  TẠM NGƯNG
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                              <span>Phòng {room.roomNumber} ({room.type})</span>
+                              {isRoomInactive && (
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-slate-200 text-slate-600 rounded border border-slate-300">
+                                  TẠM NGƯNG
+                                </span>
+                              )}
+                            </h4>
+                            <p className="text-[10px] text-slate-400 font-medium">Tiêu chuẩn • Giường lớn</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-extrabold text-brand-600">{(room.price).toLocaleString("vi-VN")}đ</p>
+                            <p className="text-[9px] text-slate-400">/ đêm</p>
+                          </div>
+                        </div>
+                        {isRoomInactive ? (
+                          <button
+                            disabled
+                            className="w-full py-2.5 bg-slate-300 text-slate-600 font-bold rounded-lg text-xs border border-slate-300 cursor-not-allowed shadow-none"
+                          >
+                            Tạm ngưng
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleBookClick(room.id, room.roomNumber, room.price)}
+                            className="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg text-xs transition cursor-pointer"
+                          >
+                            Đặt ngay
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -1057,34 +1057,14 @@ export function StaffBookingsPage() {
               </div>
 
               {/* Bottom Quick Metric Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4 max-w-md">
                   <div className="h-12 w-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-xl shrink-0">
                     <i className="fa-solid fa-door-open"></i>
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-white">{availableRooms.length}</h3>
                     <p className="text-xs text-slate-400 font-semibold">Phòng trống hôm nay</p>
-                  </div>
-                </div>
-
-                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl shrink-0">
-                    <i className="fa-solid fa-plane-arrival"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white">{todayArrivals.length}</h3>
-                    <p className="text-xs text-slate-400 font-semibold">Dự kiến khách đến</p>
-                  </div>
-                </div>
-
-                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl shrink-0">
-                    <i className="fa-solid fa-plane-departure"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white">{todayDepartures.length}</h3>
-                    <p className="text-xs text-slate-400 font-semibold">Yêu cầu Check-out</p>
                   </div>
                 </div>
               </div>
