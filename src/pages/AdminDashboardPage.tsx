@@ -7,7 +7,6 @@ import { bookingApi } from "../services/bookingApi";
 import { roomApi } from "../services/roomApi";
 import { hotelApi } from "../services/hotelApi";
 import { userApi } from "../services/userApi";
-import { paymentApi } from "../services/paymentApi";
 import { getErrorMessage } from "../services/apiClient";
 import { Role, ALL_ROLES, type User } from "../types/auth";
 import { BookingStatus } from "../types/booking";
@@ -122,46 +121,29 @@ export function AdminDashboardPage() {
   });
   const users = useMemo(() => usersRes?.data?.content || [], [usersRes]);
 
-  // 5. Fetch All Payments for revenue calculation
-  const { data: paymentsRes } = useQuery({
-    queryKey: ["adminPaymentsReal"],
-    queryFn: () => paymentApi.getAll({ page: 0, size: 100 }),
-  });
-  const payments = useMemo(() => paymentsRes?.data?.content || [], [paymentsRes]);
-
   // ==================== REAL-TIME DYNAMIC CALCULATIONS ====================
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
 
-  // Total Revenue Calculation from real completed payments & confirmed bookings
-  const totalRevenue = useMemo(() => {
-    let sum = 0;
-    payments.forEach((p) => {
-      if (p.status === "completed") sum += p.amount;
-    });
-    if (sum === 0) {
-      bookings.forEach((b) => {
-        if (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.COMPLETED) sum += b.totalPrice;
-      });
-    }
-    return sum;
-  }, [payments, bookings]);
-
   // Occupancy Rate Calculation
   const totalRoomCount = rooms.length || 1;
-  const occupiedRooms = useMemo(() => {
-    return rooms.filter((r) => r.status === "OCCUPIED" || r.status === "inactive").length;
+  const availableRoomsCount = useMemo(() => {
+    return rooms.filter((r) => r.status === "active" || r.status === "available" || r.status === "AVAILABLE").length;
   }, [rooms]);
 
-  const availableRoomsCount = useMemo(() => {
-    return rooms.filter((r) => r.status === "active" || r.status === "AVAILABLE").length;
+  const occupiedRooms = useMemo(() => {
+    return rooms.filter((r) => r.status === "occupied" || r.status === "OCCUPIED").length;
   }, [rooms]);
 
   const dirtyRoomsCount = useMemo(() => {
-    return rooms.filter((r) => r.status === "DIRTY" || r.status === "CLEANING").length;
+    return rooms.filter((r) => r.status === "cleaning" || r.status === "DIRTY" || r.status === "CLEANING").length;
   }, [rooms]);
 
   const maintenanceRoomsCount = useMemo(() => {
-    return rooms.filter((r) => r.status === "MAINTENANCE" || r.status === "BLOCKED").length;
+    return rooms.filter((r) => r.status === "maintenance" || r.status === "MAINTENANCE" || r.status === "BLOCKED").length;
+  }, [rooms]);
+
+  const inactiveRoomsCount = useMemo(() => {
+    return rooms.filter((r) => r.status === "inactive" || r.status === "INACTIVE").length;
   }, [rooms]);
 
   const occupancyRate = Math.min(100, Math.round(((totalRoomCount - availableRoomsCount) / totalRoomCount) * 100)) || 0;
@@ -601,89 +583,25 @@ export function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Hàng 1: Thống kê Doanh Thu & Tỷ Lệ Lấp Đầy Phòng */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Thẻ Doanh Thu Thực Tế */}
-                <div className="lg:col-span-2 bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 relative overflow-hidden">
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">TỔNG DOANH THU HỆ THỐNG</p>
-                      <h2 className="text-3xl font-black text-white mt-1">
-                        ${totalRevenue.toLocaleString()}.00
-                      </h2>
-                      <p className="text-xs text-emerald-400 font-semibold mt-1 flex items-center gap-1">
-                        <i className="fa-solid fa-arrow-trend-up"></i>
-                        <span>Tính từ danh sách đơn đặt & thanh toán thực tế</span>
-                      </p>
-                    </div>
-                    <span className="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs px-3 py-1.5 rounded-lg font-bold">
-                      7 Ngày Gần Nhất
-                    </span>
-                  </div>
-
-                  {/* Biểu đồ Cột Doanh Thu Tương Tác */}
-                  <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2 border-t border-slate-800/60">
-                    {(totalRevenue === 0
-                      ? [
-                          { day: "T2", val: 5, label: "$0.00", highlight: false },
-                          { day: "T3", val: 5, label: "$0.00", highlight: false },
-                          { day: "T4", val: 5, label: "$0.00", highlight: false },
-                          { day: "T5", val: 5, label: "$0.00", highlight: false },
-                          { day: "T6", val: 5, label: "$0.00", highlight: false },
-                          { day: "T7", val: 5, label: "$0.00", highlight: false },
-                          { day: "CN", val: 5, label: "$0.00", highlight: false },
-                        ]
-                      : [
-                          { day: "T2", val: 40, label: `$${Math.round(totalRevenue * 0.12).toLocaleString()}`, highlight: false },
-                          { day: "T3", val: 60, label: `$${Math.round(totalRevenue * 0.18).toLocaleString()}`, highlight: false },
-                          { day: "T4", val: 50, label: `$${Math.round(totalRevenue * 0.15).toLocaleString()}`, highlight: false },
-                          { day: "T5", val: 95, label: `$${Math.round(totalRevenue * 0.28).toLocaleString()}`, highlight: true },
-                          { day: "T6", val: 70, label: `$${Math.round(totalRevenue * 0.20).toLocaleString()}`, highlight: false },
-                          { day: "T7", val: 85, label: `$${Math.round(totalRevenue * 0.24).toLocaleString()}`, highlight: false },
-                          { day: "CN", val: 55, label: `$${Math.round(totalRevenue * 0.16).toLocaleString()}`, highlight: false },
-                        ]
-                    ).map((item, idx) => (
-                      <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer" title={item.label}>
-                        {item.highlight && totalRevenue > 0 && (
-                          <span className="text-[10px] font-bold text-slate-950 bg-teal-400 px-2 py-0.5 rounded-full shadow animate-pulse">
-                            Top Peak
-                          </span>
-                        )}
-                        <div className="w-full bg-slate-900/80 rounded-t-lg h-32 flex items-end overflow-hidden border border-slate-800/40">
-                          <div
-                            style={{ height: `${item.val}%` }}
-                            className={`w-full rounded-t-lg transition-all duration-500 ${
-                              item.highlight && totalRevenue > 0
-                                ? "bg-gradient-to-t from-teal-500 to-emerald-300 shadow-lg shadow-teal-500/30"
-                                : "bg-teal-600/30 group-hover:bg-teal-500/60"
-                            }`}
-                          ></div>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-400 group-hover:text-white transition">
-                          {item.day}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
+              {/* Hàng 1: Thống kê Tỷ Lệ Lấp Đầy Phòng */}
+              <div className="grid grid-cols-1 gap-6">
                 {/* Vòng Tròn Tỷ Lệ Lấp Đầy Phòng */}
-                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between items-center text-center">
+                <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 flex flex-col items-center text-center shadow-xl">
                   <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider w-full text-left">
-                    TỶ LỆ LẤP ĐẦY PHÒNG THỰC TẾ
+                    TỶ LỆ LẤP ĐẦY PHÒNG THỰC TẾ HỆ THỐNG
                   </p>
 
-                  <div className="relative my-4 flex items-center justify-center">
-                    <svg className="w-44 h-44 transform -rotate-90">
-                      <circle cx="88" cy="88" r="70" stroke="#1E293B" strokeWidth="14" fill="transparent" />
+                  <div className="relative my-6 flex items-center justify-center">
+                    <svg className="w-48 h-48 transform -rotate-90">
+                      <circle cx="96" cy="96" r="76" stroke="#1E293B" strokeWidth="14" fill="transparent" />
                       <circle
-                        cx="88"
-                        cy="88"
-                        r="70"
+                        cx="96"
+                        cy="96"
+                        r="76"
                         stroke="#0D9488"
                         strokeWidth="14"
-                        strokeDasharray={440}
-                        strokeDashoffset={440 - (440 * occupancyRate) / 100}
+                        strokeDasharray={477}
+                        strokeDashoffset={477 - (477 * occupancyRate) / 100}
                         strokeLinecap="round"
                         fill="transparent"
                         className="transition-all duration-1000"
@@ -697,7 +615,7 @@ export function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                  <p className="text-xs text-slate-400 leading-relaxed max-w-md">
                     Hệ thống ghi nhận <span className="text-teal-400 font-bold">{availableRoomsCount} phòng trống</span> sẵn sàng phục vụ khách hàng.
                   </p>
                 </div>
@@ -1030,36 +948,44 @@ export function AdminDashboardPage() {
               </div>
 
               {/* Thanh Thống Kê Trạng Thái KPI thực tế */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-[#0A192F] border-l-4 border-l-teal-500 border border-slate-800/80 rounded-2xl p-5">
-                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG SẴN SÀNG (AVAILABLE)</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="bg-[#0A192F] border-l-4 border-l-teal-500 border border-slate-800/80 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG SẴN SÀNG</p>
                   <div className="flex items-baseline justify-between mt-2">
-                    <h3 className="text-3xl font-black text-white">{availableRoomsCount}</h3>
-                    <span className="text-xs font-semibold text-teal-400">Phòng trống</span>
+                    <h3 className="text-2xl font-black text-white">{availableRoomsCount}</h3>
+                    <span className="text-[11px] font-semibold text-teal-400">Sẵn sàng</span>
                   </div>
                 </div>
 
-                <div className="bg-[#0A192F] border-l-4 border-l-blue-500 border border-slate-800/80 rounded-2xl p-5">
-                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG ĐANG Ở (OCCUPIED)</p>
+                <div className="bg-[#0A192F] border-l-4 border-l-blue-500 border border-slate-800/80 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG CÓ KHÁCH</p>
                   <div className="flex items-baseline justify-between mt-2">
-                    <h3 className="text-3xl font-black text-white">{occupiedRooms}</h3>
-                    <span className="text-xs font-semibold text-slate-400">{occupancyRate}% Tỷ lệ lấp đầy</span>
+                    <h3 className="text-2xl font-black text-white">{occupiedRooms}</h3>
+                    <span className="text-[11px] font-semibold text-blue-400">Có khách</span>
                   </div>
                 </div>
 
-                <div className="bg-[#0A192F] border-l-4 border-l-rose-500 border border-slate-800/80 rounded-2xl p-5">
-                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG CẦN DỌN DẸP (DIRTY)</p>
+                <div className="bg-[#0A192F] border-l-4 border-l-amber-500 border border-slate-800/80 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG DỌN DẸP</p>
                   <div className="flex items-baseline justify-between mt-2">
-                    <h3 className="text-3xl font-black text-white">{dirtyRoomsCount}</h3>
-                    <span className="text-xs font-semibold text-rose-400">Chờ vệ sinh</span>
+                    <h3 className="text-2xl font-black text-white">{dirtyRoomsCount}</h3>
+                    <span className="text-[11px] font-semibold text-amber-400">Dọn dẹp</span>
                   </div>
                 </div>
 
-                <div className="bg-[#0A192F] border-l-4 border-l-amber-500 border border-slate-800/80 rounded-2xl p-5">
-                  <p className="text-[10px] font-bold uppercase text-slate-400">ĐANG BẢO TRÌ (MAINTENANCE)</p>
+                <div className="bg-[#0A192F] border-l-4 border-l-rose-500 border border-slate-800/80 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG BẢO TRÌ</p>
                   <div className="flex items-baseline justify-between mt-2">
-                    <h3 className="text-3xl font-black text-white">{maintenanceRoomsCount}</h3>
-                    <span className="text-xs font-semibold text-amber-400">Tạm dừng dịch vụ</span>
+                    <h3 className="text-2xl font-black text-white">{maintenanceRoomsCount}</h3>
+                    <span className="text-[11px] font-semibold text-rose-400">Bảo trì</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A192F] border-l-4 border-l-slate-500 border border-slate-800/80 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold uppercase text-slate-400">PHÒNG TẠM NGƯNG</p>
+                  <div className="flex items-baseline justify-between mt-2">
+                    <h3 className="text-2xl font-black text-white">{inactiveRoomsCount}</h3>
+                    <span className="text-[11px] font-semibold text-slate-400">Tạm ngưng</span>
                   </div>
                 </div>
               </div>
@@ -1129,30 +1055,51 @@ export function AdminDashboardPage() {
                 <h3 className="font-bold text-white text-base">Danh Sách Phòng Thực Tế Trên Hệ Thống ({rooms.length} phòng)</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {rooms.map((room) => (
-                    <div key={room.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-md">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="text-xl font-black text-white">Phòng {room.roomNumber}</h4>
-                          <p className="text-[10px] text-teal-400 font-semibold uppercase">{room.type} - {getHotelName(room.hotelId)}</p>
-                        </div>
-                        <span
-                          className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${
-                            room.status === "active" || room.status === "AVAILABLE"
-                              ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
-                              : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                          }`}
-                        >
-                          {room.status === "active" ? "HOẠT ĐỘNG" : room.status}
-                        </span>
-                      </div>
+                  {rooms.map((room) => {
+                    const isAvail = room.status === "active" || room.status === "available" || room.status === "AVAILABLE";
+                    const isOcc = room.status === "occupied" || room.status === "OCCUPIED";
+                    const isClean = room.status === "cleaning" || room.status === "DIRTY" || room.status === "CLEANING";
+                    const isMaint = room.status === "maintenance" || room.status === "MAINTENANCE" || room.status === "BLOCKED";
 
-                      <div className="text-xs font-semibold text-slate-300 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/50 flex justify-between items-center">
-                        <span className="text-teal-400 font-extrabold">${room.price}/đêm</span>
-                        <span className="text-[10px] text-slate-400">Sức chứa: {room.capacity || 2} người</span>
+                    return (
+                      <div key={room.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="text-xl font-black text-white">Phòng {room.roomNumber}</h4>
+                            <p className="text-[10px] text-teal-400 font-semibold uppercase">{room.type} - {getHotelName(room.hotelId)}</p>
+                          </div>
+                          <span
+                            className={`px-2.5 py-0.5 rounded text-[9px] font-extrabold uppercase border ${
+                              isAvail
+                                ? "bg-teal-500/20 text-teal-300 border-teal-500/30"
+                                : isOcc
+                                ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                                : isClean
+                                ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                                : isMaint
+                                ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                                : "bg-slate-700/50 text-slate-300 border-slate-600"
+                            }`}
+                          >
+                            {isAvail
+                              ? "Sẵn sàng"
+                              : isOcc
+                              ? "Có khách"
+                              : isClean
+                              ? "Dọn dẹp"
+                              : isMaint
+                              ? "Bảo trì"
+                              : "Tạm ngưng"}
+                          </span>
+                        </div>
+
+                        <div className="text-xs font-semibold text-slate-300 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/50 flex justify-between items-center">
+                          <span className="text-teal-400 font-extrabold">{room.price.toLocaleString("vi-VN")} VND / đêm</span>
+                          <span className="text-[10px] text-slate-400">Sức chứa: {room.capacity || 2} người</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
