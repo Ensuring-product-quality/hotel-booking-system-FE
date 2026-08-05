@@ -57,21 +57,17 @@ export function ProfilePage() {
     formState: { errors: passwordErrors },
   } = useForm<PasswordFormValues>({ resolver: zodResolver(passwordSchema) });
 
-  // Pre-fill fields
+  // Pre-fill fields (only on first mount / user id change, not on every re-render)
   useEffect(() => {
-    if (user?.email) {
-      setProfileValue("email", user.email);
-    }
-    if (user?.fullName) {
-      setProfileValue("fullName", user.fullName);
-    }
-    if (user?.phone) {
-      setProfileValue("phone", user.phone);
-    }
-    if (user?.avatarUrl) {
+    if (user?.email) setProfileValue("email", user.email);
+    if (user?.fullName) setProfileValue("fullName", user.fullName);
+    if (user?.phone) setProfileValue("phone", user.phone);
+    // Only set avatarPreview if we don't already have a locally-uploaded one
+    if (user?.avatarUrl && !avatarPreview) {
       setAvatarPreview(user.avatarUrl);
     }
-  }, [user, setProfileValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Mutations
   const updateProfileMutation = useMutation({
@@ -120,11 +116,17 @@ export function ProfilePage() {
   const uploadAvatarMutation = useMutation({
     mutationFn: (file: File) => userApi.updateAvatar(userId, file),
     onSuccess: (res) => {
-      setAvatarSuccessMsg("Cập nhật ảnh đại diện thành công!");
+      // userApi.updateAvatar returns res.data which is StandardResponse<string>
+      // So `res` here = StandardResponse<string>, actual URL = res.data
+      const newAvatarUrl: string | undefined = res?.data;
       setAvatarErrorMsg(null);
-      if (user && res.data) {
-        setUser({ ...user, avatarUrl: res.data });
-        setAvatarPreview(res.data);
+      if (newAvatarUrl && user) {
+        const updatedUser = { ...user, avatarUrl: newAvatarUrl };
+        setUser(updatedUser);
+        setAvatarPreview(newAvatarUrl);
+        setAvatarSuccessMsg("Cập nhật ảnh đại diện thành công!");
+      } else {
+        setAvatarSuccessMsg("Cập nhật ảnh đại diện thành công!");
       }
     },
     onError: (err) => {
@@ -132,6 +134,7 @@ export function ProfilePage() {
       setAvatarSuccessMsg(null);
     },
   });
+
 
   const handleProfileSubmit = (values: ProfileFormValues) => {
     updateProfileMutation.mutate(values);
@@ -144,9 +147,10 @@ export function ProfilePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setAvatarPreview(URL.createObjectURL(file));
-      
-      // Auto-upload when file is selected
+      // Show local preview immediately
+      const localUrl = URL.createObjectURL(file);
+      setAvatarPreview(localUrl);
+      // Upload to server
       uploadAvatarMutation.mutate(file);
     }
   };

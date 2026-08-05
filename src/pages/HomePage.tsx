@@ -133,42 +133,42 @@ export function HomePage() {
           {/* Search Box */}
           <form
             onSubmit={handleSearch}
-            className="w-full bg-white text-slate-700 rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col md:flex-row gap-4 items-end"
+            className="w-full bg-white text-slate-700 rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col md:flex-row gap-0 md:gap-0 items-stretch md:items-end"
           >
             {/* Destination */}
-            <div className="w-full md:flex-1 text-left">
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
+            <div className="w-full md:flex-1 text-left md:pr-4 md:border-r-2 md:border-slate-200">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                 <i className="fa-solid fa-location-dot text-brand-600"></i>
                 Điểm đến
               </label>
               <input
                 type="text"
-                placeholder="Thành phố, địa điểm hoặc tên khách sạn"
+                placeholder="Thành phố, địa điểm, tên khách sạn..."
                 value={searchState.city}
                 onChange={(e) => setSearchState({ ...searchState, city: e.target.value })}
-                className="w-full border-b border-slate-200 py-2 focus:border-brand-500 outline-none text-slate-800 font-medium placeholder-slate-400"
+                className="w-full py-1.5 focus:outline-none text-sm text-slate-800 font-medium placeholder-slate-300 bg-transparent"
               />
             </div>
 
             {/* Combined Check-in / Check-out Dates */}
-            <div className="w-full md:w-80 text-left relative shrink-0">
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
+            <div className="w-full md:w-80 text-left relative shrink-0 md:px-4 md:border-r-2 md:border-slate-200">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                 <i className="fa-regular fa-calendar text-brand-600"></i>
-                Thời gian lưu trú
+                Nhận - Trả phòng
               </label>
               <div
                 onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-                className="w-full border-b border-slate-200 py-2 flex items-center justify-between text-slate-800 font-medium cursor-pointer min-h-[40px]"
+                className="w-full py-1.5 flex items-center justify-between text-sm text-slate-800 font-medium cursor-pointer min-h-[36px]"
               >
                 <div className="flex-1">
-                  <span className={!searchState.checkInDate ? "text-slate-400" : ""}>
-                    {searchState.checkInDate ? formatDateDisplay(searchState.checkInDate) : "Nhận phòng"}
+                  <span className={!searchState.checkInDate ? "text-slate-300 text-xs" : "text-slate-800"}>
+                    {searchState.checkInDate ? formatDateDisplay(searchState.checkInDate) : "dd/mm/yyyy"}
                   </span>
                 </div>
-                <span className="text-slate-400 text-xs px-2">&rarr;</span>
+                <span className="text-slate-300 text-xs px-2">→</span>
                 <div className="flex-1 text-right">
-                  <span className={!searchState.checkOutDate ? "text-slate-400" : ""}>
-                    {searchState.checkOutDate ? formatDateDisplay(searchState.checkOutDate) : "Trả phòng"}
+                  <span className={!searchState.checkOutDate ? "text-slate-300 text-xs" : "text-slate-800"}>
+                    {searchState.checkOutDate ? formatDateDisplay(searchState.checkOutDate) : "dd/mm/yyyy"}
                   </span>
                 </div>
               </div>
@@ -277,8 +277,8 @@ export function HomePage() {
             </div>
 
             {/* Guests */}
-            <div className="w-full md:w-20 text-left shrink-0">
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
+            <div className="w-full md:w-24 text-left shrink-0 md:pl-4">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                 <i className="fa-solid fa-user-group text-brand-600"></i>
                 Khách
               </label>
@@ -288,14 +288,14 @@ export function HomePage() {
                 max="20"
                 value={searchState.guests}
                 onChange={(e) => setSearchState({ ...searchState, guests: parseInt(e.target.value) || 1 })}
-                className="w-full border-b border-slate-200 py-2 focus:border-brand-500 outline-none text-slate-800 font-medium"
+                className="w-full py-1.5 focus:outline-none text-sm text-slate-800 font-medium bg-transparent"
               />
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full md:w-auto px-8 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition hover:scale-[1.01] shadow-lg shadow-brand-600/10 cursor-pointer shrink-0"
+              className="w-full md:w-auto px-7 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition hover:scale-[1.01] shadow-lg shadow-brand-600/10 cursor-pointer shrink-0 ml-2"
             >
               <i className="fa-solid fa-magnifying-glass"></i>
               <span>Tìm kiếm</span>
