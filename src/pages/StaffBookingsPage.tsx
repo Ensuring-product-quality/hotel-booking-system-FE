@@ -12,10 +12,10 @@ import { paymentApi } from "../services/paymentApi";
 import { getErrorMessage } from "../services/apiClient";
 import { BookingStatus } from "../types/booking";
 import type { BookingResponseDTO } from "../types/booking";
-
 import { notificationApi } from "../services/notificationApi";
 import { ManagerHotelsPage } from "./ManagerHotelsPage";
 import { ManagerRoomsPage } from "./ManagerRoomsPage";
+import { toast } from "../components/Toast";
 
 type StaffTab = "bookings" | "inventory" | "reports" | "services" | "customers" | "notifications" | "hotels" | "rooms";
 
@@ -43,10 +43,10 @@ export function StaffBookingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
       queryClient.invalidateQueries({ queryKey: ["managerRooms"] });
-      alert("Cập nhật trạng thái phòng thành công!");
+      toast.success("Cập nhật trạng thái phòng thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Không thể cập nhật trạng thái phòng."));
+      toast.error(getErrorMessage(err, "Không thể cập nhật trạng thái phòng."));
     },
   });
 
@@ -164,7 +164,7 @@ export function StaffBookingsPage() {
 
   const totalDeskRevenue = useMemo(() => {
     let sum = 0;
-    payments.forEach((p) => {
+    payments.forEach((p: any) => {
       if (p.status === "completed") sum += p.amount;
     });
     if (sum === 0) {
@@ -205,10 +205,10 @@ export function StaffBookingsPage() {
       bookingApi.update(id, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staffBookingsReal"] });
-      alert("Cập nhật trạng thái thành công!");
+      toast.success("Cập nhật trạng thái thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Cập nhật thất bại."));
+      toast.error(getErrorMessage(err, "Cập nhật thất bại."));
     },
   });
 
@@ -218,10 +218,10 @@ export function StaffBookingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staffBookingsReal"] });
       queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
-      alert("Check-in thành công!");
+      toast.success("Check-in thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Check-in thất bại."));
+      toast.error(getErrorMessage(err, "Check-in thất bại."));
     },
   });
 
@@ -231,10 +231,10 @@ export function StaffBookingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staffBookingsReal"] });
       queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
-      alert("Check-out thành công! Phòng đã được chuyển sang trạng thái dọn dẹp.");
+      toast.success("Check-out thành công! Phòng đã được chuyển sang trạng thái dọn dẹp.");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Check-out thất bại."));
+      toast.error(getErrorMessage(err, "Check-out thất bại."));
     },
   });
 
@@ -786,7 +786,7 @@ export function StaffBookingsPage() {
                   <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="font-bold text-white text-base">Lịch Công Việc Ca Làm</h3>
-                      <button onClick={() => alert("Thêm sự kiện mới")} className="h-8 w-8 rounded-lg bg-teal-500 text-slate-950 flex items-center justify-center font-bold text-xs cursor-pointer">
+                      <button onClick={() => toast.info("Thêm sự kiện mới")} className="h-8 w-8 rounded-lg bg-teal-500 text-slate-950 flex items-center justify-center font-bold text-xs cursor-pointer">
                         +
                       </button>
                     </div>
@@ -813,7 +813,7 @@ export function StaffBookingsPage() {
                       </div>
                     </div>
 
-                    <button onClick={() => alert("Mở toàn bộ lịch công việc")} className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs border border-slate-800 cursor-pointer">
+                    <button onClick={() => toast.info("Mở toàn bộ lịch công việc")} className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs border border-slate-800 cursor-pointer">
                       Xem tất cả lịch
                     </button>
                   </div>
@@ -1284,7 +1284,7 @@ export function StaffBookingsPage() {
                           </td>
                           <td className="py-4 px-6 text-slate-400">3 ngày trước</td>
                           <td className="py-4 px-6 text-right">
-                            <button onClick={() => alert(`Xem hồ sơ khách hàng ${u.username}`)} className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg border border-slate-700 cursor-pointer">
+                            <button onClick={() => toast.info(`Xem hồ sơ khách hàng ${u.username}`)} className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg border border-slate-700 cursor-pointer">
                               Hồ sơ
                             </button>
                           </td>

@@ -7,6 +7,7 @@ import { useAuthStore } from "../store/authStore";
 import { getErrorMessage } from "../services/apiClient";
 import { ROUTES } from "../constants/routes";
 import { PaymentMethod } from "../types/payment";
+import { toast } from "../components/Toast";
 
 export function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -54,7 +55,7 @@ export function BookingDetailPage() {
       paymentApi.create(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["booking", bookingId] });
-      alert("Thanh toán thành công!");
+      toast.success("Thanh toán thành công!");
     },
     onError: (err) => {
       setCheckoutError(getErrorMessage(err, "Thanh toán thất bại."));
@@ -66,11 +67,11 @@ export function BookingDetailPage() {
     mutationFn: () => bookingApi.delete(bookingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["booking", bookingId] });
-      alert("Hủy đặt phòng thành công!");
+      toast.success("Hủy đặt phòng thành công!");
       navigate(ROUTES.MY_BOOKINGS);
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Hủy đặt phòng thất bại."));
+      toast.error(getErrorMessage(err, "Hủy đặt phòng thất bại."));
     },
   });
 

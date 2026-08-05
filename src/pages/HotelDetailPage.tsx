@@ -8,6 +8,7 @@ import { useAuthStore } from "../store/authStore";
 import { getErrorMessage } from "../services/apiClient";
 import { ROUTES } from "../constants/routes";
 import { Role } from "../types/auth";
+import { toast } from "../components/Toast";
 import {
   getMediaUrl,
   handleImageError,
@@ -36,12 +37,12 @@ export function HotelDetailPage() {
       void queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
       setUploadingImage(false);
       setActiveImageIndex(null);
-      alert("Tải lên hình ảnh khách sạn thành công!");
+      toast.success("Tải lên hình ảnh khách sạn thành công!");
     },
     onError: (err) => {
       setUploadingImage(false);
       setActiveImageIndex(null);
-      alert(getErrorMessage(err, "Tải lên hình ảnh thất bại."));
+      toast.error(getErrorMessage(err, "Tải lên hình ảnh thất bại."));
     },
   });
 
@@ -237,7 +238,7 @@ export function HotelDetailPage() {
       setComment("");
       setRating(5);
       setReviewError(null);
-      alert("Đăng đánh giá thành công!");
+      toast.success("Đăng đánh giá thành công!");
     },
     onError: (err) => {
       setReviewError(getErrorMessage(err, "Đăng đánh giá thất bại."));
@@ -250,7 +251,7 @@ export function HotelDetailPage() {
       return;
     }
     if (user?.role !== Role.CUSTOMER) {
-      alert("Chỉ tài khoản Khách hàng (Customer) mới có thể đặt phòng!");
+      toast.error("Chỉ tài khoản Khách hàng (Customer) mới có thể đặt phòng!");
       return;
     }
     setSelectedRoomId(roomId);
@@ -315,7 +316,7 @@ export function HotelDetailPage() {
         await queryClient.invalidateQueries({ queryKey: ["reviews", hotelId] });
         await queryClient.invalidateQueries({ queryKey: ["hotel", hotelId] });
       } catch (err) {
-        alert(getErrorMessage(err, "Không thể xóa đánh giá này."));
+        toast.error(getErrorMessage(err, "Không thể xóa đánh giá này."));
       }
     }
   };

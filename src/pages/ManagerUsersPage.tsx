@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userApi } from "../services/userApi";
 import { useAuthStore } from "../store/authStore";
@@ -6,6 +6,7 @@ import { getErrorMessage } from "../services/apiClient";
 import { Role, ALL_ROLES } from "../types/auth";
 import type { User } from "../types/auth";
 import type { UserCreateDTO } from "../services/userApi";
+import { toast } from "../components/Toast";
 
 export function ManagerUsersPage() {
   const queryClient = useQueryClient();
@@ -58,7 +59,7 @@ export function ManagerUsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerUsers"] });
       closeModal();
-      alert("Tạo người dùng mới thành công!");
+      toast.success("Tạo người dùng mới thành công!");
     },
     onError: (err) => {
       setFormError(getErrorMessage(err, "Không thể tạo người dùng."));
@@ -71,7 +72,7 @@ export function ManagerUsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerUsers"] });
       closeModal();
-      alert("Cập nhật thông tin thành công!");
+      toast.success("Cập nhật thông tin thành công!");
     },
     onError: (err) => {
       setFormError(getErrorMessage(err, "Không thể cập nhật người dùng."));
@@ -82,10 +83,10 @@ export function ManagerUsersPage() {
     mutationFn: (id: number) => userApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerUsers"] });
-      alert("Xóa tài khoản thành công!");
+      toast.success("Xóa tài khoản thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Xóa tài khoản thất bại."));
+      toast.error(getErrorMessage(err, "Xóa tài khoản thất bại."));
     },
   });
 

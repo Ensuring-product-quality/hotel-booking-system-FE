@@ -14,8 +14,8 @@ import { BookingStatus } from "../types/booking";
 import type { BookingResponseDTO, BookingCreateDTO } from "../types/booking";
 import type { RoomCreateDTO } from "../types/room";
 import type { UserCreateDTO } from "../services/userApi";
-
 import { notificationApi } from "../services/notificationApi";
+import { toast } from "../components/Toast";
 
 type ActiveTab = "dashboard" | "bookings" | "inventory" | "users" | "notifications";
 
@@ -221,7 +221,7 @@ export function AdminDashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminBookingsReal"] });
       setIsAddBookingModalOpen(false);
-      alert("Tạo đơn đặt phòng thành công!");
+      toast.success("Tạo đơn đặt phòng thành công!");
     },
     onError: (err) => {
       setBookingFormError(getErrorMessage(err, "Không thể tạo đơn đặt phòng."));
@@ -238,7 +238,7 @@ export function AdminDashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminUsersReal"] });
       setIsAddStaffModalOpen(false);
-      alert("Tạo tài khoản nhân viên mới thành công!");
+      toast.success("Tạo tài khoản nhân viên mới thành công!");
     },
     onError: (err) => {
       setStaffFormError(getErrorMessage(err, "Không thể tạo nhân viên mới."));
@@ -251,10 +251,10 @@ export function AdminDashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminUsersReal"] });
       setEditingUser(null);
-      alert("Cập nhật phân quyền tài khoản thành công!");
+      toast.success("Cập nhật phân quyền tài khoản thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Không thể cập nhật phân quyền tài khoản."));
+      toast.error(getErrorMessage(err, "Không thể cập nhật phân quyền tài khoản."));
     },
   });
 
@@ -262,10 +262,10 @@ export function AdminDashboardPage() {
     mutationFn: (id: number) => userApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminUsersReal"] });
-      alert("Xóa tài khoản thành công!");
+      toast.success("Xóa tài khoản thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Không thể xóa tài khoản này."));
+      toast.error(getErrorMessage(err, "Không thể xóa tài khoản này."));
     },
   });
 
@@ -280,7 +280,7 @@ export function AdminDashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminRoomsReal"] });
       setIsAddRoomModalOpen(false);
-      alert("Thêm phòng mới thành công!");
+      toast.success("Thêm phòng mới thành công!");
     },
     onError: (err) => {
       setRoomFormError(getErrorMessage(err, "Không thể tạo phòng mới."));
@@ -292,10 +292,10 @@ export function AdminDashboardPage() {
       bookingApi.update(id, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminBookingsReal"] });
-      alert("Cập nhật trạng thái thành công!");
+      toast.success("Cập nhật trạng thái thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Cập nhật trạng thái thất bại."));
+      toast.error(getErrorMessage(err, "Cập nhật trạng thái thất bại."));
     },
   });
 
