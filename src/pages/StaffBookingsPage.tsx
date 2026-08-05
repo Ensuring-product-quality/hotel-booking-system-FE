@@ -124,6 +124,14 @@ export function StaffBookingsPage() {
     () => bookings.filter((b) => b.status === BookingStatus.CONFIRMED).length,
     [bookings]
   );
+  const newRequestsCount = useMemo(
+    () => bookings.filter((b) => b.status !== BookingStatus.CANCELLED && b.status !== BookingStatus.CHECKED_OUT && b.status !== BookingStatus.COMPLETED).length,
+    [bookings]
+  );
+  const historyCount = useMemo(
+    () => bookings.filter((b) => b.status === BookingStatus.CANCELLED || b.status === BookingStatus.CHECKED_OUT || b.status === BookingStatus.COMPLETED).length,
+    [bookings]
+  );
 
   const availableRooms = useMemo(
     () => rooms.filter((r) => r.status === "active" || r.status === "available"),
@@ -505,7 +513,7 @@ export function StaffBookingsPage() {
                     {currentUser?.role === Role.MANAGER ? "Quản Lý Đặt Phòng" : "Quản Lý Đặt Phòng Lễ Tân"}
                   </h1>
                   <p className="text-slate-400 text-xs mt-1">
-                    Chào buổi sáng, hôm nay có <strong className="text-teal-400">{pendingCount}</strong> yêu cầu mới cần xử lý.
+                    Chào buổi sáng, hôm nay có <strong className="text-teal-400">{newRequestsCount}</strong> yêu cầu mới cần xử lý.
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -572,7 +580,7 @@ export function StaffBookingsPage() {
                 >
                   <span>Yêu cầu mới</span>
                   <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px]">
-                    {bookings.length}
+                    {newRequestsCount}
                   </span>
                 </button>
 
@@ -597,6 +605,9 @@ export function StaffBookingsPage() {
                     }`}
                 >
                   <span>Lịch sử đặt phòng</span>
+                  <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px]">
+                    {historyCount}
+                  </span>
                 </button>
               </div>
 
