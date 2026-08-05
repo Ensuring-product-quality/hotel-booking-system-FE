@@ -346,7 +346,9 @@ export function HotelDetailPage() {
                 alt={hotel.name}
                 className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600";
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
                 }}
               />
               <button className="absolute bottom-4 left-4 bg-white/90 hover:bg-white text-slate-800 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-lg shadow-md flex items-center gap-1.5 transition cursor-pointer">
@@ -362,7 +364,9 @@ export function HotelDetailPage() {
                   alt={`${hotel.name} ${i + 2}`}
                   className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=600";
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80";
                   }}
                 />
               </div>

@@ -361,7 +361,9 @@ export function HotelsPage() {
                             alt={hotel.name}
                             className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
                             onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600";
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
                             }}
                           />
                         ) : (
