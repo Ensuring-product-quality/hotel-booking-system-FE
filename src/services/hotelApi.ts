@@ -11,6 +11,8 @@ export interface HotelSearchQuery extends PageQuery {
   city?: string;
   stars?: number;
   status?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export const hotelApi = {

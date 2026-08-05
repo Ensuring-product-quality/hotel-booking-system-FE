@@ -9,52 +9,74 @@ export function HotelsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Parse query parameters
-  const cityParam = searchParams.get("city") || "";
-  const starsParam = searchParams.get("stars") ? parseInt(searchParams.get("stars")!) : undefined;
+  // Parse applied query parameters (from URL)
+  const cityParam    = searchParams.get("city") || "";
+  const starsParam   = searchParams.get("stars") ? parseInt(searchParams.get("stars")!) : undefined;
   const keywordParam = searchParams.get("keyword") || "";
-  const pageParam = searchParams.get("page") ? parseInt(searchParams.get("page")!) : 0;
-  const sizeParam = searchParams.get("size") ? parseInt(searchParams.get("size")!) : 6;
-  const sortParam = searchParams.get("sort") || "id,asc";
+  const minPriceParam = searchParams.get("minPrice") ? parseInt(searchParams.get("minPrice")!) : undefined;
+  const maxPriceParam = searchParams.get("maxPrice") ? parseInt(searchParams.get("maxPrice")!) : undefined;
+  const pageParam    = searchParams.get("page") ? parseInt(searchParams.get("page")!) : 0;
+  const sizeParam    = searchParams.get("size") ? parseInt(searchParams.get("size")!) : 6;
+  const sortParam    = searchParams.get("sort") || "id,asc";
 
-  // Local filter states
-  const [cityInput, setCityInput] = useState(cityParam);
-  const [selectedStars, setSelectedStars] = useState<number | undefined>(starsParam);
-  const [priceRange, setPriceRange] = useState<number>(10000000); // Max 10M VND
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  // ── PENDING (UI) states — changed by user but NOT yet applied ──
+  const [pendingCity,     setPendingCity]     = useState(cityParam);
+  const [pendingStars,    setPendingStars]    = useState<number | undefined>(starsParam);
+  const [pendingMinPrice, setPendingMinPrice] = useState<number>(minPriceParam ?? 0);
+  const [pendingMaxPrice, setPendingMaxPrice] = useState<number>(maxPriceParam ?? 20000000);
 
-  // Synchronize local states when URL changes
+  // Sync pending states when URL changes (e.g. nav from HomePage)
   useEffect(() => {
-    setCityInput(cityParam);
-    setSelectedStars(starsParam);
-  }, [cityParam, starsParam]);
+    setPendingCity(cityParam);
+    setPendingStars(starsParam);
+    setPendingMinPrice(minPriceParam ?? 0);
+    setPendingMaxPrice(maxPriceParam ?? 20000000);
+  }, [cityParam, starsParam, minPriceParam, maxPriceParam]);
 
-  // Fetch hotels using search endpoint
+  // Fetch hotels — uses APPLIED params from URL only
   const { data, isLoading, error } = useQuery({
-    queryKey: ["hotels", cityParam, selectedStars, keywordParam, pageParam, sizeParam, sortParam],
+    queryKey: ["hotels", cityParam, starsParam, keywordParam, minPriceParam, maxPriceParam, pageParam, sizeParam, sortParam],
     queryFn: () =>
       hotelApi.search({
-        city: cityParam || undefined,
-        stars: selectedStars,
-        keyword: keywordParam || undefined,
-        status: "active",
-        page: pageParam,
-        size: sizeParam,
-        sort: sortParam,
+        city:     cityParam || undefined,
+        stars:    starsParam,
+        keyword:  keywordParam || undefined,
+        status:   "active",
+        minPrice: minPriceParam,
+        maxPrice: maxPriceParam,
+        page:     pageParam,
+        size:     sizeParam,
+        sort:     sortParam,
       }),
   });
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Apply all pending filters → update URL → triggers re-fetch
+  const handleApplyFilters = () => {
     const newParams = new URLSearchParams(searchParams);
-    if (cityInput) newParams.set("city", cityInput);
-    else newParams.delete("city");
+    if (pendingCity)  newParams.set("city",  pendingCity);
+    else              newParams.delete("city");
 
-    if (selectedStars !== undefined) newParams.set("stars", selectedStars.toString());
-    else newParams.delete("stars");
+    if (pendingStars !== undefined) newParams.set("stars", pendingStars.toString());
+    else                            newParams.delete("stars");
 
-    newParams.set("page", "0"); // Reset to first page
+    if (pendingMinPrice > 0) newParams.set("minPrice", pendingMinPrice.toString());
+    else                     newParams.delete("minPrice");
+
+    if (pendingMaxPrice < 20000000) newParams.set("maxPrice", pendingMaxPrice.toString());
+    else                            newParams.delete("maxPrice");
+
+    newParams.set("page", "0");
+    setSearchParams(newParams);
+  };
+
+  // Reset all filters
+  const handleResetFilters = () => {
+    setPendingCity("");
+    setPendingStars(undefined);
+    setPendingMinPrice(0);
+    setPendingMaxPrice(20000000);
+    const newParams = new URLSearchParams();
+    newParams.set("page", "0");
     setSearchParams(newParams);
   };
 
@@ -71,29 +93,13 @@ export function HotelsPage() {
     setSearchParams(newParams);
   };
 
-  const handleStarsCheckboxChange = (stars: number) => {
-    if (selectedStars === stars) {
-      setSelectedStars(undefined);
-    } else {
-      setSelectedStars(stars);
-    }
-  };
+  const hasActiveFilters =
+    !!cityParam || starsParam !== undefined || minPriceParam !== undefined || maxPriceParam !== undefined;
 
-  const toggleAmenity = (amenity: string) => {
-    setSelectedAmenities((prev) =>
-      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
-    );
-  };
-
-  const toggleType = (type: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
-  };
-
-  const hotels = data?.data?.content || [];
-  const totalPages = data?.data?.totalPages || 0;
+  const hotels       = data?.data?.content || [];
+  const totalPages   = data?.data?.totalPages || 0;
   const totalElements = data?.data?.totalElements || 0;
+
 
   return (
     <div className="flex flex-col flex-1">
@@ -159,109 +165,122 @@ export function HotelsPage() {
         {/* Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
-          <div className="flex flex-col gap-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit">
-            <form onSubmit={handleSearchSubmit} className="flex flex-col gap-4">
-              <h3 className="font-bold text-slate-800 text-base border-b border-slate-100 pb-3 mb-2">
+          <div className="flex flex-col gap-5 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm h-fit sticky top-24">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
+                <i className="fa-solid fa-sliders text-brand-500 text-sm"></i>
                 Bộ lọc tìm kiếm
               </h3>
+              {hasActiveFilters && (
+                <span className="text-[10px] font-bold bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full border border-brand-100">
+                  Đang lọc
+                </span>
+              )}
+            </div>
 
-              {/* City Input Search */}
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Thành phố</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Nhập thành phố..."
-                    value={cityInput}
-                    onChange={(e) => setCityInput(e.target.value)}
-                    className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500 text-slate-700"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-brand-600 hover:bg-brand-700 text-white rounded-lg p-2 transition cursor-pointer"
-                  >
-                    <i className="fa-solid fa-magnifying-glass"></i>
-                  </button>
-                </div>
-              </div>
-            </form>
+            {/* City Input */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Thành phố</label>
+              <input
+                type="text"
+                placeholder="Nhập thành phố..."
+                value={pendingCity}
+                onChange={(e) => setPendingCity(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleApplyFilters()}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-100 text-slate-700 transition"
+              />
+            </div>
 
             {/* Price Range Filter */}
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-3">Khoảng giá</label>
-              <input
-                type="range"
-                min="0"
-                max="20000000"
-                step="500000"
-                value={priceRange}
-                onChange={(e) => setPriceRange(parseInt(e.target.value))}
-                className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-brand-600"
-              />
-              <div className="flex justify-between text-xs font-semibold text-slate-500 mt-2">
-                <span>0đ</span>
-                <span className="text-brand-600">{priceRange.toLocaleString("vi-VN")}đ+</span>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-3">Khoảng giá / đêm</label>
+              {/* Min price */}
+              <div className="mb-3">
+                <div className="flex justify-between text-[11px] text-slate-500 mb-1">
+                  <span>Từ</span>
+                  <span className="font-semibold text-slate-700">{pendingMinPrice.toLocaleString("vi-VN")}đ</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="20000000"
+                  step="500000"
+                  value={pendingMinPrice}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    setPendingMinPrice(Math.min(val, pendingMaxPrice - 500000));
+                  }}
+                  className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-brand-600"
+                />
+              </div>
+              {/* Max price */}
+              <div>
+                <div className="flex justify-between text-[11px] text-slate-500 mb-1">
+                  <span>Đến</span>
+                  <span className="font-semibold text-brand-600">
+                    {pendingMaxPrice >= 20000000 ? "Không giới hạn" : `${pendingMaxPrice.toLocaleString("vi-VN")}đ`}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="20000000"
+                  step="500000"
+                  value={pendingMaxPrice}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    setPendingMaxPrice(Math.max(val, pendingMinPrice + 500000));
+                  }}
+                  className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-brand-600"
+                />
               </div>
             </div>
 
             {/* Stars Filter */}
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase mb-3">Xếp hạng sao</label>
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2">
                 {[5, 4, 3, 2, 1].map((stars) => (
-                  <label key={stars} className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer">
+                  <label key={stars} className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer group">
                     <input
                       type="checkbox"
-                      checked={selectedStars === stars}
-                      onChange={() => handleStarsCheckboxChange(stars)}
-                      className="h-4.5 w-4.5 rounded border-slate-200 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                      checked={pendingStars === stars}
+                      onChange={() => setPendingStars(pendingStars === stars ? undefined : stars)}
+                      className="h-4 w-4 rounded border-slate-200 text-brand-600 focus:ring-brand-500 cursor-pointer"
                     />
-                    <span className="flex items-center gap-0.5 text-amber-500">
+                    <span className="flex items-center gap-0.5 text-amber-400">
                       {Array.from({ length: stars }).map((_, i) => (
                         <i key={i} className="fa-solid fa-star text-xs"></i>
                       ))}
                     </span>
+                    <span className="text-xs text-slate-500">{stars} sao</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            {/* Amenities Filter */}
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-3">Tiện nghi</label>
-              <div className="flex flex-col gap-2.5">
-                {["Bể bơi vô cực", "Wifi miễn phí", "Phòng Gym", "Bữa sáng miễn phí"].map((amenity) => (
-                  <label key={amenity} className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedAmenities.includes(amenity)}
-                      onChange={() => toggleAmenity(amenity)}
-                      className="h-4.5 w-4.5 rounded border-slate-200 text-brand-600 focus:ring-brand-500 cursor-pointer"
-                    />
-                    <span>{amenity}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Accommodation Type */}
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-3">Loại chỗ ở</label>
-              <div className="flex flex-col gap-2.5">
-                {["Khách sạn", "Resort & Spa", "Căn hộ dịch vụ"].map((type) => (
-                  <label key={type} className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.includes(type)}
-                      onChange={() => toggleType(type)}
-                      className="h-4.5 w-4.5 rounded border-slate-200 text-brand-600 focus:ring-brand-500 cursor-pointer"
-                    />
-                    <span>{type}</span>
-                  </label>
-                ))}
-              </div>
+            {/* ── Apply & Reset Buttons ── */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={handleApplyFilters}
+                className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-sm shadow-brand-600/20 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <i className="fa-solid fa-filter text-xs"></i>
+                Áp dụng bộ lọc
+              </button>
+              {hasActiveFilters && (
+                <button
+                  onClick={handleResetFilters}
+                  className="w-full py-2 text-slate-500 hover:text-red-600 font-semibold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-2 hover:bg-red-50"
+                >
+                  <i className="fa-solid fa-rotate-left text-xs"></i>
+                  Xóa bộ lọc
+                </button>
+              )}
             </div>
           </div>
+
 
           {/* Hotels Grid */}
           <div className="lg:col-span-3 flex flex-col gap-6">
