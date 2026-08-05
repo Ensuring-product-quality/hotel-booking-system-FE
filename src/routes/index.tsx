@@ -25,6 +25,7 @@ const NotificationsPage = lazy(() => import("../pages/NotificationsPage").then((
 const ManagerHotelsPage = lazy(() => import("../pages/ManagerHotelsPage").then((m) => ({ default: m.ManagerHotelsPage })));
 const ManagerRoomsPage = lazy(() => import("../pages/ManagerRoomsPage").then((m) => ({ default: m.ManagerRoomsPage })));
 const ManagerUsersPage = lazy(() => import("../pages/ManagerUsersPage").then((m) => ({ default: m.ManagerUsersPage })));
+const StaffBookingsPage = lazy(() => import("../pages/StaffBookingsPage").then((m) => ({ default: m.StaffBookingsPage })));
 const AdminDashboardPage = lazy(() => import("../pages/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
 const ProfilePage = lazy(() => import("../pages/ProfilePage").then((m) => ({ default: m.ProfilePage })));
 
@@ -93,6 +94,14 @@ export const router = createBrowserRouter(
     {
       element: <AdminLayout />,
       children: [
+        {
+          path: ROUTES.STAFF_BOOKINGS,
+          element: (
+            <PrivateRoute allowedRoles={[Role.ADMIN, Role.MANAGER]}>
+              <SuspenseWrapper><StaffBookingsPage /></SuspenseWrapper>
+            </PrivateRoute>
+          ),
+        },
         {
           path: ROUTES.MANAGER_HOTELS,
           element: (
