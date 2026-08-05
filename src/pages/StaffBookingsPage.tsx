@@ -66,7 +66,6 @@ export function StaffBookingsPage() {
 
   // Booking Tab Sub-Filter
   const [bookingSubTab, setBookingSubTab] = useState<"new" | "pending" | "history">("new");
-  const [bookingFilterRoomType, setBookingFilterRoomType] = useState<string>("ALL");
   const [bookingFilterStatus, setBookingFilterStatus] = useState<string>("ALL");
   const [bookingFilterDate, setBookingFilterDate] = useState<string>("");
 
@@ -183,11 +182,6 @@ export function StaffBookingsPage() {
       if (bookingSubTab === "pending" && b.status !== BookingStatus.PENDING_PAYMENT) return false;
       if (bookingSubTab === "history" && b.status !== BookingStatus.COMPLETED && b.status !== BookingStatus.CHECKED_OUT && b.status !== BookingStatus.CANCELLED) return false;
 
-      const matchesRoomType = bookingFilterRoomType === "ALL" || (() => {
-        const room = rooms.find((r) => r.id === b.roomId);
-        return room?.type === bookingFilterRoomType;
-      })();
-      
       const matchesStatus = bookingFilterStatus === "ALL" || b.status === bookingFilterStatus;
       
       const matchesDate = !bookingFilterDate || (bookingFilterDate >= b.checkInDate && bookingFilterDate <= b.checkOutDate);
@@ -201,9 +195,9 @@ export function StaffBookingsPage() {
         b.userFullName?.toLowerCase().includes(searchLower) ||
         b.userPhone?.includes(searchLower);
 
-      return matchesRoomType && matchesStatus && matchesDate && matchesSearch;
+      return matchesStatus && matchesDate && matchesSearch;
     });
-  }, [bookings, bookingSubTab, bookingFilterRoomType, bookingFilterStatus, bookingFilterDate, globalSearch, rooms]);
+  }, [bookings, bookingSubTab, bookingFilterStatus, bookingFilterDate, globalSearch]);
 
   // Status Change Mutation
   const updateStatusMutation = useMutation({
@@ -547,20 +541,6 @@ export function StaffBookingsPage() {
                     onChange={(e) => setBookingFilterDate(e.target.value)}
                     className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-teal-500/60"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">LOẠI PHÒNG</label>
-                  <select
-                    value={bookingFilterRoomType}
-                    onChange={(e) => setBookingFilterRoomType(e.target.value)}
-                    className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-teal-500/60"
-                  >
-                    <option value="ALL">Tất cả các loại</option>
-                    <option value="Standard">Standard</option>
-                    <option value="Deluxe">Deluxe</option>
-                    <option value="Suite">Suite</option>
-                  </select>
                 </div>
 
                 <div>
