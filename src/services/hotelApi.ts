@@ -13,6 +13,8 @@ export interface HotelSearchQuery extends PageQuery {
   status?: string;
   minPrice?: number;
   maxPrice?: number;
+  checkInDate?: string;
+  checkOutDate?: string;
 }
 
 export const hotelApi = {

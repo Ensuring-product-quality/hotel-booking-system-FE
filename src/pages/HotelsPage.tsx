@@ -16,6 +16,8 @@ export function HotelsPage() {
   const keywordParam = searchParams.get("keyword") || "";
   const minPriceParam = searchParams.get("minPrice") ? parseInt(searchParams.get("minPrice")!) : undefined;
   const maxPriceParam = searchParams.get("maxPrice") ? parseInt(searchParams.get("maxPrice")!) : undefined;
+  const checkInParam  = searchParams.get("checkInDate") || "";
+  const checkOutParam = searchParams.get("checkOutDate") || "";
   const pageParam    = searchParams.get("page") ? parseInt(searchParams.get("page")!) : 0;
   const sizeParam    = searchParams.get("size") ? parseInt(searchParams.get("size")!) : 6;
   const sortParam    = searchParams.get("sort") || "id,asc";
@@ -39,7 +41,7 @@ export function HotelsPage() {
 
   // Fetch hotels — uses APPLIED params from URL only
   const { data, isLoading, error } = useQuery({
-    queryKey: ["hotels", cityParam, starsParam, keywordParam, minPriceParam, maxPriceParam, pageParam, sizeParam, sortParam],
+    queryKey: ["hotels", cityParam, starsParam, keywordParam, minPriceParam, maxPriceParam, checkInParam, checkOutParam, pageParam, sizeParam, sortParam],
     queryFn: () =>
       hotelApi.search({
         city:     cityParam || undefined,
@@ -48,6 +50,8 @@ export function HotelsPage() {
         status:   "active",
         minPrice: minPriceParam,
         maxPrice: maxPriceParam,
+        checkInDate: checkInParam || undefined,
+        checkOutDate: checkOutParam || undefined,
         page:     pageParam,
         size:     sizeParam,
         sort:     sortParam,
