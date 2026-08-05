@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "../components/Toast";
 
 export function ContactPage() {
   const [fullName, setFullName] = useState("");
@@ -12,7 +13,7 @@ export function ContactPage() {
     setIsSubmitting(true);
 
     setTimeout(() => {
-      alert("Gửi tin nhắn liên hệ thành công! Đội ngũ chăm sóc khách hàng sẽ phản hồi bạn sớm nhất.");
+      toast.success("Gửi tin nhắn liên hệ thành công! Đội ngũ chăm sóc khách hàng sẽ phản hồi bạn sớm nhất.");
       setFullName("");
       setEmail("");
       setMessage("");

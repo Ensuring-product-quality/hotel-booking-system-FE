@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { hotelApi } from "../services/hotelApi";
@@ -7,6 +7,7 @@ import { getErrorMessage } from "../services/apiClient";
 import { Role } from "../types/auth";
 import type { HotelResponseDTO, HotelCreateDTO } from "../types/hotel";
 import { getMediaUrl, handleImageError, DEFAULT_HOTEL_IMAGE } from "../utils/imageUtils";
+import { toast } from "../components/Toast";
 
 export function ManagerHotelsPage() {
   const queryClient = useQueryClient();
@@ -53,7 +54,7 @@ export function ManagerHotelsPage() {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
       queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       closeModal();
-      alert("Tạo khách sạn mới thành công!");
+      toast.success("Tạo khách sạn mới thành công!");
     },
     onError: (err) => {
       setFormError(getErrorMessage(err, "Không thể tạo khách sạn."));
@@ -67,7 +68,7 @@ export function ManagerHotelsPage() {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
       queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       closeModal();
-      alert("Cập nhật thông tin khách sạn thành công!");
+      toast.success("Cập nhật thông tin khách sạn thành công!");
     },
     onError: (err) => {
       setFormError(getErrorMessage(err, "Không thể cập nhật khách sạn."));
@@ -79,10 +80,10 @@ export function ManagerHotelsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
       queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
-      alert("Xóa khách sạn thành công!");
+      toast.success("Xóa khách sạn thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Xóa khách sạn thất bại."));
+      toast.error(getErrorMessage(err, "Xóa khách sạn thất bại."));
     },
   });
 
@@ -95,10 +96,10 @@ export function ManagerHotelsPage() {
       queryClient.invalidateQueries({ queryKey: ["hotel"] });
       queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
       setUploadingId(null);
-      alert("Tải ảnh lên thành công!");
+      toast.success("Tải ảnh lên thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Tải ảnh thất bại."));
+      toast.error(getErrorMessage(err, "Tải ảnh thất bại."));
       setUploadingId(null);
     },
   });

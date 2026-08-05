@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roomApi } from "../services/roomApi";
 import { hotelApi } from "../services/hotelApi";
@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/authStore";
 import { getErrorMessage } from "../services/apiClient";
 import { Role } from "../types/auth";
 import type { RoomResponseDTO, RoomCreateDTO } from "../types/room";
+import { toast } from "../components/Toast";
 
 export function ManagerRoomsPage() {
   const queryClient = useQueryClient();
@@ -63,7 +64,7 @@ export function ManagerRoomsPage() {
       queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
       queryClient.invalidateQueries({ queryKey: ["hotel"] });
       closeModal();
-      alert("Tạo phòng mới thành công!");
+      toast.success("Tạo phòng mới thành công!");
     },
     onError: (err) => {
       setFormError(getErrorMessage(err, "Không thể tạo phòng."));
@@ -78,7 +79,7 @@ export function ManagerRoomsPage() {
       queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
       queryClient.invalidateQueries({ queryKey: ["hotel"] });
       closeModal();
-      alert("Cập nhật phòng thành công!");
+      toast.success("Cập nhật phòng thành công!");
     },
     onError: (err) => {
       setFormError(getErrorMessage(err, "Không thể cập nhật phòng."));
@@ -91,10 +92,10 @@ export function ManagerRoomsPage() {
       queryClient.invalidateQueries({ queryKey: ["managerRooms"] });
       queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
       queryClient.invalidateQueries({ queryKey: ["hotel"] });
-      alert("Xóa phòng thành công!");
+      toast.success("Xóa phòng thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Xóa phòng thất bại."));
+      toast.error(getErrorMessage(err, "Xóa phòng thất bại."));
     },
   });
 
@@ -106,10 +107,10 @@ export function ManagerRoomsPage() {
       queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
       queryClient.invalidateQueries({ queryKey: ["hotel"] });
       setUploadingId(null);
-      alert("Tải ảnh phòng lên thành công!");
+      toast.success("Tải ảnh phòng lên thành công!");
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Tải ảnh phòng thất bại."));
+      toast.error(getErrorMessage(err, "Tải ảnh phòng thất bại."));
       setUploadingId(null);
     },
   });

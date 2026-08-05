@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { notificationApi } from "../services/notificationApi";
 import { getErrorMessage } from "../services/apiClient";
+import { toast } from "../components/Toast";
 
 export function NotificationsPage() {
   const queryClient = useQueryClient();
@@ -29,7 +30,7 @@ export function NotificationsPage() {
       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: (err) => {
-      alert(getErrorMessage(err, "Không thể đánh dấu thông báo này là đã đọc."));
+      toast.error(getErrorMessage(err, "Không thể đánh dấu thông báo này là đã đọc."));
     },
   });
 
@@ -38,9 +39,9 @@ export function NotificationsPage() {
     try {
       await notificationApi.markAllAsRead();
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      alert("Đã đánh dấu tất cả thông báo là đã đọc.");
+      toast.success("Đã đánh dấu tất cả thông báo là đã đọc.");
     } catch {
-      alert("Có lỗi xảy ra khi cập nhật thông báo.");
+      toast.error("Có lỗi xảy ra khi cập nhật thông báo.");
     }
   };
 
