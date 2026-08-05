@@ -199,21 +199,29 @@ export function StaffBookingsPage() {
     return list;
   }, [notifications, bookings]);
 
+  const hotelStatusMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    hotels.forEach((h) => {
+      map[h.id] = h.status;
+    });
+    return map;
+  }, [hotels]);
+
   const availableRooms = useMemo(
-    () => rooms.filter((r) => r.status === "active" || r.status === "available"),
-    [rooms]
+    () => rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && (r.status === "active" || r.status === "available")),
+    [rooms, hotelStatusMap]
   );
   const occupiedRooms = useMemo(
-    () => rooms.filter((r) => r.status === "occupied"),
-    [rooms]
+    () => rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && r.status === "occupied"),
+    [rooms, hotelStatusMap]
   );
   const dirtyRooms = useMemo(
-    () => rooms.filter((r) => r.status === "cleaning"),
-    [rooms]
+    () => rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && r.status === "cleaning"),
+    [rooms, hotelStatusMap]
   );
   const maintenanceRooms = useMemo(
-    () => rooms.filter((r) => r.status === "maintenance"),
-    [rooms]
+    () => rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && r.status === "maintenance"),
+    [rooms, hotelStatusMap]
   );
 
   const roomsByHotel = useMemo(() => {
@@ -946,107 +954,122 @@ export function StaffBookingsPage() {
                     </div>
                   ) : hotels.length === 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {rooms.map((r) => (
-                        <div key={r.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg hover:border-teal-500/50 transition">
-                          <div className="flex justify-between items-center">
-                            <span className="text-2xl font-black text-white">Phòng {r.roomNumber}</span>
-                            <span className="px-2 py-0.5 bg-slate-800 text-teal-300 font-bold text-[9px] rounded uppercase border border-slate-700">
-                              {r.type}
-                            </span>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-400">Sức chứa:</span>
-                              <span className="text-white font-bold">{r.capacity} khách</span>
+                      {rooms.map((r) => {
+                        const isHotelInactive = hotelStatusMap[r.hotelId] === "inactive";
+                        const effectiveStatus = isHotelInactive ? "inactive" : (r.status === "active" ? "available" : r.status);
+                        return (
+                          <div key={r.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg hover:border-teal-500/50 transition">
+                            <div className="flex justify-between items-center">
+                              <span className="text-2xl font-black text-white">Phòng {r.roomNumber}</span>
+                              <span className="px-2 py-0.5 bg-slate-800 text-teal-300 font-bold text-[9px] rounded uppercase border border-slate-700">
+                                {r.type}
+                              </span>
                             </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-400">Đơn giá:</span>
-                              <span className="text-teal-400 font-bold">{r.price.toLocaleString("vi-VN")}đ</span>
-                            </div>
-                            <div className="flex justify-between text-xs items-center pt-1.5">
-                              <span className="text-slate-400">Trạng thái:</span>
-                              <select
-                                value={r.status === "active" ? "available" : r.status}
-                                onChange={(e) => updateRoomStatusMutation.mutate({ id: r.id, status: e.target.value })}
-                                disabled={updateRoomStatusMutation.isPending}
-                                className={`px-2 py-0.5 border rounded-full text-[9px] uppercase font-bold cursor-pointer outline-none focus:ring-1 focus:ring-teal-500/50 ${r.status === "active" || r.status === "available"
-                                    ? "bg-green-500/20 text-green-300 border-green-500/30"
-                                    : r.status === "occupied"
-                                      ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
-                                      : r.status === "cleaning"
-                                        ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                                        : r.status === "maintenance"
-                                          ? "bg-red-500/20 text-red-300 border-red-500/30"
-                                          : "bg-slate-850 text-slate-450 border-slate-750"
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-400">Sức chứa:</span>
+                                <span className="text-white font-bold">{r.capacity} khách</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-400">Đơn giá:</span>
+                                <span className="text-teal-400 font-bold">{r.price.toLocaleString("vi-VN")}đ</span>
+                              </div>
+                              <div className="flex justify-between text-xs items-center pt-1.5">
+                                <span className="text-slate-400">Trạng thái:</span>
+                                <select
+                                  value={effectiveStatus}
+                                  onChange={(e) => updateRoomStatusMutation.mutate({ id: r.id, status: e.target.value })}
+                                  disabled={updateRoomStatusMutation.isPending || isHotelInactive}
+                                  className={`px-2 py-0.5 border rounded-full text-[9px] uppercase font-bold cursor-pointer outline-none focus:ring-1 focus:ring-teal-500/50 ${
+                                    effectiveStatus === "available"
+                                      ? "bg-green-500/20 text-green-300 border-green-500/30"
+                                      : effectiveStatus === "occupied"
+                                        ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                                        : effectiveStatus === "cleaning"
+                                          ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                                          : effectiveStatus === "maintenance"
+                                            ? "bg-red-500/20 text-red-300 border-red-500/30"
+                                            : "bg-slate-700/50 text-slate-300 border-slate-600"
                                   }`}
-                              >
-                                <option value="available" className="bg-[#0A192F] text-green-300">Sẵn sàng</option>
-                                <option value="occupied" className="bg-[#0A192F] text-blue-300">Có khách</option>
-                                <option value="cleaning" className="bg-[#0A192F] text-amber-300">Dọn dẹp</option>
-                                <option value="maintenance" className="bg-[#0A192F] text-red-300">Bảo trì</option>
-                                <option value="inactive" className="bg-[#0A192F] text-slate-400">Tạm ngưng</option>
-                              </select>
+                                >
+                                  <option value="available" className="bg-[#0A192F] text-green-300">Sẵn sàng</option>
+                                  <option value="occupied" className="bg-[#0A192F] text-blue-300">Có khách</option>
+                                  <option value="cleaning" className="bg-[#0A192F] text-amber-300">Dọn dẹp</option>
+                                  <option value="maintenance" className="bg-[#0A192F] text-red-300">Bảo trì</option>
+                                  <option value="inactive" className="bg-[#0A192F] text-slate-400">Tạm ngưng</option>
+                                </select>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="space-y-8">
                       {hotels.map((h) => {
                         const hotelRooms = roomsByHotel[h.id] || [];
                         if (hotelRooms.length === 0) return null;
+                        const isHotelInactive = h.status === "inactive";
 
                         return (
                           <div key={h.id} className="space-y-4">
-                            <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider pl-2.5 border-l-2 border-teal-500">
-                              {h.name} ({hotelRooms.length} phòng)
+                            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider pl-2.5 border-l-2 border-teal-500 flex items-center gap-2">
+                              <span>{h.name} ({hotelRooms.length} phòng)</span>
+                              {isHotelInactive && (
+                                <span className="text-[9px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-600 font-extrabold">
+                                  TẠM NGƯNG HOẠT ĐỘNG
+                                </span>
+                              )}
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                              {hotelRooms.map((r) => (
-                                <div key={r.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg hover:border-teal-500/50 transition">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-2xl font-black text-white">Phòng {r.roomNumber}</span>
-                                    <span className="px-2 py-0.5 bg-slate-800 text-teal-300 font-bold text-[9px] rounded uppercase border border-slate-700">
-                                      {r.type}
-                                    </span>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <div className="flex justify-between text-xs">
-                                      <span className="text-slate-400">Sức chứa:</span>
-                                      <span className="text-white font-bold">{r.capacity} khách</span>
+                              {hotelRooms.map((r) => {
+                                const effectiveStatus = isHotelInactive ? "inactive" : (r.status === "active" ? "available" : r.status);
+                                return (
+                                  <div key={r.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-lg hover:border-teal-500/50 transition">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-2xl font-black text-white">Phòng {r.roomNumber}</span>
+                                      <span className="px-2 py-0.5 bg-slate-800 text-teal-300 font-bold text-[9px] rounded uppercase border border-slate-700">
+                                        {r.type}
+                                      </span>
                                     </div>
-                                    <div className="flex justify-between text-xs">
-                                      <span className="text-slate-400">Đơn giá:</span>
-                                      <span className="text-teal-400 font-bold">{r.price.toLocaleString("vi-VN")}đ</span>
-                                    </div>
-                                    <div className="flex justify-between text-xs items-center pt-1.5">
-                                      <span className="text-slate-400">Trạng thái:</span>
-                                      <select
-                                        value={r.status === "active" ? "available" : r.status}
-                                        onChange={(e) => updateRoomStatusMutation.mutate({ id: r.id, status: e.target.value })}
-                                        disabled={updateRoomStatusMutation.isPending}
-                                        className={`px-2 py-0.5 border rounded-full text-[9px] uppercase font-bold cursor-pointer outline-none focus:ring-1 focus:ring-teal-500/50 ${r.status === "active" || r.status === "available"
-                                            ? "bg-green-500/20 text-green-300 border-green-500/30"
-                                            : r.status === "occupied"
-                                              ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
-                                              : r.status === "cleaning"
-                                                ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                                                : r.status === "maintenance"
-                                                  ? "bg-red-500/20 text-red-300 border-red-500/30"
-                                                  : "bg-slate-850 text-slate-450 border-slate-750"
+                                    <div className="space-y-1">
+                                      <div className="flex justify-between text-xs">
+                                        <span className="text-slate-400">Sức chứa:</span>
+                                        <span className="text-white font-bold">{r.capacity} khách</span>
+                                      </div>
+                                      <div className="flex justify-between text-xs">
+                                        <span className="text-slate-400">Đơn giá:</span>
+                                        <span className="text-teal-400 font-bold">{r.price.toLocaleString("vi-VN")}đ</span>
+                                      </div>
+                                      <div className="flex justify-between text-xs items-center pt-1.5">
+                                        <span className="text-slate-400">Trạng thái:</span>
+                                        <select
+                                          value={effectiveStatus}
+                                          onChange={(e) => updateRoomStatusMutation.mutate({ id: r.id, status: e.target.value })}
+                                          disabled={updateRoomStatusMutation.isPending || isHotelInactive}
+                                          className={`px-2 py-0.5 border rounded-full text-[9px] uppercase font-bold cursor-pointer outline-none focus:ring-1 focus:ring-teal-500/50 ${
+                                            effectiveStatus === "available"
+                                              ? "bg-green-500/20 text-green-300 border-green-500/30"
+                                              : effectiveStatus === "occupied"
+                                                ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                                                : effectiveStatus === "cleaning"
+                                                  ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                                                  : effectiveStatus === "maintenance"
+                                                    ? "bg-red-500/20 text-red-300 border-red-500/30"
+                                                    : "bg-slate-700/50 text-slate-300 border-slate-600"
                                           }`}
-                                      >
-                                        <option value="available" className="bg-[#0A192F] text-green-300">Sẵn sàng</option>
-                                        <option value="occupied" className="bg-[#0A192F] text-blue-300">Có khách</option>
-                                        <option value="cleaning" className="bg-[#0A192F] text-amber-300">Dọn dẹp</option>
-                                        <option value="maintenance" className="bg-[#0A192F] text-red-300">Bảo trì</option>
-                                        <option value="inactive" className="bg-[#0A192F] text-slate-400">Tạm ngưng</option>
-                                      </select>
+                                        >
+                                          <option value="available" className="bg-[#0A192F] text-green-300">Sẵn sàng</option>
+                                          <option value="occupied" className="bg-[#0A192F] text-blue-300">Có khách</option>
+                                          <option value="cleaning" className="bg-[#0A192F] text-amber-300">Dọn dẹp</option>
+                                          <option value="maintenance" className="bg-[#0A192F] text-red-300">Bảo trì</option>
+                                          <option value="inactive" className="bg-[#0A192F] text-slate-400">Tạm ngưng</option>
+                                        </select>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           </div>
                         );

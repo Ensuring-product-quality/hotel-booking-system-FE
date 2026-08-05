@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { hotelApi } from "../services/hotelApi";
+import { roomApi } from "../services/roomApi";
 import { useAuthStore } from "../store/authStore";
 import { getErrorMessage } from "../services/apiClient";
 import { Role } from "../types/auth";
@@ -63,13 +64,31 @@ export function ManagerHotelsPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, body }: { id: number; body: HotelCreateDTO }) =>
-      hotelApi.update(id, body),
+    mutationFn: async ({ id, body }: { id: number; body: HotelCreateDTO }) => {
+      const res = await hotelApi.update(id, body);
+      if (body.status === "inactive") {
+        try {
+          const roomsRes = await roomApi.getAll({ hotelId: id, size: 100 });
+          const roomsToDisable = roomsRes.data?.content || [];
+          await Promise.all(
+            roomsToDisable.map((r: any) => roomApi.updateStatus(r.id, "inactive"))
+          );
+        } catch (e) {
+          console.error("Auto disable rooms error:", e);
+        }
+      }
+      return res;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      queryClient.invalidateQueries({ queryKey: ["managerRooms"] });
       queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["staffRoomsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["adminRoomsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["hotels"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel"] });
       closeModal();
-      toast.success("Cập nhật thông tin khách sạn thành công!");
+      toast.success("Cập nhật thông tin khách sạn thành công! Các phòng đã tự động được đưa về trạng thái Tạm ngưng.");
     },
     onError: (err) => {
       setFormError(getErrorMessage(err, "Không thể cập nhật khách sạn."));

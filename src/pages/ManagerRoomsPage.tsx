@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roomApi } from "../services/roomApi";
 import { hotelApi } from "../services/hotelApi";
@@ -40,6 +40,14 @@ export function ManagerRoomsPage() {
     queryFn: () => hotelApi.getAll({ size: 100 }),
   });
   const hotelsList = hotelsData?.data?.content || [];
+
+  const hotelStatusMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    hotelsList.forEach((h) => {
+      map[h.id] = h.status;
+    });
+    return map;
+  }, [hotelsList]);
 
   // Query rooms
   const { data, isLoading, error } = useQuery({
@@ -259,37 +267,41 @@ export function ManagerRoomsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-slate-700">
-                  {rooms.map((room) => (
-                    <tr key={room.id} className="hover:bg-slate-50/50 transition">
-                      <td className="py-4.5 px-6 font-extrabold text-slate-800">#{room.id}</td>
-                      <td className="py-4.5 px-6 font-bold text-slate-800">{getHotelName(room.hotelId)}</td>
-                      <td className="py-4.5 px-6 font-bold text-slate-600">Phòng {room.roomNumber}</td>
-                      <td className="py-4.5 px-6 font-semibold">{room.type}</td>
-                      <td className="py-4.5 px-6 font-semibold">{room.capacity} khách</td>
-                      <td className="py-4.5 px-6 text-brand-600 font-bold">{room.price.toLocaleString("vi-VN")} VND</td>
-                      <td className="py-4.5 px-6">
-                        <span className={`px-2.5 py-0.5 border rounded-full text-[9px] uppercase font-bold ${
-                          room.status === "active" || room.status === "available"
-                            ? "bg-green-50 text-green-700 border-green-100"
-                            : room.status === "occupied"
-                            ? "bg-blue-50 text-blue-700 border-blue-100"
-                            : room.status === "cleaning"
-                            ? "bg-amber-50 text-amber-700 border-amber-100"
-                            : room.status === "maintenance"
-                            ? "bg-red-50 text-red-700 border-red-100"
-                            : "bg-slate-50 text-slate-700 border-slate-100"
-                        }`}>
-                          {room.status === "active" || room.status === "available"
-                            ? "Sẵn sàng"
-                            : room.status === "occupied"
-                            ? "Có khách"
-                            : room.status === "cleaning"
-                            ? "Dọn dẹp"
-                            : room.status === "maintenance"
-                            ? "Bảo trì"
-                            : "Tạm ngưng"}
-                        </span>
-                      </td>
+                  {rooms.map((room) => {
+                    const isHotelInactive = hotelStatusMap[room.hotelId] === "inactive";
+                    const effectiveStatus = isHotelInactive ? "inactive" : room.status;
+
+                    return (
+                      <tr key={room.id} className="hover:bg-slate-50/50 transition">
+                        <td className="py-4.5 px-6 font-extrabold text-slate-800">#{room.id}</td>
+                        <td className="py-4.5 px-6 font-bold text-slate-800">{getHotelName(room.hotelId)}</td>
+                        <td className="py-4.5 px-6 font-bold text-slate-600">Phòng {room.roomNumber}</td>
+                        <td className="py-4.5 px-6 font-semibold">{room.type}</td>
+                        <td className="py-4.5 px-6 font-semibold">{room.capacity} khách</td>
+                        <td className="py-4.5 px-6 text-brand-600 font-bold">{room.price.toLocaleString("vi-VN")} VND</td>
+                        <td className="py-4.5 px-6">
+                          <span className={`px-2.5 py-0.5 border rounded-full text-[9px] uppercase font-bold ${
+                            effectiveStatus === "active" || effectiveStatus === "available"
+                              ? "bg-green-50 text-green-700 border-green-100"
+                              : effectiveStatus === "occupied"
+                              ? "bg-blue-50 text-blue-700 border-blue-100"
+                              : effectiveStatus === "cleaning"
+                              ? "bg-amber-50 text-amber-700 border-amber-100"
+                              : effectiveStatus === "maintenance"
+                              ? "bg-red-50 text-red-700 border-red-100"
+                              : "bg-slate-100 text-slate-600 border-slate-200"
+                          }`}>
+                            {effectiveStatus === "active" || effectiveStatus === "available"
+                              ? "Sẵn sàng"
+                              : effectiveStatus === "occupied"
+                              ? "Có khách"
+                              : effectiveStatus === "cleaning"
+                              ? "Dọn dẹp"
+                              : effectiveStatus === "maintenance"
+                              ? "Bảo trì"
+                              : "Tạm ngưng"}
+                          </span>
+                        </td>
                       <td className="py-4.5 px-6 text-right flex justify-end gap-1.5 items-center">
                         <label className="px-2 py-1 border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 rounded-lg cursor-pointer transition text-[11px] font-semibold flex items-center gap-1">
                           {uploadingId === room.id ? "Đang tải..." : "Tải ảnh"}
@@ -317,7 +329,8 @@ export function ManagerRoomsPage() {
                         )}
                       </td>
                     </tr>
-                  ))}
+                  );
+                })}
                 </tbody>
               </table>
             </div>
