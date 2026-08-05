@@ -22,7 +22,7 @@ function getEffectiveBaseURL(): string {
       }
     }
   }
-  return configuredURL || "http://localhost:8080/api";
+  return configuredURL || "https://hotel-booking-system-be-production.up.railway.app/api";
 }
 
 const baseURL = getEffectiveBaseURL();
