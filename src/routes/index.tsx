@@ -129,6 +129,6 @@ export const router = createBrowserRouter(
     },
   ],
   {
-    basename: "/vi-vn",
+    basename: import.meta.env.PROD ? "/vi-vn" : "/",
   }
 );
