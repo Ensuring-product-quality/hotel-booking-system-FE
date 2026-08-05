@@ -345,6 +345,9 @@ export function HotelDetailPage() {
                 src={hotelImages[0]}
                 alt={hotel.name}
                 className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600";
+                }}
               />
               <button className="absolute bottom-4 left-4 bg-white/90 hover:bg-white text-slate-800 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-lg shadow-md flex items-center gap-1.5 transition cursor-pointer">
                 📷 <span>Xem mọi bức ảnh</span>
@@ -358,6 +361,9 @@ export function HotelDetailPage() {
                   src={imgUrl}
                   alt={`${hotel.name} ${i + 2}`}
                   className="h-full w-full object-cover hover:scale-[1.02] transition duration-500"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=600";
+                  }}
                 />
               </div>
             ))}
@@ -418,6 +424,9 @@ export function HotelDetailPage() {
                             src={room.images[0]}
                             alt={`Phòng ${room.roomNumber}`}
                             className="h-full w-full object-cover hover:scale-105 transition duration-300"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=600";
+                            }}
                           />
                         </div>
                       )}

@@ -175,6 +175,9 @@ export function HomePage() {
                 src={dest.image}
                 alt={dest.name}
                 className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-all duration-500"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600";
+                }}
               />
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>

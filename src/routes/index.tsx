@@ -28,10 +28,6 @@ const ManagerRoomsPage = lazy(() => import("../pages/ManagerRoomsPage").then((m)
 const ManagerUsersPage = lazy(() => import("../pages/ManagerUsersPage").then((m) => ({ default: m.ManagerUsersPage })));
 const AdminDashboardPage = lazy(() => import("../pages/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
 const ProfilePage = lazy(() => import("../pages/ProfilePage").then((m) => ({ default: m.ProfilePage })));
-const DiningPage = lazy(() => import("../pages/DiningPage").then((m) => ({ default: m.DiningPage })));
-const EventsPage = lazy(() => import("../pages/EventsPage").then((m) => ({ default: m.EventsPage })));
-const TransfersPage = lazy(() => import("../pages/TransfersPage").then((m) => ({ default: m.TransfersPage })));
-const WellnessPage = lazy(() => import("../pages/WellnessPage").then((m) => ({ default: m.WellnessPage })));
 
 function SuspenseWrapper({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>;
@@ -48,10 +44,6 @@ export const router = createBrowserRouter(
 
         { path: ROUTES.BOOKING_LOOKUP, element: <SuspenseWrapper><BookingLookupPage /></SuspenseWrapper> },
         { path: ROUTES.CONTACT, element: <SuspenseWrapper><ContactPage /></SuspenseWrapper> },
-        { path: "/dining", element: <SuspenseWrapper><DiningPage /></SuspenseWrapper> },
-        { path: "/events", element: <SuspenseWrapper><EventsPage /></SuspenseWrapper> },
-        { path: "/transfers", element: <SuspenseWrapper><TransfersPage /></SuspenseWrapper> },
-        { path: "/wellness", element: <SuspenseWrapper><WellnessPage /></SuspenseWrapper> },
 
         // Protected Customer Routes
         {

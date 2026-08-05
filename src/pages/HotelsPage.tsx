@@ -360,6 +360,9 @@ export function HotelsPage() {
                             src={hotel.images[0]}
                             alt={hotel.name}
                             className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600";
+                            }}
                           />
                         ) : (
                           <div className="h-full w-full min-h-56 bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
