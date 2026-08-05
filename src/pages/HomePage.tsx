@@ -18,6 +18,80 @@ export function HomePage() {
     guests: 1,
   });
 
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  const getDaysInMonth = (year: number, month: number) => {
+    const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+    const numDays = new Date(year, month + 1, 0).getDate();
+    const days = [];
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= numDays; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+
+  const formatDateStr = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const isDateInPast = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
+  const handleDayClick = (date: Date) => {
+    if (isDateInPast(date)) return;
+    const dateStr = formatDateStr(date);
+
+    if (!searchState.checkInDate || (searchState.checkInDate && searchState.checkOutDate)) {
+      setSearchState((prev) => ({
+        ...prev,
+        checkInDate: dateStr,
+        checkOutDate: "",
+      }));
+    } else {
+      if (dateStr <= searchState.checkInDate) {
+        setSearchState((prev) => ({
+          ...prev,
+          checkInDate: dateStr,
+        }));
+      } else {
+        setSearchState((prev) => ({
+          ...prev,
+          checkOutDate: dateStr,
+        }));
+        setIsDatePickerOpen(false);
+      }
+    }
+  };
+
   const formatDateDisplay = (dateStr: string) => {
     if (!dateStr) return "";
     const [year, month, day] = dateStr.split("-");
@@ -69,49 +143,137 @@ export function HomePage() {
               </label>
               <input
                 type="text"
-                placeholder="Bạn muốn đi đâu?"
+                placeholder="Thành phố, địa điểm hoặc tên khách sạn"
                 value={searchState.city}
                 onChange={(e) => setSearchState({ ...searchState, city: e.target.value })}
                 className="w-full border-b border-slate-200 py-2 focus:border-brand-500 outline-none text-slate-800 font-medium placeholder-slate-400"
               />
             </div>
 
-            {/* Check-in Date */}
-            <div className="w-full md:w-36 text-left relative shrink-0">
+            {/* Combined Check-in / Check-out Dates */}
+            <div className="w-full md:w-80 text-left relative shrink-0">
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
                 <i className="fa-regular fa-calendar text-brand-600"></i>
-                Nhận phòng
+                Thời gian lưu trú
               </label>
-              <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
-                <span className={`text-slate-800 font-medium ${!searchState.checkInDate ? "text-slate-400" : ""}`}>
-                  {formatDateDisplay(searchState.checkInDate) || "dd/mm/yyyy"}
-                </span>
-                <input
-                  type="date"
-                  value={searchState.checkInDate}
-                  onChange={(e) => setSearchState({ ...searchState, checkInDate: e.target.value })}
-                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                />
+              <div
+                onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                className="w-full border-b border-slate-200 py-2 flex items-center justify-between text-slate-800 font-medium cursor-pointer min-h-[40px]"
+              >
+                <div className="flex-1">
+                  <span className={!searchState.checkInDate ? "text-slate-400" : ""}>
+                    {searchState.checkInDate ? formatDateDisplay(searchState.checkInDate) : "Nhận phòng"}
+                  </span>
+                </div>
+                <span className="text-slate-400 text-xs px-2">&rarr;</span>
+                <div className="flex-1 text-right">
+                  <span className={!searchState.checkOutDate ? "text-slate-400" : ""}>
+                    {searchState.checkOutDate ? formatDateDisplay(searchState.checkOutDate) : "Trả phòng"}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Check-out Date */}
-            <div className="w-full md:w-36 text-left relative shrink-0">
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
-                <i className="fa-regular fa-calendar text-brand-600"></i>
-                Trả phòng
-              </label>
-              <div className="relative border-b border-slate-200 py-2 min-h-[40px] flex items-center">
-                <span className={`text-slate-800 font-medium ${!searchState.checkOutDate ? "text-slate-400" : ""}`}>
-                  {formatDateDisplay(searchState.checkOutDate) || "dd/mm/yyyy"}
-                </span>
-                <input
-                  type="date"
-                  value={searchState.checkOutDate}
-                  onChange={(e) => setSearchState({ ...searchState, checkOutDate: e.target.value })}
-                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                />
-              </div>
+              {/* Custom Date Picker Dropdown */}
+              {isDatePickerOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-transparent"
+                    onClick={() => setIsDatePickerOpen(false)}
+                  />
+                  <div className="absolute left-0 md:left-auto md:right-0 top-14 z-50 w-80 bg-white border border-slate-100 rounded-2xl shadow-2xl p-4 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                      <button
+                        type="button"
+                        onClick={handlePrevMonth}
+                        className="p-1 px-2.5 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg transition"
+                      >
+                        &larr;
+                      </button>
+                      <span>
+                        Tháng {currentMonth + 1} / {currentYear}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleNextMonth}
+                        className="p-1 px-2.5 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg transition"
+                      >
+                        &rarr;
+                      </button>
+                    </div>
+
+                    {/* Day Names Row */}
+                    <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 uppercase">
+                      <span>CN</span>
+                      <span>T2</span>
+                      <span>T3</span>
+                      <span>T4</span>
+                      <span>T5</span>
+                      <span>T6</span>
+                      <span>T7</span>
+                    </div>
+
+                    {/* Days Grid */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {getDaysInMonth(currentYear, currentMonth).map((date, idx) => {
+                        if (!date) {
+                          return <div key={`empty-${idx}`} />;
+                        }
+
+                        const dateStr = formatDateStr(date);
+                        const isPast = isDateInPast(date);
+                        const isSelectedCheckIn = searchState.checkInDate === dateStr;
+                        const isSelectedCheckOut = searchState.checkOutDate === dateStr;
+                        const isWithinRange =
+                          searchState.checkInDate &&
+                          searchState.checkOutDate &&
+                          dateStr > searchState.checkInDate &&
+                          dateStr < searchState.checkOutDate;
+
+                        let btnClass = "h-8 w-8 text-xs font-semibold rounded-lg flex items-center justify-center transition ";
+
+                        if (isPast) {
+                          btnClass += "text-slate-300 bg-transparent cursor-not-allowed";
+                        } else if (isSelectedCheckIn || isSelectedCheckOut) {
+                          btnClass += "bg-brand-600 text-white shadow-sm cursor-pointer";
+                        } else if (isWithinRange) {
+                          btnClass += "bg-brand-50 text-brand-700 cursor-pointer";
+                        } else {
+                          btnClass += "bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 cursor-pointer";
+                        }
+
+                        return (
+                          <button
+                            key={dateStr}
+                            type="button"
+                            disabled={isPast}
+                            onClick={() => handleDayClick(date)}
+                            className={btnClass}
+                            title={isPast ? "Ngày trong quá khứ" : date.getDate().toString()}
+                          >
+                            {date.getDate()}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Summary */}
+                    <div className="flex justify-between items-center text-[10px] font-medium text-slate-500 border-t border-slate-100 pt-2.5 mt-1">
+                      <div>
+                        <span>Nhận: </span>
+                        <span className="font-bold text-slate-700">
+                          {searchState.checkInDate ? formatDateDisplay(searchState.checkInDate) : "Chưa chọn"}
+                        </span>
+                      </div>
+                      <div>
+                        <span>Trả: </span>
+                        <span className="font-bold text-slate-700">
+                          {searchState.checkOutDate ? formatDateDisplay(searchState.checkOutDate) : "Chưa chọn"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Guests */}
