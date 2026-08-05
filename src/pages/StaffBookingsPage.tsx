@@ -27,7 +27,6 @@ export function StaffBookingsPage() {
 
   // Notifications states
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notificationFilterStatus, setNotificationFilterStatus] = useState<"ALL" | "unread" | "read">("ALL");
 
   const { data: notificationsRes } = useQuery({
     queryKey: ["staffNotificationsReal"],
@@ -132,6 +131,73 @@ export function StaffBookingsPage() {
     () => bookings.filter((b) => b.status === BookingStatus.CANCELLED || b.status === BookingStatus.CHECKED_OUT || b.status === BookingStatus.COMPLETED).length,
     [bookings]
   );
+
+  const combinedManagerNotifs = useMemo(() => {
+    const list: Array<{
+      id: string;
+      isCancel: boolean;
+      isNewBooking: boolean;
+      title: string;
+      message: string;
+      reason?: string;
+      createdAt: string;
+      bookingId?: number;
+      guestName?: string;
+      hotelName?: string;
+      roomNumber?: string;
+    }> = [];
+
+    // System notifications
+    notifications.forEach((n) => {
+      list.push({
+        id: `sys-${n.id}`,
+        isCancel: false,
+        isNewBooking: false,
+        title: "THÔNG BÁO HỆ THỐNG",
+        message: n.message,
+        createdAt: n.createdAt || "Hôm nay",
+      });
+    });
+
+    // Customer Bookings
+    bookings.forEach((b: any) => {
+      const guestName = b.userFullName || `Khách hàng #${b.userId}`;
+      const hotelName = b.hotelName || "Khách sạn";
+      const roomNumber = b.roomNumber ? `Phòng ${b.roomNumber}` : "";
+
+      if (b.status === BookingStatus.CANCELLED) {
+        const storedReason = localStorage.getItem(`cancellation_reason_${b.id}`);
+        list.push({
+          id: `cancel-${b.id}`,
+          isCancel: true,
+          isNewBooking: false,
+          title: `ĐƠN HỦY ĐẶT PHÒNG #${b.id}`,
+          message: `Khách hàng ${guestName} đã hủy đơn đặt ${roomNumber} tại ${hotelName}.`,
+          reason: storedReason || "Khách hàng thay đổi kế hoạch du lịch",
+          createdAt: b.updatedAt || b.createdAt || "Gần đây",
+          bookingId: b.id,
+          guestName,
+          hotelName,
+          roomNumber,
+        });
+      } else {
+        list.push({
+          id: `new-${b.id}`,
+          isCancel: false,
+          isNewBooking: true,
+          title: `ĐƠN ĐẶT PHÒNG MỚI #${b.id}`,
+          message: `Khách hàng ${guestName} vừa đặt ${roomNumber} tại ${hotelName} (Ngày: ${b.checkInDate} đến ${b.checkOutDate}).`,
+          createdAt: b.createdAt || "Gần đây",
+          bookingId: b.id,
+          guestName,
+          hotelName,
+          roomNumber,
+        });
+      }
+    });
+
+    return list;
+  }, [notifications, bookings]);
 
   const availableRooms = useMemo(
     () => rooms.filter((r) => r.status === "active" || r.status === "available"),
@@ -379,6 +445,24 @@ export function StaffBookingsPage() {
                   <i className="fa-solid fa-bed text-base"></i>
                   <span>Quản Lý Phòng</span>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab("notifications")}
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition cursor-pointer w-full text-left ${activeTab === "notifications"
+                      ? "bg-teal-600/20 text-teal-300 font-semibold border border-teal-500/30 shadow-md"
+                      : "hover:bg-slate-800/60 hover:text-slate-200"
+                    }`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <i className="fa-regular fa-bell text-base"></i>
+                    <span>Thông Báo</span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full bg-teal-500 text-slate-950 text-[10px] font-extrabold shadow">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
               </>
             )}
           </nav>
@@ -480,9 +564,6 @@ export function StaffBookingsPage() {
                 </div>
               )}
             </div>
-            <button className="p-2 hover:text-white transition">
-              <i className="fa-regular fa-envelope text-base"></i>
-            </button>
 
             <div className="h-6 w-px bg-slate-800 mx-1"></div>
 
@@ -1294,14 +1375,14 @@ export function StaffBookingsPage() {
             </div>
           )}
 
-          {/* ================= TAB 6: NHẬT KÝ THÔNG BÁO LỄ TÂN (XEM TẤT CẢ KHÔNG GIỚI HẠN) ================= */}
+          {/* ================= TAB 6: NHẬT KÝ THÔNG BÁO QUẢN LÝ (GỒM THÔNG BÁO HỦY/ĐẶT & LÝ DO HỦY) ================= */}
           {activeTab === "notifications" && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-extrabold text-white">Nhật Ký Thông Báo Lễ Tân</h1>
+                  <h1 className="text-2xl font-extrabold text-white">Nhật Ký Thông Báo Quản Lý</h1>
                   <p className="text-slate-400 text-xs mt-1">
-                    Xem lại toàn bộ lịch sử thông báo, yêu cầu nhận phòng và các ghi chú vận hành không giới hạn.
+                    Theo dõi toàn bộ đơn đặt phòng mới, thông báo hệ thống và chi tiết đơn hủy phòng kèm lý do của khách hàng.
                   </p>
                 </div>
                 <button
@@ -1314,81 +1395,96 @@ export function StaffBookingsPage() {
                 </button>
               </div>
 
-              {/* Bộ lọc thông báo */}
-              <div className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between text-xs font-semibold">
-                <div className="flex gap-2">
-                  {(["ALL", "unread", "read"] as const).map((st) => (
-                    <button
-                      key={st}
-                      onClick={() => setNotificationFilterStatus(st)}
-                      className={`px-3 py-1.5 rounded-lg border transition cursor-pointer ${notificationFilterStatus === st
-                          ? "bg-teal-500/20 text-teal-300 border-teal-500/40 font-bold"
-                          : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
-                        }`}
-                    >
-                      {st === "ALL" ? "Tất cả thông báo" : st === "unread" ? "Chưa đọc" : "Đã đọc"}
-                    </button>
-                  ))}
-                </div>
-                <span className="text-slate-400 text-xs">
-                  Hiển thị <strong className="text-teal-400">{notifications.length}</strong> thông báo
-                </span>
-              </div>
-
               {/* Danh sách thông báo dạng Card */}
               <div className="space-y-3">
-                {notifications.length === 0 ? (
+                {combinedManagerNotifs.length === 0 ? (
                   <div className="p-12 text-center bg-[#0A192F] border border-slate-800/80 rounded-2xl text-slate-400 text-xs font-semibold">
                     Không tìm thấy thông báo nào trong nhật ký.
                   </div>
                 ) : (
-                  notifications
-                    .filter((n) => (notificationFilterStatus === "ALL" ? true : n.status === notificationFilterStatus))
-                    .map((n) => (
-                      <div
-                        key={n.id}
-                        onClick={() => markAsReadMutation.mutate(n.id)}
-                        className={`bg-[#0A192F] border rounded-2xl p-5 transition cursor-pointer flex items-center justify-between gap-4 ${n.status === "unread"
-                            ? "border-teal-500/40 bg-teal-500/5 shadow-lg"
-                            : "border-slate-800/80 opacity-85"
+                  combinedManagerNotifs.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`bg-[#0A192F] border rounded-2xl p-5 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+                        item.isCancel
+                          ? "border-rose-500/40 bg-rose-500/5 shadow-lg"
+                          : item.isNewBooking
+                          ? "border-teal-500/40 bg-teal-500/5 shadow-lg"
+                          : "border-slate-800/80"
+                      }`}
+                    >
+                      <div className="flex items-start gap-4 flex-1">
+                        <div
+                          className={`h-10 w-10 rounded-xl flex items-center justify-center text-base shrink-0 font-bold ${
+                            item.isCancel
+                              ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                              : item.isNewBooking
+                              ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                              : "bg-blue-500/20 text-blue-300 border border-blue-500/40"
                           }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`h-10 w-10 rounded-xl flex items-center justify-center text-base shrink-0 font-bold ${n.status === "unread"
-                                ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
-                                : "bg-slate-800 text-slate-400 border border-slate-700"
-                              }`}
-                          >
-                            <i className="fa-solid fa-bell"></i>
-                          </div>
-                          <div>
-                            <p className={`text-sm ${n.status === "unread" ? "font-bold text-white" : "text-slate-300"}`}>
-                              {n.message}
-                            </p>
-                            <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-2">
-                              <span><i className="fa-regular fa-clock"></i> {n.createdAt || "Hôm nay"}</span>
-                              &bull;
-                              <span className={n.status === "unread" ? "text-teal-400 font-bold" : "text-slate-500"}>
-                                {n.status === "unread" ? "Chưa đọc" : "Đã đọc"}
-                              </span>
-                            </p>
-                          </div>
+                        >
+                          <i
+                            className={
+                              item.isCancel
+                                ? "fa-solid fa-circle-xmark text-rose-400"
+                                : item.isNewBooking
+                                ? "fa-solid fa-calendar-check text-teal-400"
+                                : "fa-solid fa-bell"
+                            }
+                          ></i>
                         </div>
 
-                        {n.status === "unread" && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsReadMutation.mutate(n.id);
-                            }}
-                            className="px-3 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 text-xs font-bold rounded-xl transition cursor-pointer shrink-0"
-                          >
-                            Đánh dấu đã đọc
-                          </button>
-                        )}
+                        <div className="space-y-1 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
+                                item.isCancel
+                                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                  : item.isNewBooking
+                                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
+                                  : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                              }`}
+                            >
+                              {item.title}
+                            </span>
+                            {item.bookingId && (
+                              <span className="text-[10px] text-slate-400 font-bold">
+                                Mã đơn: #{item.bookingId}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-sm font-semibold text-white leading-relaxed">
+                            {item.message}
+                          </p>
+
+                          {/* Hiển thị lý do hủy phòng của khách hàng */}
+                          {item.isCancel && item.reason && (
+                            <div className="mt-2 p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-rose-200">
+                              <span className="font-bold text-rose-400">Lý do hủy từ khách hàng: </span>
+                              <span className="italic">"{item.reason}"</span>
+                            </div>
+                          )}
+
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            <i className="fa-regular fa-clock mr-1"></i>
+                            {item.createdAt}
+                          </p>
+                        </div>
                       </div>
-                    ))
+
+                      {/* Chuyển sang trang Quản lý đặt phòng khi bấm */}
+                      {item.bookingId && (
+                        <button
+                          onClick={() => setActiveTab("bookings")}
+                          className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer shrink-0 flex items-center gap-1.5 self-end sm:self-center shadow"
+                        >
+                          <span>Xem đơn đặt phòng</span>
+                          <i className="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                      )}
+                    </div>
+                  ))
                 )}
               </div>
             </div>

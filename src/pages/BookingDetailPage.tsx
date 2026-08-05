@@ -24,6 +24,10 @@ export function BookingDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit_card");
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
+  // Cancellation modal states
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+
   // Fetch booking details
   const { data: bookingData, isLoading, error } = useQuery({
     queryKey: ["booking", bookingId],
@@ -67,6 +71,9 @@ export function BookingDetailPage() {
     mutationFn: () => bookingApi.delete(bookingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["booking", bookingId] });
+      const finalReason = cancelReason.trim() || "Khách hàng thay đổi kế hoạch du lịch";
+      localStorage.setItem(`cancellation_reason_${bookingId}`, finalReason);
+      setIsCancelModalOpen(false);
       toast.success("Hủy đặt phòng thành công!");
       navigate(ROUTES.MY_BOOKINGS);
     },
@@ -379,23 +386,115 @@ export function BookingDetailPage() {
               </div>
             </div>
 
-            {/* Cancel Booking Action */}
+            {/* Cancel Booking Action Button */}
             {(status === "pending_payment" || status === "confirmed") && (
               <button
-                onClick={() => {
-                  if (confirm("Bạn có chắc chắn muốn hủy đặt phòng này không?")) {
-                    cancelMutation.mutate();
-                  }
-                }}
-                disabled={cancelMutation.isPending}
-                className="w-full py-3 border border-red-200 text-red-600 font-bold hover:bg-red-50 rounded-xl text-xs transition cursor-pointer disabled:opacity-50"
+                onClick={() => setIsCancelModalOpen(true)}
+                className="w-full py-3 border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 rounded-xl text-xs transition cursor-pointer"
               >
-                {cancelMutation.isPending ? "Đang hủy..." : "Hủy đơn đặt phòng"}
+                Hủy đơn đặt phòng
               </button>
             )}
           </div>
         </div>
       </main>
+
+      {/* Cancellation Reason Modal */}
+      {isCancelModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+            {/* Modal Header */}
+            <div className="bg-rose-600 text-white p-5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <i className="fa-solid fa-triangle-exclamation text-lg"></i>
+                <h3 className="font-extrabold text-base">Xác nhận hủy đặt phòng #{bookingId}</h3>
+              </div>
+              <button
+                onClick={() => setIsCancelModalOpen(false)}
+                className="text-white/80 hover:text-white transition cursor-pointer p-1"
+              >
+                <i className="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 flex flex-col gap-4">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Bạn có chắc chắn muốn hủy đơn đặt phòng này không? Vui lòng chọn hoặc viết lý do để hỗ trợ phản hồi tốt hơn.
+              </p>
+
+              {/* Textarea for cancellation reason */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1.5">
+                  Lý do hủy phòng của bạn:
+                </label>
+                <textarea
+                  rows={3}
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Nhập lý do hủy tại đây..."
+                  className="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-slate-800 font-medium resize-none bg-slate-50/50"
+                ></textarea>
+              </div>
+
+              {/* Preset Quick Options */}
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400 mb-2">
+                  Hoặc chọn nhanh lý do có sẵn:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    "Thay đổi kế hoạch du lịch",
+                    "Tìm được khách sạn khác phù hợp hơn",
+                    "Thay đổi lịch trình chuyến đi",
+                    "Trùng lịch công tác / cá nhân",
+                    "Bận việc gia đình đột xuất",
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setCancelReason(preset)}
+                      className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition cursor-pointer ${
+                        cancelReason === preset
+                          ? "bg-rose-50 border-rose-300 text-rose-700 font-bold"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons: Confirm & Cancel */}
+              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCancelModalOpen(false)}
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => cancelMutation.mutate()}
+                  disabled={cancelMutation.isPending}
+                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl transition shadow-md shadow-rose-600/20 cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {cancelMutation.isPending ? (
+                    <span>Đang hủy...</span>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-check"></i>
+                      <span>Xác nhận hủy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

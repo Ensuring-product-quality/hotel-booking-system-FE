@@ -30,6 +30,22 @@ export function HotelsPage() {
   const [pendingAmenities,  setPendingAmenities]  = useState<string[]>([]);
   const [pendingTypes,      setPendingTypes]      = useState<string[]>([]);
 
+  // Lượt thích (Likes) state
+  const [likedHotels, setLikedHotels] = useState<Record<number, boolean>>({});
+  const [likeCounts, setLikeCounts]   = useState<Record<number, number>>({});
+
+  const toggleLike = (hotelId: number, defaultLikes = 12) => {
+    setLikedHotels((prev) => {
+      const isLiked = !prev[hotelId];
+      const currentLikes = likeCounts[hotelId] ?? defaultLikes;
+      setLikeCounts((cPrev) => ({
+        ...cPrev,
+        [hotelId]: isLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1),
+      }));
+      return { ...prev, [hotelId]: isLiked };
+    });
+  };
+
 
   // Sync pending states when URL changes (e.g. nav from HomePage)
   useEffect(() => {
@@ -366,8 +382,17 @@ export function HotelsPage() {
                           alt={hotel.name}
                           className="h-full w-full object-cover group-hover:scale-103 transition-all duration-500"
                         />
-                        <button className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white text-slate-600 hover:text-red-500 rounded-full transition shadow-sm cursor-pointer flex items-center justify-center w-8 h-8">
-                          <i className="fa-regular fa-heart text-sm"></i>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleLike(hotel.id, (hotel.id * 7) % 30 + 12);
+                          }}
+                          className={`absolute top-4 right-4 p-2 bg-white/90 hover:bg-white rounded-full transition shadow-sm cursor-pointer flex items-center justify-center w-8 h-8 ${
+                            likedHotels[hotel.id] ? "text-pink-500" : "text-slate-400 hover:text-pink-500"
+                          }`}
+                          title="Thích khách sạn này"
+                        >
+                          <i className={likedHotels[hotel.id] ? "fa-solid fa-heart text-pink-500 text-sm" : "fa-regular fa-heart text-sm"}></i>
                         </button>
                       </div>
 
@@ -403,25 +428,39 @@ export function HotelsPage() {
 
                         {/* Booking CTA Row */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-t border-slate-50 pt-5 mt-6">
-                          <div className="flex items-center gap-2">
-                            <span className="bg-emerald-50 text-emerald-600 font-bold text-xs px-2.5 py-1 rounded-lg">{hotel.averageRating.toFixed(1)}</span>
-                            <div>
-                              <p className="text-xs font-bold text-slate-700">Điểm đánh giá</p>
-                              <p className="text-[10px] text-slate-400">Dữ liệu từ hệ thống</p>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-emerald-50 text-emerald-600 font-bold text-xs px-2.5 py-1 rounded-lg">{hotel.averageRating.toFixed(1)}</span>
+                              <div>
+                                <p className="text-xs font-bold text-slate-700">Điểm đánh giá</p>
+                                <p className="text-[10px] text-slate-400">Dữ liệu từ hệ thống</p>
+                              </div>
                             </div>
+
+                            {/* Heart & Lượt thích button */}
+                            <button
+                              onClick={() => toggleLike(hotel.id, (hotel.id * 7) % 30 + 12)}
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                                likedHotels[hotel.id]
+                                  ? "bg-pink-50 border-pink-200 text-pink-600 font-bold"
+                                  : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-pink-50 hover:text-pink-600"
+                              }`}
+                              title="Thích khách sạn này"
+                            >
+                              <i className={likedHotels[hotel.id] ? "fa-solid fa-heart text-pink-500 text-sm" : "fa-regular fa-heart text-sm"}></i>
+                              <span className="text-xs font-bold">
+                                {likeCounts[hotel.id] ?? ((hotel.id * 7) % 30 + 12)}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-normal">thích</span>
+                            </button>
                           </div>
 
                           <div className="flex items-end gap-4 w-full sm:w-auto justify-between sm:justify-end">
                             <div className="text-right">
                               {hotel.price && hotel.price > 0 ? (
-                                <>
-                                  <p className="text-[10px] text-slate-400 line-through">
-                                    {(Math.round(hotel.price * 1.25)).toLocaleString("vi-VN")}đ
-                                  </p>
-                                  <p className="text-lg font-extrabold text-brand-600">
-                                    {hotel.price.toLocaleString("vi-VN")}đ <span className="text-xs font-normal text-slate-400">/ đêm</span>
-                                  </p>
-                                </>
+                                <p className="text-lg font-extrabold text-brand-600">
+                                  {hotel.price.toLocaleString("vi-VN")}đ <span className="text-xs font-normal text-slate-400">/ đêm</span>
+                                </p>
                               ) : (
                                 <p className="text-sm font-semibold text-slate-500">Liên hệ đặt phòng</p>
                               )}
