@@ -117,7 +117,7 @@ export function HomePage() {
     <div className="flex flex-col">
 
       {/* Hero Section */}
-      <section className="relative h-[560px] flex items-center justify-center text-center bg-cover bg-center overflow-hidden" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1920')" }}>
+      <section className="relative h-[560px] flex items-center justify-center text-center bg-cover bg-center overflow-visible" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1920')" }}>
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/40"></div>
 
