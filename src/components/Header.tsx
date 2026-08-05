@@ -235,14 +235,14 @@ export function Header() {
 
 
 
-          {/* Tra cứu đặt phòng */}
+          {/* Lịch sử đặt phòng */}
           <Link
-            to={ROUTES.BOOKING_LOOKUP}
+            to={ROUTES.BOOKING_HISTORY}
             className={`transition hover:text-brand-600 ${
-              isLinkActive(ROUTES.BOOKING_LOOKUP) ? "text-brand-600 font-semibold" : ""
+              isLinkActive(ROUTES.BOOKING_HISTORY) ? "text-brand-600 font-semibold" : ""
             }`}
           >
-            Tra cứu đặt phòng
+            Lịch sử đặt phòng
           </Link>
 
           {/* Liên hệ */}
@@ -274,17 +274,7 @@ export function Header() {
                 )}
               </Link>
 
-              {(user?.role === Role.MANAGER ||
-                user?.role === Role.ADMIN) && (
-                <Link
-                  to={ROUTES.STAFF_BOOKINGS}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold rounded-lg border border-brand-100 transition shadow-sm cursor-pointer shrink-0"
-                  title="Quay Lại Trang Quản Lý"
-                >
-                  <i className="fa-solid fa-gauge-high"></i>
-                  <span>Trang Quản Lý</span>
-                </Link>
-              )}
+
 
               {/* User Dropdown/Display */}
               <div className="relative group">
@@ -484,15 +474,15 @@ export function Header() {
             </div>
 
 
-            {/* Tra cứu đặt phòng */}
+            {/* Lịch sử đặt phòng */}
             <Link
-              to={ROUTES.BOOKING_LOOKUP}
+              to={ROUTES.BOOKING_HISTORY}
               onClick={() => setIsMobileMenuOpen(false)}
               className={`flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg hover:bg-slate-50 transition ${
-                isLinkActive(ROUTES.BOOKING_LOOKUP) ? "text-brand-600 bg-brand-50/30" : "text-slate-700"
+                isLinkActive(ROUTES.BOOKING_HISTORY) ? "text-brand-600 bg-brand-50/30" : "text-slate-700"
               }`}
             >
-              Tra cứu đặt phòng
+              Lịch sử đặt phòng
             </Link>
 
             {/* Liên hệ */}

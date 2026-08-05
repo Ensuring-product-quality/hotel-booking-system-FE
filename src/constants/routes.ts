@@ -9,12 +9,11 @@ export const ROUTES = {
   MY_BOOKINGS: "/my-bookings",
   BOOKING_DETAIL: "/bookings/:id",
   NOTIFICATIONS: "/notifications",
-  STAFF_BOOKINGS: "/staff/bookings",
   MANAGER_HOTELS: "/manager/hotels",
   MANAGER_ROOMS: "/manager/rooms",
   MANAGER_USERS: "/manager/users",
   ADMIN_DASHBOARD: "/admin/dashboard",
-  BOOKING_LOOKUP: "/booking-lookup",
+  BOOKING_HISTORY: "/booking-history",
   CONTACT: "/contact",
   PROFILE: "/profile",
 } as const;

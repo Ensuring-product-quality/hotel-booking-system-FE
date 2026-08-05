@@ -18,11 +18,10 @@ const HotelsPage = lazy(() => import("../pages/HotelsPage").then((m) => ({ defau
 const HotelDetailPage = lazy(() => import("../pages/HotelDetailPage").then((m) => ({ default: m.HotelDetailPage })));
 const MyBookingsPage = lazy(() => import("../pages/MyBookingsPage").then((m) => ({ default: m.MyBookingsPage })));
 
-const BookingLookupPage = lazy(() => import("../pages/BookingLookupPage").then((m) => ({ default: m.BookingLookupPage })));
+const BookingHistoryPage = lazy(() => import("../pages/BookingHistoryPage").then((m) => ({ default: m.BookingHistoryPage })));
 const ContactPage = lazy(() => import("../pages/ContactPage").then((m) => ({ default: m.ContactPage })));
 const BookingDetailPage = lazy(() => import("../pages/BookingDetailPage").then((m) => ({ default: m.BookingDetailPage })));
 const NotificationsPage = lazy(() => import("../pages/NotificationsPage").then((m) => ({ default: m.NotificationsPage })));
-const StaffBookingsPage = lazy(() => import("../pages/StaffBookingsPage").then((m) => ({ default: m.StaffBookingsPage })));
 const ManagerHotelsPage = lazy(() => import("../pages/ManagerHotelsPage").then((m) => ({ default: m.ManagerHotelsPage })));
 const ManagerRoomsPage = lazy(() => import("../pages/ManagerRoomsPage").then((m) => ({ default: m.ManagerRoomsPage })));
 const ManagerUsersPage = lazy(() => import("../pages/ManagerUsersPage").then((m) => ({ default: m.ManagerUsersPage })));
@@ -42,7 +41,7 @@ export const router = createBrowserRouter(
         { path: ROUTES.HOTELS, element: <SuspenseWrapper><HotelsPage /></SuspenseWrapper> },
         { path: ROUTES.HOTEL_DETAIL, element: <SuspenseWrapper><HotelDetailPage /></SuspenseWrapper> },
 
-        { path: ROUTES.BOOKING_LOOKUP, element: <SuspenseWrapper><BookingLookupPage /></SuspenseWrapper> },
+        { path: ROUTES.BOOKING_HISTORY, element: <SuspenseWrapper><BookingHistoryPage /></SuspenseWrapper> },
         { path: ROUTES.CONTACT, element: <SuspenseWrapper><ContactPage /></SuspenseWrapper> },
 
         // Protected Customer Routes
@@ -94,14 +93,6 @@ export const router = createBrowserRouter(
     {
       element: <AdminLayout />,
       children: [
-        {
-          path: ROUTES.STAFF_BOOKINGS,
-          element: (
-            <PrivateRoute allowedRoles={[Role.MANAGER, Role.ADMIN]}>
-              <SuspenseWrapper><StaffBookingsPage /></SuspenseWrapper>
-            </PrivateRoute>
-          ),
-        },
         {
           path: ROUTES.MANAGER_HOTELS,
           element: (

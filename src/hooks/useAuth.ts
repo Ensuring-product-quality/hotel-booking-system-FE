@@ -74,7 +74,7 @@ export function useAuth() {
         } else if (userObj?.role === Role.ADMIN) {
           navigate(ROUTES.ADMIN_DASHBOARD);
         } else if (userObj?.role === Role.MANAGER) {
-          navigate(ROUTES.STAFF_BOOKINGS);
+          navigate(ROUTES.HOME);
         } else {
           navigate(ROUTES.HOME);
         }
