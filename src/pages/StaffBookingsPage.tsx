@@ -65,7 +65,7 @@ export function StaffBookingsPage() {
   });
 
   // Booking Tab Sub-Filter
-  const [bookingSubTab, setBookingSubTab] = useState<"new" | "pending" | "history">("new");
+  const [bookingSubTab, setBookingSubTab] = useState<"new" | "history">("new");
   const [bookingFilterStatus, setBookingFilterStatus] = useState<string>("ALL");
   const [bookingFilterDate, setBookingFilterDate] = useState<string>("");
 
@@ -187,7 +187,6 @@ export function StaffBookingsPage() {
   const filteredBookings = useMemo(() => {
     return bookings.filter((b) => {
       if (bookingSubTab === "new" && (b.status === BookingStatus.CANCELLED || b.status === BookingStatus.CHECKED_OUT || b.status === BookingStatus.COMPLETED)) return false;
-      if (bookingSubTab === "pending" && b.status !== BookingStatus.PENDING_PAYMENT) return false;
       if (bookingSubTab === "history" && b.status !== BookingStatus.COMPLETED && b.status !== BookingStatus.CHECKED_OUT && b.status !== BookingStatus.CANCELLED) return false;
 
       const matchesStatus = bookingFilterStatus === "ALL" || b.status === bookingFilterStatus;
@@ -569,7 +568,7 @@ export function StaffBookingsPage() {
                 </div>
               </div>
 
-              {/* Sub Tabs Yêu cầu mới / Chờ xác nhận / Lịch sử */}
+              {/* Sub Tabs Yêu cầu mới / Lịch sử */}
               <div className="border-b border-slate-800 flex gap-6 text-xs font-bold text-slate-400">
                 <button
                   onClick={() => setBookingSubTab("new")}
@@ -581,19 +580,6 @@ export function StaffBookingsPage() {
                   <span>Yêu cầu mới</span>
                   <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px]">
                     {newRequestsCount}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setBookingSubTab("pending")}
-                  className={`pb-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${bookingSubTab === "pending"
-                      ? "border-teal-400 text-teal-300"
-                      : "border-transparent hover:text-white"
-                    }`}
-                >
-                  <span>Chờ xác nhận</span>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px]">
-                    {pendingCount}
                   </span>
                 </button>
 
