@@ -27,6 +27,7 @@ export interface HotelCreateDTO {
   stars: number;
   description: string;
   status: "active" | "inactive";
+  price?: number;
 }
 
 export type HotelUpdateDTO = Partial<HotelCreateDTO>;

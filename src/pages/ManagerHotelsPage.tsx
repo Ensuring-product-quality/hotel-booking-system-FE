@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { hotelApi } from "../services/hotelApi";
@@ -26,6 +26,7 @@ export function ManagerHotelsPage() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [stars, setStars] = useState(5);
+  const [price, setPrice] = useState<number | undefined>(1500000);
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"active" | "inactive">("active");
   const [formError, setFormError] = useState<string | null>(null);
@@ -112,6 +113,7 @@ export function ManagerHotelsPage() {
       setAddress(hotel.address);
       setCity(hotel.city);
       setStars(hotel.stars);
+      setPrice(hotel.price ?? 1500000);
       setDescription(hotel.description);
       setStatus(hotel.status);
     } else {
@@ -120,6 +122,7 @@ export function ManagerHotelsPage() {
       setAddress("");
       setCity("");
       setStars(5);
+      setPrice(1500000);
       setDescription("");
       setStatus("active");
     }
@@ -143,6 +146,7 @@ export function ManagerHotelsPage() {
       address,
       city,
       stars,
+      price: price && price > 0 ? price : undefined,
       description,
       status,
     };
@@ -378,8 +382,8 @@ export function ManagerHotelsPage() {
                 </div>
               </div>
 
-              {/* Stars & Status */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Stars, Status & Price */}
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Xếp hạng sao</label>
                   <select
@@ -391,6 +395,16 @@ export function ManagerHotelsPage() {
                       <option key={s} value={s}>{s} sao</option>
                     ))}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Giá tiền / đêm (VNĐ)</label>
+                  <input
+                    type="number"
+                    value={price || ""}
+                    onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                    placeholder="1500000"
+                    className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-xs outline-none focus:border-brand-500 text-slate-700"
+                  />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Trạng thái hoạt động</label>
