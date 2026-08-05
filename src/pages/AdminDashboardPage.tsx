@@ -122,29 +122,37 @@ export function AdminDashboardPage() {
   const users = useMemo(() => usersRes?.data?.content || [], [usersRes]);
 
   // ==================== REAL-TIME DYNAMIC CALCULATIONS ====================
+  const hotelStatusMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    hotels.forEach((h) => {
+      map[h.id] = h.status;
+    });
+    return map;
+  }, [hotels]);
+
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
 
   // Occupancy Rate Calculation
   const totalRoomCount = rooms.length || 1;
   const availableRoomsCount = useMemo(() => {
-    return rooms.filter((r) => r.status === "active" || r.status === "available" || r.status === "AVAILABLE").length;
-  }, [rooms]);
+    return rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && (r.status === "active" || r.status === "available" || r.status === "AVAILABLE")).length;
+  }, [rooms, hotelStatusMap]);
 
   const occupiedRooms = useMemo(() => {
-    return rooms.filter((r) => r.status === "occupied" || r.status === "OCCUPIED").length;
-  }, [rooms]);
+    return rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && (r.status === "occupied" || r.status === "OCCUPIED")).length;
+  }, [rooms, hotelStatusMap]);
 
   const dirtyRoomsCount = useMemo(() => {
-    return rooms.filter((r) => r.status === "cleaning" || r.status === "DIRTY" || r.status === "CLEANING").length;
-  }, [rooms]);
+    return rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && (r.status === "cleaning" || r.status === "DIRTY" || r.status === "CLEANING")).length;
+  }, [rooms, hotelStatusMap]);
 
   const maintenanceRoomsCount = useMemo(() => {
-    return rooms.filter((r) => r.status === "maintenance" || r.status === "MAINTENANCE" || r.status === "BLOCKED").length;
-  }, [rooms]);
+    return rooms.filter((r) => hotelStatusMap[r.hotelId] !== "inactive" && (r.status === "maintenance" || r.status === "MAINTENANCE" || r.status === "BLOCKED")).length;
+  }, [rooms, hotelStatusMap]);
 
   const inactiveRoomsCount = useMemo(() => {
-    return rooms.filter((r) => r.status === "inactive" || r.status === "INACTIVE").length;
-  }, [rooms]);
+    return rooms.filter((r) => hotelStatusMap[r.hotelId] === "inactive" || r.status === "inactive" || r.status === "INACTIVE").length;
+  }, [rooms, hotelStatusMap]);
 
   const occupancyRate = Math.min(100, Math.round(((totalRoomCount - availableRoomsCount) / totalRoomCount) * 100)) || 0;
 
@@ -1056,10 +1064,11 @@ export function AdminDashboardPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {rooms.map((room) => {
-                    const isAvail = room.status === "active" || room.status === "available" || room.status === "AVAILABLE";
-                    const isOcc = room.status === "occupied" || room.status === "OCCUPIED";
-                    const isClean = room.status === "cleaning" || room.status === "DIRTY" || room.status === "CLEANING";
-                    const isMaint = room.status === "maintenance" || room.status === "MAINTENANCE" || room.status === "BLOCKED";
+                    const isHotelInactive = hotelStatusMap[room.hotelId] === "inactive";
+                    const isAvail = !isHotelInactive && (room.status === "active" || room.status === "available" || room.status === "AVAILABLE");
+                    const isOcc = !isHotelInactive && (room.status === "occupied" || room.status === "OCCUPIED");
+                    const isClean = !isHotelInactive && (room.status === "cleaning" || room.status === "DIRTY" || room.status === "CLEANING");
+                    const isMaint = !isHotelInactive && (room.status === "maintenance" || room.status === "MAINTENANCE" || room.status === "BLOCKED");
 
                     return (
                       <div key={room.id} className="bg-[#0A192F] border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-md">
