@@ -66,12 +66,19 @@ function forceLogoutAndRedirect() {
 
 interface RetriableConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
+  _fallbackTried?: boolean;
 }
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetriableConfig | undefined;
+
+    if (!error.response && originalRequest && !originalRequest._fallbackTried) {
+      originalRequest._fallbackTried = true;
+      originalRequest.baseURL = "https://hotel-booking-system-be-production.up.railway.app/api";
+      return apiClient(originalRequest);
+    }
 
     if (!originalRequest || error.response?.status !== 401) {
       return Promise.reject(error);
