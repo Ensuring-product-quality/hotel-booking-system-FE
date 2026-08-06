@@ -134,7 +134,22 @@ export function MyBookingsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t border-slate-50 sm:border-0 pt-4 sm:pt-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-slate-50 sm:border-0 pt-4 sm:pt-0">
+                    {booking.status === "cancelled" && (
+                      <button
+                        onClick={() => {
+                          if (booking.hotelId) {
+                            navigate(`/hotels/${booking.hotelId}`);
+                          } else {
+                            navigate(ROUTES.HOTELS);
+                          }
+                        }}
+                        className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center gap-1.5"
+                      >
+                        <i className="fa-solid fa-rotate-right text-[10px]"></i>
+                        <span>Đặt lại đơn này</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => navigate(ROUTES.BOOKING_DETAIL.replace(":id", booking.id.toString()))}
                       className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs transition cursor-pointer"

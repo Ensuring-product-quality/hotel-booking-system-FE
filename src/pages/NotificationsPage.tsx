@@ -341,14 +341,28 @@ export function NotificationsPage() {
 
                   {/* Right Action Button */}
                   {item.bookingId && (
-                    <Link
-                      to={`${ROUTES.BOOKING_HISTORY}?id=${item.bookingId}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="shrink-0 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5 self-end sm:self-center"
-                    >
-                      <span>Xem chi tiết đơn</span>
-                      <i className="fa-solid fa-chevron-right text-[10px]"></i>
-                    </Link>
+                    <div className="shrink-0 flex items-center gap-2 self-end sm:self-center">
+                      {isCancelled && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(ROUTES.HOTELS);
+                          }}
+                          className="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5 cursor-pointer shadow-brand-600/20"
+                        >
+                          <i className="fa-solid fa-rotate-right text-[10px]"></i>
+                          <span>Đặt lại phòng</span>
+                        </button>
+                      )}
+                      <Link
+                        to={`${ROUTES.BOOKING_HISTORY}?id=${item.bookingId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5"
+                      >
+                        <span>Xem chi tiết</span>
+                        <i className="fa-solid fa-chevron-right text-[10px]"></i>
+                      </Link>
+                    </div>
                   )}
                 </div>
               );

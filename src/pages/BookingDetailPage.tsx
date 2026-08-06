@@ -386,13 +386,30 @@ export function BookingDetailPage() {
               </div>
             </div>
 
-            {/* Cancel Booking Action Button */}
+            {/* Action Buttons: Cancel or Re-book */}
             {(status === "pending_payment" || status === "confirmed") && (
               <button
                 onClick={() => setIsCancelModalOpen(true)}
                 className="w-full py-3 border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 rounded-xl text-xs transition cursor-pointer"
               >
                 Hủy đơn đặt phòng
+              </button>
+            )}
+
+            {status === "cancelled" && (
+              <button
+                onClick={() => {
+                  const hotelId = room?.hotelId || (booking as any)?.hotelId;
+                  if (hotelId) {
+                    navigate(`/hotels/${hotelId}`);
+                  } else {
+                    navigate(ROUTES.HOTELS);
+                  }
+                }}
+                className="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md shadow-brand-600/20 flex items-center justify-center gap-2"
+              >
+                <i className="fa-solid fa-rotate-right text-xs"></i>
+                <span>Đặt lại phòng này</span>
               </button>
             )}
           </div>

@@ -268,15 +268,32 @@ export function BookingHistoryPage() {
                               <span className="text-xs font-normal text-slate-400 ml-0.5">đ</span>
                             </p>
                           </div>
-                          <button
-                            onClick={() =>
-                              navigate(ROUTES.BOOKING_DETAIL.replace(":id", booking.id.toString()))
-                            }
-                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-brand-600 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-sm"
-                          >
-                            <i className="fa-solid fa-eye text-[10px]"></i>
-                            Xem chi tiết
-                          </button>
+                          <div className="flex flex-col sm:items-end gap-2">
+                            {booking.status === BookingStatus.CANCELLED && (
+                              <button
+                                onClick={() => {
+                                  if (booking.hotelId) {
+                                    navigate(`/hotels/${booking.hotelId}`);
+                                  } else {
+                                    navigate(ROUTES.HOTELS);
+                                  }
+                                }}
+                                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-sm shadow-brand-600/20"
+                              >
+                                <i className="fa-solid fa-rotate-right text-[10px]"></i>
+                                Đặt lại đơn này
+                              </button>
+                            )}
+                            <button
+                              onClick={() =>
+                                navigate(ROUTES.BOOKING_DETAIL.replace(":id", booking.id.toString()))
+                              }
+                              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-sm"
+                            >
+                              <i className="fa-solid fa-eye text-[10px]"></i>
+                              Xem chi tiết
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
