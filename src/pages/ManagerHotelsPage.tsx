@@ -54,7 +54,9 @@ export function ManagerHotelsPage() {
     mutationFn: (body: HotelCreateDTO) => hotelApi.create(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managerHotels"] });
+      queryClient.invalidateQueries({ queryKey: ["managerHotelsList"] });
       queryClient.invalidateQueries({ queryKey: ["staffHotelsReal"] });
+      queryClient.invalidateQueries({ queryKey: ["hotels"] });
       closeModal();
       toast.success("Tạo khách sạn mới thành công!");
     },
@@ -168,6 +170,7 @@ export function ManagerHotelsPage() {
       price: price && price > 0 ? price : undefined,
       description,
       status,
+      managerId: user?.id,
     };
 
     if (editingHotel) {
