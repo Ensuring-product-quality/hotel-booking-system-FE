@@ -34,7 +34,7 @@ export function HotelsPage() {
   const [likedHotels, setLikedHotels] = useState<Record<number, boolean>>({});
   const [likeCounts, setLikeCounts]   = useState<Record<number, number>>({});
 
-  const toggleLike = (hotelId: number, defaultLikes = 12) => {
+  const toggleLike = (hotelId: number, defaultLikes = 0) => {
     setLikedHotels((prev) => {
       const isLiked = !prev[hotelId];
       const currentLikes = likeCounts[hotelId] ?? defaultLikes;
@@ -148,8 +148,8 @@ export function HotelsPage() {
     const starsB = b.stars ?? 0;
     if (starsB !== starsA) return starsB - starsA;
 
-    const likesA = likeCounts[a.id] ?? ((a.id * 7) % 30 + 12);
-    const likesB = likeCounts[b.id] ?? ((b.id * 7) % 30 + 12);
+    const likesA = likeCounts[a.id] ?? ((a as any).likeCount || (a as any).likes || 0);
+    const likesB = likeCounts[b.id] ?? ((b as any).likeCount || (b as any).likes || 0);
     return likesB - likesA;
   });
 
@@ -417,7 +417,7 @@ export function HotelsPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleLike(hotel.id, (hotel.id * 7) % 30 + 12);
+                            toggleLike(hotel.id, (hotel as any).likeCount || (hotel as any).likes || 0);
                           }}
                           className={`absolute top-4 right-4 p-2 bg-white/90 hover:bg-white rounded-full transition shadow-sm cursor-pointer flex items-center justify-center w-8 h-8 ${
                             likedHotels[hotel.id] ? "text-pink-500" : "text-slate-400 hover:text-pink-500"
@@ -478,7 +478,7 @@ export function HotelsPage() {
 
                             {/* Heart & Lượt thích button */}
                             <button
-                              onClick={() => toggleLike(hotel.id, (hotel.id * 7) % 30 + 12)}
+                              onClick={() => toggleLike(hotel.id, (hotel as any).likeCount || (hotel as any).likes || 0)}
                               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition cursor-pointer ${
                                 likedHotels[hotel.id]
                                   ? "bg-pink-50 border-pink-200 text-pink-600 font-bold"
@@ -488,7 +488,7 @@ export function HotelsPage() {
                             >
                               <i className={likedHotels[hotel.id] ? "fa-solid fa-heart text-pink-500 text-sm" : "fa-regular fa-heart text-sm"}></i>
                               <span className="text-xs font-bold">
-                                {likeCounts[hotel.id] ?? ((hotel.id * 7) % 30 + 12)}
+                                {likeCounts[hotel.id] ?? ((hotel as any).likeCount || (hotel as any).likes || 0)}
                               </span>
                               <span className="text-[10px] text-slate-400 font-normal">thích</span>
                             </button>
