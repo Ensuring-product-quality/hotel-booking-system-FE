@@ -157,6 +157,8 @@ export function ManagerHotelsPage() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (createMutation.isPending || updateMutation.isPending) return;
+
     if (!name || !address || !city) {
       setFormError("Vui lòng nhập tên, địa chỉ và thành phố.");
       return;
