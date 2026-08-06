@@ -201,14 +201,13 @@ export function ManagerHotelsPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Quản lý khách sạn</h1>
             <p className="text-slate-400 text-sm mt-1">Danh sách hệ thống khách sạn trực thuộc HotelBooking</p>
           </div>
-          {isAdmin && (
-            <button
-              onClick={() => openModal(null)}
-              className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition hover:scale-[1.01] cursor-pointer"
-            >
-              + Thêm khách sạn
-            </button>
-          )}
+          <button
+            onClick={() => openModal(null)}
+            className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition hover:scale-[1.01] cursor-pointer flex items-center gap-1.5"
+          >
+            <i className="fa-solid fa-plus text-xs"></i>
+            <span>Thêm khách sạn</span>
+          </button>
         </div>
 
         {/* Hotels Table List */}
@@ -295,7 +294,7 @@ export function ManagerHotelsPage() {
                         </button>
 
                         {/* Delete button only visible to Admin */}
-                        {isAdmin && (
+                        {(isAdmin || user?.role === Role.MANAGER) && (
                           <button
                             onClick={() => handleDeleteClick(hotel.id)}
                             className="px-2 py-1 border border-red-100 text-red-600 bg-red-50/30 hover:bg-red-50 rounded-lg transition text-[11px] font-semibold cursor-pointer"
